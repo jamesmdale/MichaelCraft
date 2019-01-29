@@ -123,11 +123,11 @@ void CreateOpenGLWindow(float clientAspect )
 
 void Initialize()
 {
-	g_theApp = new TheApp();
-	CreateOpenGLWindow( CLIENT_ASPECT );
+	CreateOpenGLWindow( CLIENT_ASPECT );	
 
 	EngineStartup();
 
+	g_theApp = new TheApp();
 	g_theApp->Initialize();
 }
 

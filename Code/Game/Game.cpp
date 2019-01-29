@@ -20,10 +20,6 @@
 #include "Game\GameStates\MainMenuState.hpp"
 #include "Game\GameStates\LoadingState.hpp"
 #include "Game\GameStates\PlayingState.hpp"
-#include "Game\GameStates\ReadyState.hpp"
-
-
-
 #include <vector>
 #include <string>
 
@@ -35,26 +31,26 @@ bool m_isPaused = false;
 //  =========================================================================================
 Game::Game()
 {
-	m_renderScene = new RenderScene();
 	m_forwardRenderingPath = new ForwardRenderingPath();
+	m_forwardRenderingPath2D = new ForwardRenderingPath2D();
 }
 
 //  =========================================================================================
 Game::~Game()
 {
-	// delete render members
+	//delete render members
+	delete(m_forwardRenderingPath2D);
+	m_forwardRenderingPath2D = nullptr;
+
 	delete(m_forwardRenderingPath);
 	m_forwardRenderingPath = nullptr;
 
-	delete(m_renderScene);
-	m_renderScene = nullptr;
-
-	// delete camera members
+	//delete camera members
 	delete(m_gameCamera);
 	m_gameCamera = nullptr;
 
-	delete(m_gameCamera);
-	m_gameCamera = nullptr;
+	delete(m_uiCamera);
+	m_uiCamera = nullptr;
 
 	//cleanup global members
 
@@ -88,16 +84,20 @@ void Game::Initialize()
 
 	m_gameClock = new Clock(GetMasterClock());
 
-	// add cameras
+	// add game cameras
 	m_gameCamera = new Camera();
 	m_gameCamera->SetDepthStencilTarget(theRenderer->GetDefaultDepthStencilTarget());
 	m_gameCamera->SetColorTarget(theRenderer->GetDefaultRenderTarget());
 	m_gameCamera->SetPerspective(60.f, CLIENT_ASPECT, 0.1f, 10000.f);
-	m_gameCamera->Translate(Vector3(0.f, 5.f, -20.f));
+	m_gameCamera->Translate(Vector3(0.f, 0.f, 0.f));
 
-	m_gameCamera->m_skybox = new Skybox("Data/Images/galaxy2.png");
+	//m_gameCamera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 
-	m_renderScene->AddCamera(m_gameCamera);
+	//add ui camera
+	m_uiCamera = new Camera();
+	m_uiCamera->SetColorTarget(theRenderer->GetDefaultRenderTarget());
+	m_uiCamera->SetOrtho(0.f, theWindow->m_clientWidth, 0.f, theWindow->m_clientHeight, -1.f, 1.f);
+	m_uiCamera->SetView(Matrix44::IDENTITY);
 
 	// add menu states
 	TODO("Add other menu states");

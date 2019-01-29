@@ -64,7 +64,6 @@ protected:
 public:
 	eGameState m_type = NONE_GAME_STATE;
 	Camera* m_camera = nullptr;
-	RenderScene2D* m_renderScene2D = nullptr;
 
 	bool m_doesResetOnTransition = true;	
 

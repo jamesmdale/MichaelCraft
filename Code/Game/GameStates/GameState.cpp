@@ -13,16 +13,10 @@ std::vector<GameState*> GameState::s_gameStates;
 GameState::GameState(Camera* camera)
 {
 	m_camera = camera;
-	m_renderScene2D = new RenderScene2D();
-
-	m_renderScene2D->AddCamera(m_camera);
 }
 
 GameState::~GameState()
 {	
-	delete(m_renderScene2D);
-	m_renderScene2D = nullptr;
-
 	//game will manage deletion of camera
 	m_camera = nullptr; 
 
@@ -52,8 +46,9 @@ void GameState::Render()
 	theRenderer->ClearDepth(1.f);
 	theRenderer->ClearColor(Rgba::BLACK);
 
-	//render from forward rendering path
-	Game::GetInstance()->m_forwardRenderingPath2D->Render(m_renderScene2D);
+	//  ----------------------------------------------
+	// render something here
+	//  ----------------------------------------------
 
 	theRenderer = nullptr;
 }

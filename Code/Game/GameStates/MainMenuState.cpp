@@ -34,9 +34,6 @@ void MainMenuState::Render()
 	case PLAY:
 		playColor = Rgba::WHITE;
 		break;
-	case CONNECT:
-		connectColor = Rgba::WHITE;
-		break;
 	case EXIT:
 		quitColor = Rgba::WHITE;
 		break;

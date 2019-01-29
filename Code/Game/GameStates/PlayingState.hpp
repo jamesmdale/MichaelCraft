@@ -2,11 +2,12 @@
 #include "Game\GameStates\GameState.hpp"
 #include "Engine\Time\Stopwatch.hpp"
 #include "Engine\Core\Widget.hpp"
+#include "Game\Player.hpp"
 
-class Board;
-class TurnStateManager;
 class Player;
-class Tank;
+class RenderScene;
+class RenderScene2D;
+
 class PlayingState : public GameState
 {
 public:
@@ -24,8 +25,14 @@ public:
 	virtual void PostRender() override;
 	virtual float UpdateFromInput(float deltaSeconds) override;
 
+	float UpdateFromInputDebug(float deltaSeconds);
 
 public:
+	RenderScene* m_renderScene = nullptr;
+	RenderScene2D* m_renderScene2D = nullptr;
 
+	Camera* m_uiCamera = nullptr;
+
+	Player* m_player = nullptr;
 };
 

@@ -4,7 +4,6 @@
 enum eMainMenuOptions
 {
 	PLAY,
-	CONNECT,
 	EXIT,
 	NUM_MAIN_MENU_OPTIONS
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine\Time\Clock.hpp"
 #include "Engine\Renderer\ForwardRenderingPath.hpp"
+#include "Engine\Renderer\ForwardRenderingPath2D.hpp"
 #include "Engine\Renderer\RenderScene.hpp"
 #include "Engine\Camera\Camera.hpp"
 #include "Game\GameCommon.hpp"
@@ -14,11 +15,12 @@ class Game
 {
 public:  
 	//camera members
-	Camera* m_gameCamera = nullptr;
+	Camera * m_gameCamera = nullptr;
+	Camera* m_uiCamera = nullptr;
 
 	//rendering members
 	ForwardRenderingPath* m_forwardRenderingPath = nullptr;
-	RenderScene* m_renderScene = nullptr;
+	ForwardRenderingPath2D* m_forwardRenderingPath2D = nullptr;
 
 	//clock
 	Clock* m_gameClock = nullptr;

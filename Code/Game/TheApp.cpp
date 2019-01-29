@@ -18,7 +18,6 @@
 #include "Engine\Net\NetSession.hpp"
 
 TheApp* g_theApp = nullptr;
-TCPSocket* hostTest = nullptr;
 static bool isRunning = false;
 
 
@@ -32,9 +31,7 @@ TheApp::TheApp()
 //  =============================================================================
 TheApp::~TheApp()
 {
-	if(m_hostThread != nullptr)
-		m_hostThread->join();
-	TODO("Cleanup (delete and null out) input system and renderer");
+
 }
 
 
@@ -56,7 +53,6 @@ void TheApp::RunFrame()
 
 	Sleep(1);
 	TODO("Need to add sleep function to release CPU cycles and reduce system demand");
-
 }
 
 

@@ -298,8 +298,8 @@
     <ClCompile Include="GameStates\MainMenuState.cpp" />
     <ClCompile Include="GameStates\GameState.cpp" />
     <ClCompile Include="GameStates\PlayingState.cpp" />
-    <ClCompile Include="GameStates\ReadyState.cpp" />
     <ClCompile Include="Main_Win32.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="TheApp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -310,7 +310,7 @@
     <ClInclude Include="GameStates\MainMenuState.hpp" />
     <ClInclude Include="GameStates\GameState.hpp" />
     <ClInclude Include="GameStates\PlayingState.hpp" />
-    <ClInclude Include="GameStates\ReadyState.hpp" />
+    <ClInclude Include="Player.hpp" />
     <ClInclude Include="SessionInfrastructure\NetSession.hpp" />
     <ClInclude Include="TheApp.hpp" />
   </ItemGroup>

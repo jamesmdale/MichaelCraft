@@ -31,7 +31,7 @@
     <ClCompile Include="GameStates\GameState.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="GameStates\ReadyState.cpp">
+    <ClCompile Include="Player.cpp">
       <Filter>General</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,6 +53,6 @@
     <ClInclude Include="GameStates\PlayingState.hpp" />
     <ClInclude Include="GameStates\GameState.hpp" />
     <ClInclude Include="SessionInfrastructure\NetSession.hpp" />
-    <ClInclude Include="GameStates\ReadyState.hpp" />
+    <ClInclude Include="Player.hpp" />
   </ItemGroup>
 </Project>
