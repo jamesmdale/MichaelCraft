@@ -1,5 +1,6 @@
 #include "Game\Game.hpp"
 #include "Game\GameStates\PlayingState.hpp"
+#include "Game\GameMeshes.hpp"
 #include "Engine\Window\Window.hpp"
 #include "Engine\Debug\DebugRender.hpp"
 #include "Engine\Core\LightObject.hpp"
@@ -31,20 +32,20 @@ void PlayingState::Initialize()
 	Window* theWindow = Window::GetInstance();
 	Renderer* theRenderer = Renderer::GetInstance();
 
-	//init scenes
-	m_renderScene = new RenderScene();
-	m_renderScene2D = new RenderScene2D();
-
 	m_camera = Game::GetInstance()->m_gameCamera;
 	m_uiCamera = Game::GetInstance()->m_uiCamera;
 
-	m_renderScene->AddCamera(m_camera);
-	m_renderScene2D->AddCamera(m_uiCamera);
+	m_michaelCraftCamera = new GameCamera();
+	m_michaelCraftCamera->Translate(-g_worldForward * 10.f);
 
+	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
+	
+	//update building
+	MeshBuilder builder;
 
-	m_player = new Player();
-	m_player->SetCamera(m_camera);
+	builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
+	m_axisMesh = builder.CreateMesh<VertexPCU>();
 
 	m_isInitialized = true;
 }
@@ -52,8 +53,7 @@ void PlayingState::Initialize()
 //  =============================================================================
 void PlayingState::Update(float deltaSeconds)
 { 
-
-
+	deltaSeconds = UpdateFromInput(deltaSeconds);
 }
 
 //  =============================================================================
@@ -68,15 +68,22 @@ void PlayingState::Render()
 	Renderer* theRenderer = Renderer::GetInstance();
 	Game* theGame = Game::GetInstance();
 
-	theRenderer->SetCamera(theGame->m_gameCamera);
-
 	//always do this first at the beginning of the frame's render
+	theRenderer->SetCamera(m_camera);	
 	theRenderer->ClearDepth(1.f);
 	theRenderer->ClearColor(Rgba::BLACK);
 
-	//render from forward rendering path
-	theGame->m_forwardRenderingPath->Render(m_renderScene);
-	theGame->m_forwardRenderingPath2D->Render(m_renderScene2D);
+	//hammer over camera view matrix
+	m_michaelCraftCamera->CreateFliippedViewMatrix(m_camera->m_viewMatrix);
+
+	//draw axis for debugging
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+	theRenderer->DrawMesh(m_axisMesh);
+
+	Mesh* blockMesh = MakeBlock(Vector3(2.5f, 0.f, 0.f));
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("Data/Images/Cards/Chillwind Yeti.png"));
+
+	theRenderer->DrawMesh(blockMesh);
 }
 
 //  =============================================================================
@@ -88,12 +95,87 @@ void PlayingState::PostRender()
 //  =============================================================================
 float PlayingState::UpdateFromInput(float deltaSeconds)
 {
+	InputSystem* theInput = InputSystem::GetInstance();
+
+	Vector2 mouseDelta = Vector2::ZERO;
+	mouseDelta = InputSystem::GetInstance()->GetMouse()->GetMouseDelta();
+
+	//calculate rotation for camera and use same rotation for player
+	//m_camera->m_transform->AddRotation(Vector3(mouseDelta.y, mouseDelta.x, 0.f) * deltaSeconds * 10.f);
+
+	m_michaelCraftCamera->m_yawDegreesZ += -mouseDelta.x * 0.05f;
+	m_michaelCraftCamera->m_pitchDegreesY += mouseDelta.y * 0.05f;
+
+	m_michaelCraftCamera->m_yawDegreesZ = Modulus(m_michaelCraftCamera->m_yawDegreesZ, 360.f);
+	m_michaelCraftCamera->m_pitchDegreesY = ClampFloat(m_michaelCraftCamera->m_pitchDegreesY,-90.f, 90.f);
+
+	/*Vector3 rotation = Vector3(clampedX, clampedY, 0.f);
+	m_camera->m_transform->SetLocalRotation(Vector3(rotation));*/
+
+	Vector3 cameraForward = Vector3(CosDegrees(m_michaelCraftCamera->m_yawDegreesZ), SinDegrees(m_michaelCraftCamera->m_yawDegreesZ), 0);
+	Vector3 cameraRight = Vector3(SinDegrees(m_michaelCraftCamera->m_yawDegreesZ), -CosDegrees(m_michaelCraftCamera->m_yawDegreesZ), 0);
+
+	Vector3 positionToAdd = Vector3::ZERO;
+	Vector3 positionAtStartOfFrame = positionToAdd;
+
+	//update movement
+	//forward (x)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
+	{
+		//calculate movement for camera and use same movement for ship and light
+		positionToAdd = cameraForward * deltaSeconds * 10.f;
+		m_michaelCraftCamera->Translate(positionToAdd);
+	}
+
+	//backward (-x)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
+	{
+		positionToAdd = -cameraForward * deltaSeconds * 10.f;
+		m_michaelCraftCamera->Translate(positionToAdd);
+	}
+
+	//left is north (y)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_A))
+	{
+		positionToAdd = -cameraRight * deltaSeconds * 10.f;
+		m_michaelCraftCamera->Translate(positionToAdd);
+	}
+
+	//right is south (-y)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_D))
+	{
+		positionToAdd = cameraRight * deltaSeconds * 10.f;
+		m_michaelCraftCamera->Translate(positionToAdd);
+	}
+
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE))
+	{
+		positionToAdd = g_worldUp * deltaSeconds * 10.f;
+		m_michaelCraftCamera->Translate(positionToAdd);
+	}
+
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL))
+	{
+		positionToAdd = -g_worldUp * deltaSeconds * 10.f;
+		m_michaelCraftCamera->Translate(positionToAdd);
+	}
+
+
+	//deltaSeconds = m_player->UpdateFromInput(deltaSeconds);
 	deltaSeconds = UpdateFromInputDebug(deltaSeconds);
-	
-	deltaSeconds = m_player->UpdateFromInput(deltaSeconds);
 
 	// return 
 	return deltaSeconds; //new deltaSeconds
+}
+
+//  =========================================================================================
+void PlayingState::InitializeAxisObject()
+{
+	MeshBuilder builder;
+
+	//put matrix here
+	builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
+	m_axisMesh = builder.CreateMesh<VertexPCU>();
 }
 
 //  =========================================================================================

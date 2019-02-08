@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine\Core\GameObject.hpp"
+#include "Game\GameCamera.hpp"
 
 class Player : GameObject
 {
@@ -15,5 +16,5 @@ public:
 	void SetCamera(Camera* camera);
 
 public:
-	Camera* m_camera = nullptr;
+	GameCamera* m_camera = nullptr;
 };

@@ -1,8 +1,10 @@
 #pragma once
-#include "Game\GameStates\GameState.hpp"
 #include "Engine\Time\Stopwatch.hpp"
 #include "Engine\Core\Widget.hpp"
 #include "Game\Player.hpp"
+#include "Game\GameStates\GameState.hpp"
+#include "Game\GameCamera.hpp"
+#include "Game\GameCamera.hpp"
 
 class Player;
 class RenderScene;
@@ -25,13 +27,18 @@ public:
 	virtual void PostRender() override;
 	virtual float UpdateFromInput(float deltaSeconds) override;
 
+	void InitializeAxisObject();
+
 	float UpdateFromInputDebug(float deltaSeconds);
 
 public:
 	RenderScene* m_renderScene = nullptr;
 	RenderScene2D* m_renderScene2D = nullptr;
+	Mesh* m_axisMesh = nullptr;
 
 	Camera* m_uiCamera = nullptr;
+
+	GameCamera* m_michaelCraftCamera = nullptr;
 
 	Player* m_player = nullptr;
 };

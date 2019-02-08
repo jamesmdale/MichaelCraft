@@ -34,6 +34,12 @@
     <ClCompile Include="Player.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="GameCamera.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMeshes.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.hpp">
@@ -54,5 +60,7 @@
     <ClInclude Include="GameStates\GameState.hpp" />
     <ClInclude Include="SessionInfrastructure\NetSession.hpp" />
     <ClInclude Include="Player.hpp" />
+    <ClInclude Include="GameCamera.hpp" />
+    <ClInclude Include="GameMeshes.hpp" />
   </ItemGroup>
 </Project>

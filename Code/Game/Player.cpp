@@ -90,18 +90,18 @@ float Player::UpdateFromInput(float deltaSeconds)
 }
 
 //  =========================================================================================
-void Player::SetCamera(Camera * camera)
+void Player::SetCamera(Camera* camera)
 {
-	if (camera != nullptr)
-	{
-		if (m_camera != nullptr)
-		{
-			m_transform->RemoveChildTransform(m_camera->m_transform);
-			m_camera = nullptr;
-		}
+	//if (camera != nullptr)
+	//{
+	//	if (m_camera != nullptr)
+	//	{
+	//		m_transform->RemoveChildTransform(m_camera->m_transform);
+	//		m_camera = nullptr;
+	//	}
 
-		m_camera = camera;
-		m_transform->AddChildTransform(m_camera->m_transform);
-	}
+	//	m_camera = camera;
+	//	m_transform->AddChildTransform(m_camera->m_transform);
+	//}
 }
 

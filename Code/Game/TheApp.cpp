@@ -68,9 +68,9 @@ void TheApp::Initialize()
 	masterClock = nullptr;	
 
 	//init mouse input settings
-	InputSystem::GetInstance()->GetMouse()->MouseLockToScreen(false);
+	InputSystem::GetInstance()->GetMouse()->MouseLockToScreen(true);
 	InputSystem::GetInstance()->GetMouse()->MouseShowCursor(true);
-	InputSystem::GetInstance()->GetMouse()->SetMouseMode(MOUSE_ABSOLUTE_MODE);	
+	InputSystem::GetInstance()->GetMouse()->SetMouseMode(MOUSE_RELATIVE_MODE);	
 
 	Game::GetInstance()->Initialize();
 }

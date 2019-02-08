@@ -1,5 +1,6 @@
 #include <stdlib.h>
-#include "Game\Game.hpp"
+#include <vector>
+#include <string>
 #include "Engine\Math\MathUtils.hpp"
 #include "Engine\Renderer\Renderer.hpp"
 #include "Engine\Math\Matrix44.hpp"
@@ -15,13 +16,13 @@
 #include "Engine\Core\StringUtils.hpp"
 #include "Engine\Core\EngineCommon.hpp"
 #include "Engine\Core\DevConsole.hpp"
+#include "Game\Game.hpp"
 #include "Game\GameCommon.hpp"
 #include "Game\GameStates\GameState.hpp"
 #include "Game\GameStates\MainMenuState.hpp"
 #include "Game\GameStates\LoadingState.hpp"
 #include "Game\GameStates\PlayingState.hpp"
-#include <vector>
-#include <string>
+
 
 //game instance
 static Game* g_theGame = nullptr;
@@ -89,10 +90,8 @@ void Game::Initialize()
 	m_gameCamera->SetDepthStencilTarget(theRenderer->GetDefaultDepthStencilTarget());
 	m_gameCamera->SetColorTarget(theRenderer->GetDefaultRenderTarget());
 	m_gameCamera->SetPerspective(60.f, CLIENT_ASPECT, 0.1f, 10000.f);
-	m_gameCamera->Translate(Vector3(0.f, 0.f, 0.f));
 
 	//m_gameCamera->m_skybox = new Skybox("Data/Images/galaxy2.png");
-
 	//add ui camera
 	m_uiCamera = new Camera();
 	m_uiCamera->SetColorTarget(theRenderer->GetDefaultRenderTarget());
@@ -101,7 +100,7 @@ void Game::Initialize()
 
 	// add menu states
 	TODO("Add other menu states");
-	GameState::AddGameState(new MainMenuState(m_gameCamera));
+	GameState::AddGameState(new MainMenuState(m_uiCamera));
 	GameState::AddGameState(new PlayingState(m_gameCamera));
 
 	// set to initial menu
