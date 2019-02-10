@@ -1,4 +1,4 @@
-#include "Game\GameCamera.hpp"
+#include "Game\GameObjects\GameCamera.hpp"
 #include "Game\GameCommon.hpp"
 
 

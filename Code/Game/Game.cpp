@@ -32,23 +32,15 @@ bool m_isPaused = false;
 //  =========================================================================================
 Game::Game()
 {
-	m_forwardRenderingPath = new ForwardRenderingPath();
-	m_forwardRenderingPath2D = new ForwardRenderingPath2D();
+
 }
 
 //  =========================================================================================
 Game::~Game()
 {
-	//delete render members
-	delete(m_forwardRenderingPath2D);
-	m_forwardRenderingPath2D = nullptr;
-
-	delete(m_forwardRenderingPath);
-	m_forwardRenderingPath = nullptr;
-
 	//delete camera members
-	delete(m_gameCamera);
-	m_gameCamera = nullptr;
+	delete(m_engineCamera);
+	m_engineCamera = nullptr;
 
 	delete(m_uiCamera);
 	m_uiCamera = nullptr;
@@ -86,10 +78,10 @@ void Game::Initialize()
 	m_gameClock = new Clock(GetMasterClock());
 
 	// add game cameras
-	m_gameCamera = new Camera();
-	m_gameCamera->SetDepthStencilTarget(theRenderer->GetDefaultDepthStencilTarget());
-	m_gameCamera->SetColorTarget(theRenderer->GetDefaultRenderTarget());
-	m_gameCamera->SetPerspective(60.f, CLIENT_ASPECT, 0.1f, 10000.f);
+	m_engineCamera = new Camera();
+	m_engineCamera->SetDepthStencilTarget(theRenderer->GetDefaultDepthStencilTarget());
+	m_engineCamera->SetColorTarget(theRenderer->GetDefaultRenderTarget());
+	m_engineCamera->SetPerspective(60.f, CLIENT_ASPECT, 0.1f, 10000.f);
 
 	//m_gameCamera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	//add ui camera
@@ -101,7 +93,7 @@ void Game::Initialize()
 	// add menu states
 	TODO("Add other menu states");
 	GameState::AddGameState(new MainMenuState(m_uiCamera));
-	GameState::AddGameState(new PlayingState(m_gameCamera));
+	GameState::AddGameState(new PlayingState(m_engineCamera));
 
 	// set to initial menu
 	GameState::TransitionGameStatesImmediate(GameState::GetGameStateFromGlobalListByType(MAIN_MENU_GAME_STATE));

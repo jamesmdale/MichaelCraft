@@ -1,10 +1,10 @@
 #pragma once
 #include "Engine\Time\Stopwatch.hpp"
 #include "Engine\Core\Widget.hpp"
-#include "Game\Player.hpp"
+#include "Game\GameObjects\Player.hpp"
 #include "Game\GameStates\GameState.hpp"
-#include "Game\GameCamera.hpp"
-#include "Game\GameCamera.hpp"
+#include "Game\GameObjects\GameCamera.hpp"
+#include "Game\GameObjects\World.hpp"
 
 class Player;
 class RenderScene;
@@ -27,19 +27,17 @@ public:
 	virtual void PostRender() override;
 	virtual float UpdateFromInput(float deltaSeconds) override;
 
-	void InitializeAxisObject();
-
 	float UpdateFromInputDebug(float deltaSeconds);
 
 public:
-	RenderScene* m_renderScene = nullptr;
-	RenderScene2D* m_renderScene2D = nullptr;
-	Mesh* m_axisMesh = nullptr;
 
-	Camera* m_uiCamera = nullptr;
+	World* m_world = nullptr;
+	//Mesh* m_axisMesh = nullptr;
 
-	GameCamera* m_michaelCraftCamera = nullptr;
+	//Camera* m_uiCamera = nullptr;
 
-	Player* m_player = nullptr;
+	//GameCamera* m_gameCamera = nullptr;
+
+	//Player* m_player = nullptr;
 };
 

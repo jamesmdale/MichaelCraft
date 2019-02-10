@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine\Core\GameObject.hpp"
-#include "Game\GameCamera.hpp"
+#include "Game\GameObjects\GameCamera.hpp"
 
 class Player : GameObject
 {

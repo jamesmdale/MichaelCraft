@@ -16,12 +16,8 @@ class Game
 {
 public:  
 	//camera members
-	Camera * m_gameCamera = nullptr;
+	Camera * m_engineCamera = nullptr;
 	Camera* m_uiCamera = nullptr;
-
-	//rendering members
-	ForwardRenderingPath* m_forwardRenderingPath = nullptr;
-	ForwardRenderingPath2D* m_forwardRenderingPath2D = nullptr;
 
 	//clock
 	Clock* m_gameClock = nullptr;
