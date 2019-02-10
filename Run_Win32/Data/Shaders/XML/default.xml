@@ -15,7 +15,7 @@
    </blend>
 
    <!-- compare less is default -->
-   <depth write="false" compare="less"/>
+   <depth write="true" compare="less"/>
 
     <!-- bindings -->
     <bindings>

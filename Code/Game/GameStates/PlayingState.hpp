@@ -7,8 +7,6 @@
 #include "Game\GameObjects\World.hpp"
 
 class Player;
-class RenderScene;
-class RenderScene2D;
 
 class PlayingState : public GameState
 {

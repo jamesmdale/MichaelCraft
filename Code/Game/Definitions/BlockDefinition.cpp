@@ -10,23 +10,17 @@ BlockDefinition::BlockDefinition(const tinyxml2::XMLElement& element)
 	m_type = ParseXmlAttribute(element, "id", m_type);
 	m_name = ParseXmlAttribute(element, "name", m_name);
 
-	/*std::string type = "";
-	type = ParseXmlAttribute(element, "type", type);*/
-	//m_type = ConvertTypeToCardTypeEnum(type);	
-
-	//m_subType = ParseXmlAttribute(element, "subtype", m_subType);
-
-	//m_id = ParseXmlAttribute(element, "id", m_id);
-
 	//get image value
-	/*const tinyxml2::XMLElement* imageElement = element.FirstChildElement("Image");
-	if (imageElement)
+	const tinyxml2::XMLElement* texcoordElement = element.FirstChildElement("TextureCoords");
+	if (texcoordElement)
 	{
-		std::string fileName = "";
-		fileName = ParseXmlAttribute(*imageElement, "file", fileName);
-
-		m_imagePath = Stringf("Data/Images/Cards/%s", fileName.c_str());
-	}*/
+		m_frontTexCoords = ParseXmlAttribute(*texcoordElement, "front", m_frontTexCoords);
+		m_rightSideTexCoords = ParseXmlAttribute(*texcoordElement, "right", m_rightSideTexCoords);
+		m_backTexCoords = ParseXmlAttribute(*texcoordElement, "back", m_backTexCoords);
+		m_leftSideTexCoords = ParseXmlAttribute(*texcoordElement, "left", m_leftSideTexCoords);
+		m_topTexCoords = ParseXmlAttribute(*texcoordElement, "top", m_topTexCoords);	
+		m_bottomTexCoords = ParseXmlAttribute(*texcoordElement, "bottom", m_bottomTexCoords);		
+	}
 }
 
 //  =========================================================================================
@@ -43,19 +37,6 @@ void BlockDefinition::Initialize(const std::string& filePath)
 		s_blockDefinitions.insert(std::pair<uchar8, BlockDefinition*>(newDef->m_type, newDef));
 	}
 }
-
-//  =========================================================================================
-//BlockDefinition* BlockDefinition::GetDefinitionByName(const std::string& cardName)
-//{
-//	std::map<std::string, BlockDefinition*>::iterator mapIterator = s_blockDefinitions.find(cardName);
-//	if (mapIterator == s_blockDefinitions.end()) {
-//		return nullptr;
-//	}
-//	else 
-//	{
-//		return mapIterator->second;
-//	}
-//}
 
 //  =========================================================================================
 BlockDefinition* BlockDefinition::GetDefinitionById(const uchar8 id)

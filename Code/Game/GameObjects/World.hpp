@@ -20,6 +20,9 @@ public:
 	void UpdateFromInput(float deltaSeconds);
 
 	void UpdateChunks();
+	void RenderChunks();
+
+	void ActivateChunk(Chunk* chunk);
 
 public:
 	std::map<IntVector2, Chunk*> m_activeChunks;

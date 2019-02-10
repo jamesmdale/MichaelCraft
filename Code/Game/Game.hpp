@@ -1,12 +1,8 @@
 #pragma once
 #include <vector>
 #include "Engine\Time\Clock.hpp"
-#include "Engine\Renderer\ForwardRenderingPath.hpp"
-#include "Engine\Renderer\ForwardRenderingPath2D.hpp"
-#include "Engine\Renderer\RenderScene.hpp"
 #include "Engine\Camera\Camera.hpp"
 #include "Game\GameCommon.hpp"
-
 
 class NetMessage;
 class NetConnection;

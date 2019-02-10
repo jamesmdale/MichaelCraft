@@ -22,6 +22,7 @@
 #include "Game\GameStates\MainMenuState.hpp"
 #include "Game\GameStates\LoadingState.hpp"
 #include "Game\GameStates\PlayingState.hpp"
+#include "Game\Definitions\BlockDefinition.hpp"
 
 
 //game instance
@@ -98,6 +99,9 @@ void Game::Initialize()
 	// set to initial menu
 	GameState::TransitionGameStatesImmediate(GameState::GetGameStateFromGlobalListByType(MAIN_MENU_GAME_STATE));
 	GameState::UpdateGlobalGameState(0.f);
+
+	//initialize definitions
+	BlockDefinition::Initialize("Data/Definitions/BlockDefinitions.xml");
 
 	// cleanup
 	theRenderer = nullptr;

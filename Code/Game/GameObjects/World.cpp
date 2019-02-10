@@ -1,6 +1,6 @@
 #include "Game\Game.hpp"
 #include "Game\GameStates\PlayingState.hpp"
-#include "Game\GameObjects\GameMeshes.hpp"
+#include "Game\ObjectMeshbuilder.hpp"
 #include "Engine\Window\Window.hpp"
 #include "Engine\Debug\DebugRender.hpp"
 #include "Engine\Core\LightObject.hpp"
@@ -8,6 +8,8 @@
 #include "Engine\Renderer\RenderScene.hpp"
 #include "Engine\Renderer\RenderScene2D.hpp"
 #include "Engine\Core\StringUtils.hpp"
+#include "Engine\Renderer\MeshBuilder.hpp"
+#include "Engine\Renderer\Mesh.hpp"
 #include <map>
 #include <string>
 
@@ -43,12 +45,17 @@ void World::Initialize()
 
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
+
+	Chunk* chunk = new Chunk(IntVector2(0,0));
+	ActivateChunk(chunk);
 }
 
 //  =========================================================================================
 void World::Update(float deltaSeconds)
 {
 	UpdateFromInput(deltaSeconds);
+
+	UpdateChunks();
 }
 
 //  =========================================================================================
@@ -83,6 +90,12 @@ void World::Render()
 	////cleanup..for now
 	//delete(blockMesh);
 	//blockMesh = nullptr;
+
+	RenderChunks();
+
+	//generate and render test mesh
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("Data/Images/coin.jpg"));
+	theRenderer->DrawMesh(MakeBlockToMesh(Vector3(-2.f, -2.f, 0.f), 0));
 }
 
 //  =========================================================================================
@@ -170,4 +183,21 @@ void World::UpdateChunks()
 	{
 		chunkIterator->second->Update();
 	}
+}
+
+//  =========================================================================================
+void World::RenderChunks()
+{
+	std::map<IntVector2, Chunk*>::iterator chunkIterator;
+
+	for (chunkIterator = m_activeChunks.begin(); chunkIterator != m_activeChunks.end(); ++chunkIterator)
+	{
+		chunkIterator->second->Render();
+	}
+}
+
+//  =========================================================================================
+void World::ActivateChunk(Chunk* chunk)
+{
+	m_activeChunks.insert(std::pair<IntVector2, Chunk*>(chunk->m_chunkCoords, chunk));
 }

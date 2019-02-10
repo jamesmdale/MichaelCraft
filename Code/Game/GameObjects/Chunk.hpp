@@ -1,30 +1,39 @@
 #pragma once
-#include "Engine\Renderer\MeshBuilder.hpp"
 #include "Engine\Math\AABB3.hpp"
 #include "Engine\Math\IntVector3.hpp"
 #include "Game\GameObjects\Block.hpp"
 #include "Game\GameCommon.hpp"
 
+class Meshbuilder;
+class Mesh;
+
 class Chunk
 {
 public:
-	Chunk();
+	Chunk(const IntVector2& coordinates);
 	~Chunk();
 
 	void Update();
 	void Render();
 
-	//helper functions
+	// helper functions ----------------------------------------------
 	void GenerateChunkMesh();
+
+	//block helpers
 	int GetBlockIndexForBlockCoords(const IntVector3& blockCoords);
 	IntVector3 GetBlockCoordsForBlockIndex(int blockIndex);
+	Vector3 GetBlockWorldCenterForBlockIndex(int blockIndex);
+	void AddBlockToMesh(const Vector3& center, Block* block);
+
+	//chunk helpers
+	//Vector3 GetWorldPositionOfBlockZero();
 
 public:
 	Block m_blocks[BLOCKS_PER_CHUNK];
 	IntVector2 m_chunkCoords;
 	AABB3 m_worldBounds;
-	MeshBuilder* m_meshBuilder = new MeshBuilder();
-	Mesh* m_gpyMesh = nullptr;
+	MeshBuilder* m_meshBuilder = nullptr;
+	Mesh* m_gpuMesh = nullptr;
 	bool m_isVBOPriority =- true;
 	
 };

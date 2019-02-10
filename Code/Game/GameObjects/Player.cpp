@@ -1,4 +1,4 @@
-#include "Game\Player.hpp"
+#include "Game\GameObjects\Player.hpp"
 #include "Engine\Input\InputSystem.hpp"
 
 //  =========================================================================================

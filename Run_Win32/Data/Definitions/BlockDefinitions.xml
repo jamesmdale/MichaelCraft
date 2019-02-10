@@ -1,6 +1,18 @@
-<BlockDefinitions spriteSheetPath="Data/Images/Terrain32x32.png">
+<BlockDefinitions>
 
 	<BlockDefinition id="0" name="air">
+		<TextureCoords front="0,0,1,1," right="0,0,1,1," back="0,0,1,1," left="0,0,1,1," top="0,0,1,1," bottom="0,0,1,1," />
+	</BlockDefinition>
+
+	<BlockDefinition id="1" name="grass">
+		<TextureCoords front="0,0,1,1," right="0,0,1,1," back="0,0,1,1," left="0,0,1,1," top="0,0,1,1," bottom="0,0,1,1," />
+	</BlockDefinition>
+
+	<BlockDefinition id="2" name="dirt">
+		<TextureCoords front="0,0,1,1," right="0,0,1,1," back="0,0,1,1," left="0,0,1,1," top="0,0,1,1," bottom="0,0,1,1," />
+	</BlockDefinition>
+
+	<BlockDefinition id="3" name="stone">
 		<TextureCoords front="0,0,1,1," right="0,0,1,1," back="0,0,1,1," left="0,0,1,1," top="0,0,1,1," bottom="0,0,1,1," />
 	</BlockDefinition>
 

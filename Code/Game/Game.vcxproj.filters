@@ -34,9 +34,6 @@
     <ClCompile Include="GameObjects\GameCamera.cpp">
       <Filter>General</Filter>
     </ClCompile>
-    <ClCompile Include="GameObjects\GameMeshes.cpp">
-      <Filter>General</Filter>
-    </ClCompile>
     <ClCompile Include="GameObjects\Player.cpp">
       <Filter>General</Filter>
     </ClCompile>
@@ -50,6 +47,9 @@
       <Filter>General</Filter>
     </ClCompile>
     <ClCompile Include="Definitions\BlockDefinition.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectMeshbuilder.cpp">
       <Filter>General</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,11 +72,11 @@
     <ClInclude Include="GameStates\GameState.hpp" />
     <ClInclude Include="SessionInfrastructure\NetSession.hpp" />
     <ClInclude Include="GameObjects\GameCamera.hpp" />
-    <ClInclude Include="GameObjects\GameMeshes.hpp" />
     <ClInclude Include="GameObjects\Player.hpp" />
     <ClInclude Include="GameObjects\World.hpp" />
     <ClInclude Include="GameObjects\Block.hpp" />
     <ClInclude Include="GameObjects\Chunk.hpp" />
     <ClInclude Include="Definitions\BlockDefinition.hpp" />
+    <ClInclude Include="ObjectMeshbuilder.hpp" />
   </ItemGroup>
 </Project>

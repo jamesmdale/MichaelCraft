@@ -12,9 +12,7 @@ class BlockDefinition
 public:
 	explicit BlockDefinition(const tinyxml2::XMLElement& element);
 	static void Initialize(const std::string& filePath);
-	//static BlockDefinition* GetDefinitionByName(const std::string& blockName);
 	static BlockDefinition* GetDefinitionById(const uchar8 id);
-
 
 public:
 	std::string m_name = "";
