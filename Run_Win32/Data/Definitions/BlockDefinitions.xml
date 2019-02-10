@@ -1,19 +1,19 @@
 <BlockDefinitions>
 
 	<BlockDefinition id="0" name="air">
-		<TextureCoords front="0,0,1,1," right="0,0,1,1," back="0,0,1,1," left="0,0,1,1," top="0,0,1,1," bottom="0,0,1,1," />
+		<TextureCoords front="1,2" right="1,2," back="1,2" left="1,2" top="1,2" bottom="1,2" />
 	</BlockDefinition>
 
 	<BlockDefinition id="1" name="grass">
-		<TextureCoords front="0,0,1,1," right="0,0,1,1," back="0,0,1,1," left="0,0,1,1," top="0,0,1,1," bottom="0,0,1,1," />
+		<TextureCoords front="3,3" right="3,3" back="3,3" left="3,3" top="21,0," bottom="4,3" />
 	</BlockDefinition>
 
 	<BlockDefinition id="2" name="dirt">
-		<TextureCoords front="0,0,1,1," right="0,0,1,1," back="0,0,1,1," left="0,0,1,1," top="0,0,1,1," bottom="0,0,1,1," />
+		<TextureCoords front="4,3" right="4,3" back="4,3" left="4,3" top="4,3" bottom="4,3" />
 	</BlockDefinition>
 
 	<BlockDefinition id="3" name="stone">
-		<TextureCoords front="0,0,1,1," right="0,0,1,1," back="0,0,1,1," left="0,0,1,1," top="0,0,1,1," bottom="0,0,1,1," />
+		<TextureCoords front="7,4" right="7,4" back="7,4" left="7,4" top="7,4" bottom="7,4" />
 	</BlockDefinition>
 
 </BlockDefinitions>

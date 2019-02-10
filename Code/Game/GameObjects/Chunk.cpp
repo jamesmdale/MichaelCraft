@@ -1,13 +1,19 @@
 #include "Game\GameObjects\Chunk.hpp"
 #include "Game\Definitions\BlockDefinition.hpp"
+#include "Game\GameCommon.hpp"
+#include "Game\Game.hpp"
 #include "Engine\Renderer\MeshBuilder.hpp"
 #include "Engine\Renderer\Mesh.hpp"
+#include "Engine\Math\SmoothNoise.hpp"
+
 
 const Vector3 blockCenterOffset = Vector3(0.5f, 0.5f, 0.5f);
 
 //  =========================================================================================
 Chunk::Chunk(const IntVector2& coordinates)
 {
+	m_chunkCoords = coordinates;
+
 	BlockDefinition* airBlockDef = BlockDefinition::GetDefinitionById(0);
 	for (int blockIndex = 0; blockIndex < BLOCKS_PER_CHUNK; ++blockIndex)
 	{
@@ -20,9 +26,11 @@ Chunk::Chunk(const IntVector2& coordinates)
 	m_worldBounds = AABB3(minsWorldCoordinates, maxsWorldCoordinates);
 
 	m_meshBuilder = new MeshBuilder();
-	m_chunkCoords = coordinates;
 
-	//randomization step goes here
+	//randomization
+	GenerateBlockDataWithPerlin();
+
+	//generation
 	GenerateChunkMesh();
 }
 
@@ -47,9 +55,59 @@ void Chunk::Render()
 {
 	Renderer* theRenderer = Renderer::GetInstance();
 
-	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("Data/Images/coin.jpg"));
+	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
 	theRenderer->m_defaultShader->SetFrontFace(WIND_COUNTER_CLOCKWISE);
 	theRenderer->DrawMesh(m_gpuMesh);
+}
+
+//  =========================================================================================
+void Chunk::GenerateBlockDataWithPerlin()
+{
+	std::vector<int> columnHeights;
+
+	//foreach column we need to generate a height
+	for (int columnIndex = 0; columnIndex < BLOCKS_WIDE_X * BLOCKS_WIDE_Y; ++columnIndex)
+	{
+		IntVector3 columnCoordinates = GetBlockCoordsForBlockIndex(columnIndex);
+		Vector3 columnWorldCoordinates = GetBlockWorldCenterForBlockIndex(columnIndex);
+		float height0to1 = Compute2dPerlinNoise(columnWorldCoordinates.x, columnWorldCoordinates.y, 50.f, 10);
+
+		float height = RangeMapFloat(height0to1, 0.f, 1.f, 128.f, 150.f);
+
+		int heightAsInt = RoundToNearestInt(height);
+
+		for (int blockIndexInColumn = 0; blockIndexInColumn < BLOCKS_HIGH_Z; ++blockIndexInColumn)
+		{	
+			//leave as air
+			if (blockIndexInColumn > heightAsInt)
+			{
+				//do nothing. all of this is air
+			}
+
+			//make the block grass if it is on top
+			else if (blockIndexInColumn == heightAsInt)
+			{
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = 1;
+				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
+			}
+
+			//else make the block dirt
+			else if (blockIndexInColumn < heightAsInt && blockIndexInColumn >= heightAsInt - 3)
+			{
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = 2;
+				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
+			}
+
+			//make the block stone if it is lower than 7 below the half point line of the chunk
+			else
+			{
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = 3;
+				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
+			}			
+
+			
+		}
+	}
 }
 
 //  =========================================================================================
@@ -81,26 +139,36 @@ IntVector3 Chunk::GetBlockCoordsForBlockIndex(int blockIndex)
 }
 
 //  =========================================================================================
-Vector3 Chunk::GetBlockWorldCenterForBlockIndex(int blockIndex)
+Vector3 Chunk::GetBlockWorldCoordsForBlockIndex(int blockIndex)
 {
 	Vector3 worldCoordinates = Vector3(GetBlockCoordsForBlockIndex(blockIndex));
-	return worldCoordinates + m_worldBounds.mins + blockCenterOffset;
+	return worldCoordinates + m_worldBounds.mins;
+}
+
+//  =========================================================================================
+Vector3 Chunk::GetBlockWorldCenterForBlockIndex(int blockIndex)
+{
+	return GetBlockWorldCoordsForBlockIndex(blockIndex) + blockCenterOffset;
 }
 
 //  =========================================================================================
 void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 {
+	if(block->m_type == 0)
+		return;
+
 	float xVal = 0.5f;
 	float yVal = 0.5f;
 	float zVal = 0.5f;
 
 	BlockDefinition* blockDef = BlockDefinition::GetDefinitionById(block->m_type);
-	AABB2 frontTexCoords = blockDef->m_frontTexCoords;
-	AABB2 rightTexCoords = blockDef->m_rightSideTexCoords;
-	AABB2 backTexCoords = blockDef->m_backTexCoords;
-	AABB2 leftTexCoords = blockDef->m_leftSideTexCoords;
-	AABB2 topTexCoords = blockDef->m_topTexCoords;
-	AABB2 bottomTexCoords = blockDef->m_bottomTexCoords;
+
+	AABB2 frontTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_frontTexCoords);
+	AABB2 rightTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_rightSideTexCoords);
+	AABB2 backTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_backTexCoords);
+	AABB2 leftTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_leftSideTexCoords);
+	AABB2 topTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_topTexCoords);
+	AABB2 bottomTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_bottomTexCoords);
 
 	Rgba tint = Rgba::WHITE;
 
@@ -110,25 +178,26 @@ void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 
 	//front face
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.mins.y);
+	m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.mins.y);
+	m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.maxs.y);
+	
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.maxs.y);
+	m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.maxs.y);
+	m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
@@ -137,25 +206,25 @@ void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 
 	//right face
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(rightTexCoords.mins.x, rightTexCoords.mins.y);
+	m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(1.f, 0.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.mins.y);
+	m_meshBuilder->SetUV(rightTexCoords.mins.x, rightTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(1.f, 0.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
+	m_meshBuilder->SetUV(rightTexCoords.mins.x, rightTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(1.f, 0.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(rightTexCoords.mins.x, rightTexCoords.maxs.y);
+	m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(1.f, 0.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
@@ -164,25 +233,25 @@ void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 
 	//back face
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(backTexCoords.mins.x, backTexCoords.mins.y);
+	m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, 1.f));
 	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.mins.y);
+	m_meshBuilder->SetUV(backTexCoords.mins.x, backTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, 1.f));
 	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
+	m_meshBuilder->SetUV(backTexCoords.mins.x, backTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, 1.f));
 	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(backTexCoords.mins.x, backTexCoords.maxs.y);
+	m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, 1.f));
 	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
@@ -191,25 +260,25 @@ void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 
 	//left face
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(leftTexCoords.mins.x, leftTexCoords.mins.y);
+	m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(-1.f, 0.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.mins.y);
+	m_meshBuilder->SetUV(leftTexCoords.mins.x, leftTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(-1.f, 0.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.maxs.y);
+	m_meshBuilder->SetColor(tint);	
+	m_meshBuilder->SetUV(leftTexCoords.mins.x, leftTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(-1.f, 0.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(leftTexCoords.mins.x, leftTexCoords.maxs.y);
+	m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(-1.f, 0.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
@@ -218,25 +287,25 @@ void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 
 	//top face
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
+	m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 1.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
+	m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 1.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
+	m_meshBuilder->SetColor(tint);	
+	m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 1.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
+	m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, 1.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
@@ -245,25 +314,25 @@ void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 
 	//bottom face
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(bottomTexCoords.mins.x, bottomTexCoords.mins.y);
+	m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, -1.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.mins.y);
+	m_meshBuilder->SetUV(bottomTexCoords.mins.x, bottomTexCoords.maxs.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, -1.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.maxs.y);
+	m_meshBuilder->SetColor(tint);	
+	m_meshBuilder->SetUV(bottomTexCoords.mins.x, bottomTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, -1.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(bottomTexCoords.mins.x, bottomTexCoords.maxs.y);
+	m_meshBuilder->SetColor(tint);	
+	m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.mins.y);
 	m_meshBuilder->SetNormal(Vector3(0.f, -1.f, 0.f));
 	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));

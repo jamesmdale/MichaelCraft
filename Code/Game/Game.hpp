@@ -7,6 +7,7 @@
 class NetMessage;
 class NetConnection;
 enum eNetMessageFlag;
+class Spritesheet;
 
 class Game
 {
@@ -17,6 +18,8 @@ public:
 
 	//clock
 	Clock* m_gameClock = nullptr;
+
+	SpriteSheet* m_terrainSprites = nullptr;
 
 public:
 	Game();
@@ -36,6 +39,7 @@ public:
 	float UpdateInput(float deltaSeconds);
 };
 
+SpriteSheet* GetTerrainSprites();
 
 
 

@@ -20,12 +20,12 @@ public:
 	uint8_t m_state = UINT8_MAX;
 
 	//texture coordinates for block
-	AABB2 m_frontTexCoords = AABB2::ZERO_TO_ONE;
-	AABB2 m_rightSideTexCoords = AABB2::ZERO_TO_ONE;
-	AABB2 m_backTexCoords = AABB2::ZERO_TO_ONE;
-	AABB2 m_leftSideTexCoords = AABB2::ZERO_TO_ONE;
-	AABB2 m_bottomTexCoords = AABB2::ZERO_TO_ONE;
-	AABB2 m_topTexCoords = AABB2::ZERO_TO_ONE;
+	IntVector2 m_frontTexCoords = IntVector2::ZERO;
+	IntVector2 m_rightSideTexCoords = IntVector2::ZERO;
+	IntVector2 m_backTexCoords = IntVector2::ZERO;
+	IntVector2 m_leftSideTexCoords = IntVector2::ZERO;
+	IntVector2 m_bottomTexCoords = IntVector2::ZERO;
+	IntVector2 m_topTexCoords = IntVector2::ZERO;
 
 	bool m_doesTarget = false;
 

@@ -16,6 +16,7 @@
 #include "Engine\Core\StringUtils.hpp"
 #include "Engine\Core\EngineCommon.hpp"
 #include "Engine\Core\DevConsole.hpp"
+#include "Engine\Renderer\SpriteSheet.hpp"
 #include "Game\Game.hpp"
 #include "Game\GameCommon.hpp"
 #include "Game\GameStates\GameState.hpp"
@@ -27,6 +28,7 @@
 
 //game instance
 static Game* g_theGame = nullptr;
+static SpriteSheet* g_terrainSprites = nullptr;
 
 bool m_isPaused = false;
 
@@ -102,6 +104,7 @@ void Game::Initialize()
 
 	//initialize definitions
 	BlockDefinition::Initialize("Data/Definitions/BlockDefinitions.xml");
+	g_terrainSprites = new SpriteSheet(*theRenderer->CreateOrGetTexture("Data/Images/Terrain_32x32.png"), 32, 32);
 
 	// cleanup
 	theRenderer = nullptr;
@@ -150,4 +153,10 @@ float Game::UpdateInput(float deltaSeconds)
 	deltaSeconds = GameState::GetCurrentGameState()->UpdateFromInput(deltaSeconds);
 
 	return deltaSeconds;
+}
+
+//  =========================================================================================
+SpriteSheet* GetTerrainSprites()
+{
+	return g_terrainSprites;
 }

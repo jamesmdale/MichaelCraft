@@ -1,9 +1,10 @@
 #include "Game\ObjectMeshbuilder.hpp"
 #include "Game\Definitions\BlockDefinition.hpp"
+#include "Game\Game.hpp"
 #include "Engine\Renderer\MeshBuilder.hpp"
 
 //  =========================================================================================
-Mesh* MakeBlockToMesh(const Vector3 & center, const uchar8 type)
+Mesh* MakeBlockToMesh(const Vector3& center, const uchar8 type)
 {
 	MeshBuilder builder;
 
@@ -12,12 +13,13 @@ Mesh* MakeBlockToMesh(const Vector3 & center, const uchar8 type)
 	float zVal = 0.5f;
 
 	BlockDefinition* blockDef = BlockDefinition::GetDefinitionById(type);
-	AABB2 frontTexCoords = blockDef->m_frontTexCoords;
-	AABB2 rightTexCoords = blockDef->m_rightSideTexCoords;
-	AABB2 backTexCoords = blockDef->m_backTexCoords;
-	AABB2 leftTexCoords = blockDef->m_leftSideTexCoords;
-	AABB2 topTexCoords = blockDef->m_topTexCoords;
-	AABB2 bottomTexCoords = blockDef->m_bottomTexCoords;
+
+	AABB2 frontTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_frontTexCoords);
+	AABB2 rightTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_rightSideTexCoords);
+	AABB2 backTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_backTexCoords);
+	AABB2 leftTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_leftSideTexCoords);
+	AABB2 topTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_topTexCoords);
+	AABB2 bottomTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_bottomTexCoords);
 
 	Rgba tint = Rgba::WHITE;
 
@@ -27,25 +29,25 @@ Mesh* MakeBlockToMesh(const Vector3 & center, const uchar8 type)
 
 												   //front face
 	builder.SetColor(tint);
-	builder.SetUV(frontTexCoords.mins.x, frontTexCoords.mins.y);
+	builder.SetUV(frontTexCoords.maxs.x, frontTexCoords.maxs.y);
 	builder.SetNormal(Vector3(0.f, 0.f, -1.f));
 	builder.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(frontTexCoords.maxs.x, frontTexCoords.mins.y);
+	builder.SetUV(frontTexCoords.mins.x, frontTexCoords.maxs.y);
 	builder.SetNormal(Vector3(0.f, 0.f, -1.f));
 	builder.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	builder.SetColor(tint);
-	builder.SetUV(frontTexCoords.maxs.x, frontTexCoords.maxs.y);
+	builder.SetColor(tint);	
+	builder.SetUV(frontTexCoords.mins.x, frontTexCoords.mins.y);
 	builder.SetNormal(Vector3(0.f, 0.f, -1.f));
 	builder.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-	builder.SetColor(tint);
-	builder.SetUV(frontTexCoords.mins.x, frontTexCoords.maxs.y);
+	builder.SetColor(tint);	
+	builder.SetUV(frontTexCoords.maxs.x, frontTexCoords.mins.y);
 	builder.SetNormal(Vector3(0.f, 0.f, -1.f));
 	builder.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
@@ -54,25 +56,25 @@ Mesh* MakeBlockToMesh(const Vector3 & center, const uchar8 type)
 
 	//right face
 	builder.SetColor(tint);
-	builder.SetUV(rightTexCoords.mins.x, rightTexCoords.mins.y);
+	builder.SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
 	builder.SetNormal(Vector3(1.f, 0.f, 0.f));
 	builder.SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(rightTexCoords.maxs.x, rightTexCoords.mins.y);
+	builder.SetUV(rightTexCoords.mins.x, rightTexCoords.maxs.y);
 	builder.SetNormal(Vector3(1.f, 0.f, 0.f));
 	builder.SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
+	builder.SetUV(rightTexCoords.mins.x, rightTexCoords.mins.y);
 	builder.SetNormal(Vector3(1.f, 0.f, 0.f));
 	builder.SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-	builder.SetColor(tint);
-	builder.SetUV(rightTexCoords.mins.x, rightTexCoords.maxs.y);
+	builder.SetColor(tint);	
+	builder.SetUV(rightTexCoords.maxs.x, rightTexCoords.mins.y);
 	builder.SetNormal(Vector3(1.f, 0.f, 0.f));
 	builder.SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
@@ -81,25 +83,25 @@ Mesh* MakeBlockToMesh(const Vector3 & center, const uchar8 type)
 
 	//back face
 	builder.SetColor(tint);
-	builder.SetUV(backTexCoords.mins.x, backTexCoords.mins.y);
+	builder.SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
 	builder.SetNormal(Vector3(0.f, 0.f, 1.f));
 	builder.SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(backTexCoords.maxs.x, backTexCoords.mins.y);
+	builder.SetUV(backTexCoords.mins.x, backTexCoords.maxs.y);
 	builder.SetNormal(Vector3(0.f, 0.f, 1.f));
 	builder.SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
+	builder.SetUV(backTexCoords.mins.x, backTexCoords.mins.y);
 	builder.SetNormal(Vector3(0.f, 0.f, 1.f));
 	builder.SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-	builder.SetColor(tint);
-	builder.SetUV(backTexCoords.mins.x, backTexCoords.maxs.y);
+	builder.SetColor(tint);	
+	builder.SetUV(backTexCoords.maxs.x, backTexCoords.mins.y);
 	builder.SetNormal(Vector3(0.f, 0.f, 1.f));
 	builder.SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
@@ -108,25 +110,25 @@ Mesh* MakeBlockToMesh(const Vector3 & center, const uchar8 type)
 
 	//left face
 	builder.SetColor(tint);
-	builder.SetUV(leftTexCoords.mins.x, leftTexCoords.mins.y);
+	builder.SetUV(leftTexCoords.maxs.x, leftTexCoords.maxs.y);
 	builder.SetNormal(Vector3(-1.f, 0.f, 0.f));
 	builder.SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(leftTexCoords.maxs.x, leftTexCoords.mins.y);
+	builder.SetUV(leftTexCoords.mins.x, leftTexCoords.maxs.y);
 	builder.SetNormal(Vector3(-1.f, 0.f, 0.f));
 	builder.SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(leftTexCoords.maxs.x, leftTexCoords.maxs.y);
+	builder.SetUV(leftTexCoords.mins.x, leftTexCoords.mins.y);
 	builder.SetNormal(Vector3(-1.f, 0.f, 0.f));
 	builder.SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(leftTexCoords.mins.x, leftTexCoords.maxs.y);
+	builder.SetUV(leftTexCoords.maxs.x, leftTexCoords.mins.y);
 	builder.SetNormal(Vector3(-1.f, 0.f, 0.f));
 	builder.SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
@@ -135,25 +137,25 @@ Mesh* MakeBlockToMesh(const Vector3 & center, const uchar8 type)
 
 	//top face
 	builder.SetColor(tint);
-	builder.SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
+	builder.SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
 	builder.SetNormal(Vector3(0.f, 1.f, 0.f));
 	builder.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
+	builder.SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
 	builder.SetNormal(Vector3(0.f, 1.f, 0.f));
 	builder.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
+	builder.SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
 	builder.SetNormal(Vector3(0.f, 1.f, 0.f));
 	builder.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
+	builder.SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
 	builder.SetNormal(Vector3(0.f, 1.f, 0.f));
 	builder.SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
@@ -162,25 +164,26 @@ Mesh* MakeBlockToMesh(const Vector3 & center, const uchar8 type)
 
 	//bottom face
 	builder.SetColor(tint);
-	builder.SetUV(bottomTexCoords.mins.x, bottomTexCoords.mins.y);
+
+	builder.SetUV(bottomTexCoords.maxs.x, bottomTexCoords.maxs.y);
 	builder.SetNormal(Vector3(0.f, -1.f, 0.f));
 	builder.SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(bottomTexCoords.maxs.x, bottomTexCoords.mins.y);
+	builder.SetUV(bottomTexCoords.mins.x, bottomTexCoords.maxs.y);
 	builder.SetNormal(Vector3(0.f, -1.f, 0.f));
 	builder.SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
 	builder.SetColor(tint);
-	builder.SetUV(bottomTexCoords.maxs.x, bottomTexCoords.maxs.y);
+	builder.SetUV(bottomTexCoords.mins.x, bottomTexCoords.mins.y);
 	builder.SetNormal(Vector3(0.f, -1.f, 0.f));
 	builder.SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	builder.SetColor(tint);
-	builder.SetUV(bottomTexCoords.mins.x, bottomTexCoords.maxs.y);
+	builder.SetColor(tint);	
+	builder.SetUV(bottomTexCoords.maxs.x, bottomTexCoords.mins.y);
 	builder.SetNormal(Vector3(0.f, -1.f, 0.f));
 	builder.SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
 	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));

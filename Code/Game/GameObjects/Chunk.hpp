@@ -17,11 +17,13 @@ public:
 	void Render();
 
 	// helper functions ----------------------------------------------
+	void GenerateBlockDataWithPerlin();
 	void GenerateChunkMesh();
 
 	//block helpers
 	int GetBlockIndexForBlockCoords(const IntVector3& blockCoords);
 	IntVector3 GetBlockCoordsForBlockIndex(int blockIndex);
+	Vector3 GetBlockWorldCoordsForBlockIndex(int blockIndex);
 	Vector3 GetBlockWorldCenterForBlockIndex(int blockIndex);
 	void AddBlockToMesh(const Vector3& center, Block* block);
 
@@ -35,5 +37,4 @@ public:
 	MeshBuilder* m_meshBuilder = nullptr;
 	Mesh* m_gpuMesh = nullptr;
 	bool m_isVBOPriority =- true;
-	
 };

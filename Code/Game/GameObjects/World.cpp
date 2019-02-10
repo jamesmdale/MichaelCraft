@@ -46,8 +46,25 @@ void World::Initialize()
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
 
-	Chunk* chunk = new Chunk(IntVector2(0,0));
-	ActivateChunk(chunk);
+	//chunk 1
+	Chunk* chunk1 = new Chunk(IntVector2(0,0));
+	ActivateChunk(chunk1);
+
+	//chunk 2
+	Chunk* chunk2 = new Chunk(IntVector2(-1, 2));
+	ActivateChunk(chunk2);
+
+	//chunk 3
+	Chunk* chunk3 = new Chunk(IntVector2(0, 2));
+	ActivateChunk(chunk3);
+
+	//chunk 4
+	Chunk* chunk4 = new Chunk(IntVector2(1, 2));
+	ActivateChunk(chunk4);
+
+	//chunk 5
+	Chunk* chunk5 = new Chunk(IntVector2(0, 3));
+	ActivateChunk(chunk5);
 }
 
 //  =========================================================================================
@@ -94,8 +111,8 @@ void World::Render()
 	RenderChunks();
 
 	//generate and render test mesh
-	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("Data/Images/coin.jpg"));
-	theRenderer->DrawMesh(MakeBlockToMesh(Vector3(-2.f, -2.f, 0.f), 0));
+	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
+	theRenderer->DrawMesh(MakeBlockToMesh(Vector3(-2.f, -2.f, 0.f), 1));
 }
 
 //  =========================================================================================

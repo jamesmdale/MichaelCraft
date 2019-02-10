@@ -83,7 +83,7 @@ float MainMenuState::UpdateFromInput(float deltaSeconds)
 		}
 	}
 
-	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_SPACE))
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_RETURN))
 	{
 		switch (m_selectedMenuOption)
 		{
