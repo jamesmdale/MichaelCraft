@@ -55,6 +55,8 @@ void Chunk::Render()
 {
 	Renderer* theRenderer = Renderer::GetInstance();
 
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+
 	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
 	theRenderer->m_defaultShader->SetFrontFace(WIND_COUNTER_CLOCKWISE);
 	theRenderer->DrawMesh(m_gpuMesh);
@@ -184,8 +186,7 @@ void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
 	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.maxs.y);
-	
+	m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.maxs.y);	
 	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
 	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
 	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));

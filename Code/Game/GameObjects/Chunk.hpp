@@ -36,5 +36,5 @@ public:
 	AABB3 m_worldBounds;
 	MeshBuilder* m_meshBuilder = nullptr;
 	Mesh* m_gpuMesh = nullptr;
-	bool m_isVBOPriority =- true;
+	bool m_isVBOPriority = true;
 };

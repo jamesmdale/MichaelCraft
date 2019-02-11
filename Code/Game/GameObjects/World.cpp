@@ -1,6 +1,7 @@
 #include "Game\Game.hpp"
 #include "Game\GameStates\PlayingState.hpp"
 #include "Game\ObjectMeshbuilder.hpp"
+#include "Game\GameCommon.hpp"
 #include "Engine\Window\Window.hpp"
 #include "Engine\Debug\DebugRender.hpp"
 #include "Engine\Core\LightObject.hpp"
@@ -34,7 +35,6 @@ World::~World()
 void World::Initialize()
 {
 	//initialize game camera
-	Window* theWindow = Window::GetInstance();
 	Renderer* theRenderer = Renderer::GetInstance();
 
 	m_engineCamera = Game::GetInstance()->m_engineCamera;
@@ -79,7 +79,6 @@ void World::Update(float deltaSeconds)
 void World::Render()
 {
 	Renderer* theRenderer = Renderer::GetInstance();
-	Game* theGame = Game::GetInstance();
 
 	//always do this first at the beginning of the frame's render
 	theRenderer->SetCamera(m_engineCamera);	
@@ -94,25 +93,30 @@ void World::Render()
 	builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
 	Mesh* axisMesh = builder.CreateMesh<VertexPCU>();
 
+	/*Mesh* axisMesh = CreateBasis(Vector3::ZERO, 1.f);*/
+
 	//draw axis for debugging
-	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default_always_depth"));
 	theRenderer->DrawMesh(axisMesh);
 
-	//make a blockmesh
-	//Mesh* blockMesh = MakeBlockMesh(builder, Vector3(2.5f, 0.f, 0.f));
-	//theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("Data/Images/Cards/Chillwind Yeti.png"));
-
-	//theRenderer->DrawMesh(blockMesh);
-
-	////cleanup..for now
-	//delete(blockMesh);
-	//blockMesh = nullptr;
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+	theRenderer->DrawMesh(axisMesh);
 
 	RenderChunks();
 
 	//generate and render test mesh
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
 	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
-	theRenderer->DrawMesh(MakeBlockToMesh(Vector3(-2.f, -2.f, 0.f), 1));
+
+	Mesh* blockMesh = MakeBlockToMesh(Vector3(-2.f, -2.f, 0.f), 1);
+	theRenderer->DrawMesh(blockMesh);
+
+	delete(axisMesh);
+	axisMesh = nullptr;
+
+	delete(blockMesh);
+	blockMesh = nullptr;
 }
 
 //  =========================================================================================
@@ -171,13 +175,13 @@ void World::UpdateFromInput(float deltaSeconds)
 		m_gameCamera->Translate(positionToAdd);
 	}
 
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE))
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE) || theInput->IsKeyPressed(theInput->KEYBOARD_E))
 	{
 		positionToAdd = g_worldUp * deltaSeconds * 10.f;
 		m_gameCamera->Translate(positionToAdd);
 	}
 
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL))
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL) || theInput->IsKeyPressed(theInput->KEYBOARD_Q))
 	{
 		positionToAdd = -g_worldUp * deltaSeconds * 10.f;
 		m_gameCamera->Translate(positionToAdd);
@@ -217,4 +221,55 @@ void World::RenderChunks()
 void World::ActivateChunk(Chunk* chunk)
 {
 	m_activeChunks.insert(std::pair<IntVector2, Chunk*>(chunk->m_chunkCoords, chunk));
+}
+
+//  =========================================================================================
+Mesh* World::CreateBasis(const Vector3& center, float width, float scale)
+{
+	UNUSED(width);
+
+	MeshBuilder builder;
+
+	builder.Begin(TRIANGLES_DRAW_PRIMITIVE, true);
+
+	//up - z
+	builder.SetColor(Rgba::BLUE);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z));
+
+	builder.SetColor(Rgba::BLUE);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z) + (scale * g_worldUp));
+
+	builder.SetColor(Rgba::BLUE);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z));
+
+	//forward - x
+	builder.SetColor(Rgba::RED);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z));
+
+	builder.SetColor(Rgba::RED);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z) + (scale * g_east));
+
+	builder.SetColor(Rgba::RED);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z));
+
+	//left - y
+	builder.SetColor(Rgba::GREEN);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z));
+
+	builder.SetColor(Rgba::GREEN);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z) + (scale * g_north));
+
+	builder.SetColor(Rgba::GREEN);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center.x, center.y, center.z));
+
+	return builder.CreateMesh<VertexPCU>();
 }

@@ -24,6 +24,8 @@ public:
 
 	void ActivateChunk(Chunk* chunk);
 
+	Mesh* CreateBasis(const Vector3& center, float width, float scale = 1.f);
+
 public:
 	std::map<IntVector2, Chunk*> m_activeChunks;
 

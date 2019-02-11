@@ -15,7 +15,7 @@ Player::~Player()
 //  =========================================================================================
 void Player::Update(float deltaSeconds)
 {
-
+	UNUSED(deltaSeconds);
 }
 
 //  =========================================================================================
@@ -92,6 +92,7 @@ float Player::UpdateFromInput(float deltaSeconds)
 //  =========================================================================================
 void Player::SetCamera(Camera* camera)
 {
+	UNUSED(camera);
 	//if (camera != nullptr)
 	//{
 	//	if (m_camera != nullptr)
