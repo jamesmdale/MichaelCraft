@@ -36,5 +36,12 @@ public:
 	AABB3 m_worldBounds;
 	MeshBuilder* m_meshBuilder = nullptr;
 	Mesh* m_gpuMesh = nullptr;
-	bool m_isVBOPriority = true;
+
+	Chunk* m_northNeighbor = nullptr;
+	Chunk* m_westNeighbor = nullptr;
+	Chunk* m_southNeighbor = nullptr;
+	Chunk* m_eastNeighbor = nullptr;
+	
+	bool m_isMeshDirty = false;
+	bool m_doesRequireSave = false;
 };

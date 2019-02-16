@@ -292,6 +292,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameObjects\BlockLocator.cpp" />
     <ClCompile Include="Definitions\BlockDefinition.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObjects\Block.cpp" />
@@ -309,6 +310,7 @@
     <ClCompile Include="GameObjects\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameObjects\BlockLocator.hpp" />
     <ClInclude Include="Definitions\BlockDefinition.hpp" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
     <ClInclude Include="Game.hpp" />

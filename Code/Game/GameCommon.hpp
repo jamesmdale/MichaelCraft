@@ -10,7 +10,6 @@
 extern bool g_isDebug;
 extern bool g_isQuitting;
 
-
 constexpr uint BLOCKS_WIDE_X = 16;
 constexpr uint BLOCKS_WIDE_Y = 16;
 constexpr uint BLOCKS_HIGH_Z = 256;
@@ -24,6 +23,13 @@ constexpr uint16 CHUNK_X_MASK = 0b0000'0000'0000'1111;
 constexpr uint16 CHUNK_Y_MASK = 0b0000'0000'1111'0000;
 constexpr uint16 CHUNK_Z_MASK = 0b1111'1111'0000'0000;
 
+constexpr int CHUNK_DISTANCE_RENDER = 1;
+constexpr int CHUNK_DISTANCE_ACTIVATION = 5;
+constexpr int CHUNK_DISTANCE_DEACTIVATION = 7;
+
+constexpr float CHUNK_RENDER_RADIUS = (float)BLOCKS_WIDE_X * (float)CHUNK_DISTANCE_RENDER;
+constexpr float CHUNK_ACTIVATION_RADIUS = (float)BLOCKS_WIDE_X * (float)CHUNK_DISTANCE_ACTIVATION;
+constexpr float CHUNK_DEACTIVATION_RADIUS = (float)BLOCKS_WIDE_X * (float)CHUNK_DISTANCE_DEACTIVATION;
 
 //convenience directions
 extern Vector3 g_worldUp;

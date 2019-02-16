@@ -52,6 +52,9 @@
     <ClCompile Include="ObjectMeshbuilder.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="GameObjects\BlockLocator.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.hpp">
@@ -78,5 +81,6 @@
     <ClInclude Include="GameObjects\Chunk.hpp" />
     <ClInclude Include="Definitions\BlockDefinition.hpp" />
     <ClInclude Include="ObjectMeshbuilder.hpp" />
+    <ClInclude Include="GameObjects\BlockLocator.hpp" />
   </ItemGroup>
 </Project>

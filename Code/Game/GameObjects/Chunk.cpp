@@ -42,6 +42,13 @@ Chunk::~Chunk()
 
 	delete(m_gpuMesh);
 	m_gpuMesh = nullptr;
+
+	//clean up neighbor pointers
+	m_northNeighbor = nullptr;
+	m_westNeighbor = nullptr;
+	m_southNeighbor = nullptr;
+	m_eastNeighbor = nullptr;
+	
 }
 
 //  =========================================================================================
@@ -72,9 +79,9 @@ void Chunk::GenerateBlockDataWithPerlin()
 	{
 		IntVector3 columnCoordinates = GetBlockCoordsForBlockIndex(columnIndex);
 		Vector3 columnWorldCoordinates = GetBlockWorldCenterForBlockIndex(columnIndex);
-		float height0to1 = Compute2dPerlinNoise(columnWorldCoordinates.x, columnWorldCoordinates.y, 50.f, 10);
+		float height0to1 = Compute2dPerlinNoise(columnWorldCoordinates.x, columnWorldCoordinates.y, 300.f, 5);
 
-		float height = RangeMapFloat(height0to1, 0.f, 1.f, 128.f, 150.f);
+		float height = RangeMapFloat(height0to1, 0.f, 1.f, 100.f, 150.f);
 
 		int heightAsInt = RoundToNearestInt(height);
 
