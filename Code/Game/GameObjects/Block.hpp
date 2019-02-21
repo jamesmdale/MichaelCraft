@@ -13,7 +13,7 @@ public:
 	bool IsOpaque();
 
 public:
-	uchar8 m_type; //max 255 types
-	uchar8 m_bits; //state
+	uchar8 m_type = 0; //max 255 types
+	uchar8 m_bits = 0; //state
 	//uchar8 m_lighting; //lighting state
 };

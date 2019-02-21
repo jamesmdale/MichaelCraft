@@ -16,6 +16,7 @@
 #include "Engine\Renderer\Mesh.hpp"
 #include "Engine\Math\IntVector2.hpp"
 #include "Engine\Math\MathUtils.hpp"
+#include "Engine\Renderer\RendererTypes.hpp"
 #include <map>
 #include <string>
 #include <algorithm>
@@ -47,7 +48,7 @@ void World::Initialize()
 	m_uiCamera = Game::GetInstance()->m_uiCamera;
 
 	m_gameCamera = new GameCamera();
-	m_gameCamera->Translate(Vector3(0.f, 0.f, 300.f));
+	m_gameCamera->Translate(Vector3(0.f, 0.f, 10.f));
 
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
@@ -87,13 +88,13 @@ void World::Render()
 
 	MeshBuilder builder;
 
-	builder.CreateBasis(Matrix44::IDENTITY, Vector3( 19.375f, 2.582f, 107.458f ), 1.f);
+	builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
 	Mesh* axisMesh = builder.CreateMesh<VertexPCU>();
 
-	////draw axis for debugging
+	//draw axis for debugging
 	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
 	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default_always_depth"));
-	theRenderer->DrawMesh(axisMesh);
+	theRenderer->DrawMesh(axisMesh);	
 
 	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
 	theRenderer->DrawMesh(axisMesh);
@@ -101,15 +102,23 @@ void World::Render()
 	Mesh* raycastBlockHighlightMesh = nullptr;
 	Mesh* raycastMesh = nullptr;
 	//draw impact highlight box for raycast
+
+	raycastMesh = CreateLine(m_raycastResult.m_ray.m_startPosition, m_raycastResult.m_impactWorldPosition);
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->DrawMesh(raycastMesh);
+
 	if (m_raycastResult.m_didImpact && m_raycastResult.m_impactBlockLocator.IsValid())
 	{
-		raycastMesh = CreateLine(m_raycastResult.m_ray.m_startPosition, m_raycastResult.m_impactWorldPosition);
-		theRenderer->DrawMesh(raycastMesh);
-
 		Vector3 blockCenter = m_raycastResult.m_impactBlockLocator.m_chunk->GetBlockWorldCenterForBlockIndex(m_raycastResult.m_impactBlockLocator.m_blockIndex);
-		raycastBlockHighlightMesh = CreateBlockHighlightBox(blockCenter, m_raycastResult.m_impactNormal);
+		raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, m_raycastResult.m_impactNormal);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
 		theRenderer->DrawMesh(raycastBlockHighlightMesh);
 	}
+
+	Vector3 blockCenter = Vector3(0.f, 0.f, 0.f);
+	raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, Vector3(0.f, -1.f, 0.f));
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->DrawMesh(raycastBlockHighlightMesh);
 
 	//render all chunks
 	RenderChunks();
@@ -471,7 +480,6 @@ void World::GenerateChunkBuildOrderCheatSheet()
 //  =========================================================================================
 RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float maxDistance)
 {
-
 	// create ray that we are moving along line ----------------------------------------------
 	RaycastResult result;
 	Ray raycast = Ray(start, forward, maxDistance);
@@ -559,7 +567,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 			didStepDuringIteration = true;
 			currentCoordinates = newCoordinates;
 		}
-		else if (newCoordinates.z > currentCoordinates.z)
+		else if (newCoordinates.z < currentCoordinates.z)
 		{
 			blockLocator.StepDown();
 			movementDirection = IntVector3(0, 0, -1);
