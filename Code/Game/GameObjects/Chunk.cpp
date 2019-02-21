@@ -225,7 +225,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	//right face
 	if (southLocator.GetBlock()->m_type == 0)
 	{
-		Rgba southTint = Rgba(0.7f, 0.7f, 0.7f, 1.f);
+		Rgba southTint = Rgba(0.f, 1.f, 0.f, 1.f);
 
 		m_meshBuilder->SetColor(southTint);
 		m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
@@ -250,7 +250,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	//back face
 	if (eastLocator.GetBlock()->m_type == 0)
 	{
-		Rgba eastTint = Rgba(0.5f, 0.5f, 0.5f, 1.f);
+		Rgba eastTint = Rgba(0.f, 0.f, 1.f, 1.f);
 
 		m_meshBuilder->SetColor(eastTint);
 		m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
