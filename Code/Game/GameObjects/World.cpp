@@ -279,7 +279,7 @@ void World::RenderChunks()
 //  =========================================================================================
 void World::ActivateChunks()
 {
-	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x / BLOCKS_WIDE_X), floorf(m_gameCamera->m_position.y / BLOCKS_WIDE_Y));
+	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x * BLOCKS_WIDE_X_DIVISOR), floorf(m_gameCamera->m_position.y * BLOCKS_WIDE_Y_DIVISOR));
 	Vector2 playerChunkCenter = Vector2(playerChunkCoords) + Vector2(0.5f, 0.5f);
 
 	//loop through my neighborhood and find the first chunk that needs activating(loaded or generated, hooked up)
@@ -335,7 +335,7 @@ void World::ActivateChunks()
 //  =========================================================================================
 void World::GenerateDirtyChunks()
 {
-	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x * BLOCKS_WIDE_X_DIVISOR), floorf(m_gameCamera->m_position.y / BLOCKS_WIDE_Y_DIVISOR));
+	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x * BLOCKS_WIDE_X_DIVISOR), floorf(m_gameCamera->m_position.y * BLOCKS_WIDE_Y_DIVISOR));
 	Vector2 playerChunkCenter = Vector2(playerChunkCoords) + Vector2(0.5f, 0.5f);
 
 	//loop through my active chunk list and generate the mesh for anyone marked as dirty
