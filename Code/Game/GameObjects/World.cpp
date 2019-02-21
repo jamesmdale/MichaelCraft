@@ -44,32 +44,12 @@ void World::Initialize()
 	m_uiCamera = Game::GetInstance()->m_uiCamera;
 
 	m_gameCamera = new GameCamera();
-	m_gameCamera->Translate(-Vector3(-1, 0, 30) * 10.f);
+	m_gameCamera->Translate(Vector3(0.f, 0.f, 300.f));
 
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
 
 	GenerateChunkBuildOrderCheatSheet();
-
-	////chunk 1
-	//Chunk* chunk1 = new Chunk(IntVector2(0,0));
-	//ActivateChunk(chunk1);
-
-	////chunk 2
-	//Chunk* chunk2 = new Chunk(IntVector2(-1, 2));
-	//ActivateChunk(chunk2);
-
-	////chunk 3
-	//Chunk* chunk3 = new Chunk(IntVector2(0, 2));
-	//ActivateChunk(chunk3);
-
-	////chunk 4
-	//Chunk* chunk4 = new Chunk(IntVector2(1, 2));
-	//ActivateChunk(chunk4);
-
-	////chunk 5
-	//Chunk* chunk5 = new Chunk(IntVector2(0, 3));
-	//ActivateChunk(chunk5);
 }
 
 //  =========================================================================================
@@ -78,6 +58,7 @@ void World::Update(float deltaSeconds)
 	UpdateFromInput(deltaSeconds);
 
 	ActivateChunks();
+	//MarkUnrenderedChunksDirtyWithinRenderRadius();
 	GenerateDirtyChunks();
 	DeactivateChunks();
 }
@@ -97,34 +78,34 @@ void World::Render()
 
 	MeshBuilder builder;
 
-	builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
-	Mesh* axisMesh = builder.CreateMesh<VertexPCU>();
+	//builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
+	//Mesh* axisMesh = builder.CreateMesh<VertexPCU>();
 
-	/*Mesh* axisMesh = CreateBasis(Vector3::ZERO, 1.f);*/
+	///*Mesh* axisMesh = CreateBasis(Vector3::ZERO, 1.f);*/
 
-	//draw axis for debugging
-	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default_always_depth"));
-	theRenderer->DrawMesh(axisMesh);
+	////draw axis for debugging
+	//theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default_always_depth"));
+	//theRenderer->DrawMesh(axisMesh);
 
-	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
-	theRenderer->DrawMesh(axisMesh);
+	//theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+	//theRenderer->DrawMesh(axisMesh);
 
 	//render all chunks
 	RenderChunks();
 
 	//generate and render test mesh
-	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+	/*theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
 	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
 
 	Mesh* blockMesh = MakeBlockToMesh(Vector3(-2.f, -2.f, 0.f), 1);
-	theRenderer->DrawMesh(blockMesh);
+	theRenderer->DrawMesh(blockMesh);*/
 
-	delete(axisMesh);
+	/*delete(axisMesh);
 	axisMesh = nullptr;
 
 	delete(blockMesh);
-	blockMesh = nullptr;
+	blockMesh = nullptr;*/
 }
 
 //  =========================================================================================
@@ -135,66 +116,65 @@ void World::UpdateFromInput(float deltaSeconds)
 	Vector2 mouseDelta = Vector2::ZERO;
 	mouseDelta = InputSystem::GetInstance()->GetMouse()->GetMouseDelta();
 
-//calculate rotation for camera and use same rotation for player
-//m_camera->m_transform->AddRotation(Vector3(mouseDelta.y, mouseDelta.x, 0.f) * deltaSeconds * 10.f);
+	//calculate rotation for camera and use same rotation for player
+	//m_camera->m_transform->AddRotation(Vector3(mouseDelta.y, mouseDelta.x, 0.f) * deltaSeconds * 10.f);
 
-m_gameCamera->m_yawDegreesZ += -mouseDelta.x * 0.05f;
-m_gameCamera->m_pitchDegreesY += mouseDelta.y * 0.05f;
+	m_gameCamera->m_yawDegreesZ += -mouseDelta.x * 0.05f;
+	m_gameCamera->m_pitchDegreesY += mouseDelta.y * 0.05f;
 
-m_gameCamera->m_yawDegreesZ = Modulus(m_gameCamera->m_yawDegreesZ, 360.f);
-m_gameCamera->m_pitchDegreesY = ClampFloat(m_gameCamera->m_pitchDegreesY, -90.f, 90.f);
+	m_gameCamera->m_yawDegreesZ = Modulus(m_gameCamera->m_yawDegreesZ, 360.f);
+	m_gameCamera->m_pitchDegreesY = ClampFloat(m_gameCamera->m_pitchDegreesY, -90.f, 90.f);
 
-/*Vector3 rotation = Vector3(clampedX, clampedY, 0.f);
-m_camera->m_transform->SetLocalRotation(Vector3(rotation));*/
+	/*Vector3 rotation = Vector3(clampedX, clampedY, 0.f);
+	m_camera->m_transform->SetLocalRotation(Vector3(rotation));*/
 
-Vector3 cameraForward = Vector3(CosDegrees(m_gameCamera->m_yawDegreesZ), SinDegrees(m_gameCamera->m_yawDegreesZ), 0);
-Vector3 cameraRight = Vector3(SinDegrees(m_gameCamera->m_yawDegreesZ), -CosDegrees(m_gameCamera->m_yawDegreesZ), 0);
+	Vector3 cameraForward = Vector3(CosDegrees(m_gameCamera->m_yawDegreesZ), SinDegrees(m_gameCamera->m_yawDegreesZ), 0);
+	Vector3 cameraRight = Vector3(SinDegrees(m_gameCamera->m_yawDegreesZ), -CosDegrees(m_gameCamera->m_yawDegreesZ), 0);
 
-Vector3 positionToAdd = Vector3::ZERO;
-Vector3 positionAtStartOfFrame = positionToAdd;
+	Vector3 positionToAdd = Vector3::ZERO;
+	Vector3 positionAtStartOfFrame = positionToAdd;
 
-//update movement
-//forward (x)
-if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
-{
-	//calculate movement for camera and use same movement for ship and light
-	positionToAdd = cameraForward * deltaSeconds * 10.f;
-	m_gameCamera->Translate(positionToAdd);
-}
+	//update movement
+	//forward (x)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
+	{
+		//calculate movement for camera and use same movement for ship and light
+		positionToAdd = cameraForward * deltaSeconds * 10.f;
+		m_gameCamera->Translate(positionToAdd);
+	}
 
-//backward (-x)
-if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
-{
-	positionToAdd = -cameraForward * deltaSeconds * 10.f;
-	m_gameCamera->Translate(positionToAdd);
-}
+	//backward (-x)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
+	{
+		positionToAdd = -cameraForward * deltaSeconds * 10.f;
+		m_gameCamera->Translate(positionToAdd);
+	}
 
-//left is north (y)
-if (theInput->IsKeyPressed(theInput->KEYBOARD_A))
-{
-	positionToAdd = -cameraRight * deltaSeconds * 10.f;
-	m_gameCamera->Translate(positionToAdd);
-}
+	//left is north (y)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_A))
+	{
+		positionToAdd = -cameraRight * deltaSeconds * 10.f;
+		m_gameCamera->Translate(positionToAdd);
+	}
 
-//right is south (-y)
-if (theInput->IsKeyPressed(theInput->KEYBOARD_D))
-{
-	positionToAdd = cameraRight * deltaSeconds * 10.f;
-	m_gameCamera->Translate(positionToAdd);
-}
+	//right is south (-y)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_D))
+	{
+		positionToAdd = cameraRight * deltaSeconds * 10.f;
+		m_gameCamera->Translate(positionToAdd);
+	}
 
-if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE) || theInput->IsKeyPressed(theInput->KEYBOARD_E))
-{
-	positionToAdd = g_worldUp * deltaSeconds * 10.f;
-	m_gameCamera->Translate(positionToAdd);
-}
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE) || theInput->IsKeyPressed(theInput->KEYBOARD_E))
+	{
+		positionToAdd = g_worldUp * deltaSeconds * 10.f;
+		m_gameCamera->Translate(positionToAdd);
+	}
 
-if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL) || theInput->IsKeyPressed(theInput->KEYBOARD_Q))
-{
-	positionToAdd = -g_worldUp * deltaSeconds * 10.f;
-	m_gameCamera->Translate(positionToAdd);
-}
-
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL) || theInput->IsKeyPressed(theInput->KEYBOARD_Q))
+	{
+		positionToAdd = -g_worldUp * deltaSeconds * 10.f;
+		m_gameCamera->Translate(positionToAdd);
+	}
 
 //deltaSeconds = m_player->UpdateFromInput(deltaSeconds);
 //deltaSeconds = UpdateFromInputDebug(deltaSeconds);
@@ -221,7 +201,9 @@ void World::RenderChunks()
 
 	for (chunkIterator = m_activeChunks.begin(); chunkIterator != m_activeChunks.end(); ++chunkIterator)
 	{
-		chunkIterator->second->Render();
+		Chunk* chunk = chunkIterator->second;
+		if(chunk->m_gpuMesh != nullptr)
+			chunk->Render();
 	}
 }
 
@@ -239,22 +221,66 @@ void World::ActivateChunks()
 
 		if (chunkIterator == m_activeChunks.end())
 		{
+			float distanceOut = 0.f;
 			//we didn't find the chunk in the activation list so we must confirm we should add it
-			if (CompareDistanceFromLocationToLocationLessThanRadius(playerChunkCenter, playerChunkCenter + Vector2(m_neighborHoodBuildOrder[chunkIndex]), CHUNK_ACTIVATION_RADIUS))
+			if (CompareDistanceFromLocationToLocationLessThanRadius(distanceOut, playerChunkCenter, playerChunkCenter + Vector2(m_neighborHoodBuildOrder[chunkIndex]), (float)CHUNK_DISTANCE_ACTIVATION))
 			{
 				ActivateChunk(worldChunkCoord);
 
 				//for now we are only activating one chunk a frame
 				return;
 			}
+			else
+			{
+				continue;
+			}
 		}	
 	}
 }
 
+////  =========================================================================================
+//void World::MarkUnrenderedChunksDirtyWithinRenderRadius()
+//{
+//	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x / BLOCKS_WIDE_X), floorf(m_gameCamera->m_position.y / BLOCKS_WIDE_Y));
+//	Vector2 playerChunkCenter = Vector2(playerChunkCoords) + Vector2(0.5f, 0.5f);
+//
+//	std::map<IntVector2, Chunk*>::iterator activeChunkIterator;
+//	for (activeChunkIterator = m_activeChunks.begin(); activeChunkIterator != m_activeChunks.end(); ++activeChunkIterator)
+//	{
+//		//we the chunk doesn't have a mesh yet, we should check to see if need to draw it.
+//		Chunk* chunk = activeChunkIterator->second;
+//		
+//		//we've already got a mesh for them
+//		if(chunk->m_gpuMesh != nullptr)
+//			continue;
+//
+//		float distanceOut = 0.f;
+//		if (chunk->DoesHaveAllNeighbors() && CompareDistanceFromLocationToLocationLessThanRadius(distanceOut, playerChunkCenter, Vector2(activeChunkIterator->first) + Vector2(0.5f, 0.5f), (float)CHUNK_DISTANCE_RENDER))
+//		{
+//			chunk->m_isMeshDirty = true;
+//			return;
+//		}
+//	}
+//}
+
 //  =========================================================================================
 void World::GenerateDirtyChunks()
 {
+	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x / BLOCKS_WIDE_X), floorf(m_gameCamera->m_position.y / BLOCKS_WIDE_Y));
+	Vector2 playerChunkCenter = Vector2(playerChunkCoords) + Vector2(0.5f, 0.5f);
+
 	//loop through my active chunk list and generate the mesh for anyone marked as dirty
+	std::map<IntVector2, Chunk*>::iterator activeChunkIterator;
+	for (activeChunkIterator = m_activeChunks.begin(); activeChunkIterator != m_activeChunks.end(); ++activeChunkIterator)
+	{
+		Chunk* chunk = activeChunkIterator->second;
+		float distanceOut = 0.f;
+		if (chunk->m_isMeshDirty && chunk->DoesHaveAllNeighbors() && CompareDistanceFromLocationToLocationLessThanRadius(distanceOut, playerChunkCenter, Vector2(activeChunkIterator->first) + Vector2(0.5f, 0.5f), (float)CHUNK_DISTANCE_RENDER))
+		{
+			chunk->GenerateChunkMesh();
+			chunk->m_isMeshDirty = false;
+		}
+	}
 }
 
 //  =========================================================================================
@@ -266,18 +292,27 @@ void World::DeactivateChunks()
 	Vector2 playerChunkCenter = Vector2(playerChunkCoords) + Vector2(0.5f, 0.5f);
 
 	//loop through my neighborhood and find the first chunk that needs activating(loaded or generated, hooked up)
+	std::map<IntVector2, Chunk*>::iterator furthestAwayChunkIterator = m_activeChunks.end();
+	float furthestDistance = 0.f;
+
 	std::map<IntVector2, Chunk*>::iterator activeChunkIterator;
 	for (activeChunkIterator = m_activeChunks.begin(); activeChunkIterator != m_activeChunks.end(); ++activeChunkIterator)
 	{
 		//we didn't find the chunk in the activation list so we must confirm we should add it
-		if (CompareDistanceFromLocationToLocationGreaterThanRadius(playerChunkCenter, Vector2(activeChunkIterator->first) + Vector2(0.5f, 0.5f), CHUNK_DISTANCE_DEACTIVATION))
+		float distanceOut = 0.f;
+		if (CompareDistanceFromLocationToLocationGreaterThanRadius(distanceOut, playerChunkCenter, Vector2(activeChunkIterator->first) + Vector2(0.5f, 0.5f), (float)CHUNK_DISTANCE_DEACTIVATION))
 		{
-			DeactivateChunk(activeChunkIterator->first);
+			//store the chunk that is the furthest away
+			if (distanceOut > furthestDistance)
+			{
+				furthestAwayChunkIterator = activeChunkIterator;
+			}
+		}			
+	}
 
-			//for now we are only activating one chunk a frame
-			return;
-		}
-			
+	if (furthestAwayChunkIterator != m_activeChunks.end())
+	{
+		DeactivateChunk(furthestAwayChunkIterator->first);
 	}
 }
 
@@ -286,6 +321,39 @@ void World::ActivateChunk(const IntVector2& chunkCoordinates)
 {
 	Chunk* chunk = new Chunk(chunkCoordinates);
 	m_activeChunks.insert(std::pair<IntVector2, Chunk*>(chunk->m_chunkCoords, chunk));
+
+	// hook neighbors if they exist ----------------------------------------------
+	std::map<IntVector2, Chunk*>::iterator activeChunkIterator;
+
+	//find north neighbor and hook them if they exist
+	activeChunkIterator = m_activeChunks.find(chunkCoordinates + IntVector2(0, 1));
+	if (activeChunkIterator != m_activeChunks.end())
+	{
+		chunk->AddNeighbor(activeChunkIterator->second, NORTH_NEIGHBOR_TYPE);
+	}
+
+	//find west neighbor and hook them if they exist
+	activeChunkIterator = m_activeChunks.find(chunkCoordinates + IntVector2(-1, 0));
+	if (activeChunkIterator != m_activeChunks.end())
+	{
+		chunk->AddNeighbor(activeChunkIterator->second, WEST_NEIGHBOR_TYPE);
+	}
+
+	//find south neighbor and hook them if they exist
+	activeChunkIterator = m_activeChunks.find(chunkCoordinates + IntVector2(0, -1));
+	if (activeChunkIterator != m_activeChunks.end())
+	{
+		chunk->AddNeighbor(activeChunkIterator->second, SOUTH_NEIGHBOR_TYPE);
+	}
+
+	//find east neighbor and hook them if they exist
+	activeChunkIterator = m_activeChunks.find(chunkCoordinates + IntVector2(1, 0));
+	if (activeChunkIterator != m_activeChunks.end())
+	{
+		chunk->AddNeighbor(activeChunkIterator->second, EAST_NEIGHBOR_TYPE);
+	}
+
+	chunk->m_isMeshDirty = true;
 }
 
 //  =========================================================================================
@@ -382,12 +450,12 @@ bool CompareDistanceFromZeroLessThan(const IntVector2& first, const IntVector2& 
 }
 
 //  =========================================================================================
-bool CompareDistanceFromLocationToLocationLessThanRadius(const Vector2& startLocation, const Vector2& endLocation, const float radius)
+bool CompareDistanceFromLocationToLocationLessThanRadius(float& outDistanceSquared, const Vector2& startLocation, const Vector2& endLocation, const float radius)
 {
-	float distanceSquared = GetDistanceSquared(startLocation, endLocation);
+	outDistanceSquared = GetDistanceSquared(startLocation, endLocation);
 	float radiusSquared = radius * radius;
 
-	if(distanceSquared < radiusSquared)
+	if(outDistanceSquared < radiusSquared)
 		return true;
 
 	return false;
@@ -395,12 +463,12 @@ bool CompareDistanceFromLocationToLocationLessThanRadius(const Vector2& startLoc
 }
 
 //  =========================================================================================
-bool CompareDistanceFromLocationToLocationGreaterThanRadius(const Vector2& startLocation, const Vector2& endLocation, const float radius)
+bool CompareDistanceFromLocationToLocationGreaterThanRadius(float& outDistanceSquared, const Vector2& startLocation, const Vector2& endLocation, const float radius)
 {
-	float distanceSquared = GetDistanceSquared(startLocation, endLocation);
+	outDistanceSquared = GetDistanceSquared(startLocation, endLocation);
 	float radiusSquared = radius * radius;
 
-	if(distanceSquared > radiusSquared)
+	if(outDistanceSquared > radiusSquared)
 		return true;
 
 	return false;

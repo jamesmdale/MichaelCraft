@@ -7,6 +7,15 @@
 class Meshbuilder;
 class Mesh;
 
+enum eNeighborType
+{
+	NORTH_NEIGHBOR_TYPE,
+	WEST_NEIGHBOR_TYPE,
+	SOUTH_NEIGHBOR_TYPE,
+	EAST_NEIGHBOR_TYPE,
+	NUM_NEIGHBOR_TYPES
+};
+
 class Chunk
 {
 public:
@@ -25,10 +34,10 @@ public:
 	IntVector3 GetBlockCoordsForBlockIndex(int blockIndex);
 	Vector3 GetBlockWorldCoordsForBlockIndex(int blockIndex);
 	Vector3 GetBlockWorldCenterForBlockIndex(int blockIndex);
-	void AddBlockToMesh(const Vector3& center, Block* block);
+	void AddBlockToMesh(const int blockIndex, const Vector3& center, Block* block);
 
-	//chunk helpers
-	//Vector3 GetWorldPositionOfBlockZero();
+	void AddNeighbor(Chunk* neighbor, eNeighborType neighborDirection);
+	bool DoesHaveAllNeighbors();
 
 public:
 	Block m_blocks[BLOCKS_PER_CHUNK];

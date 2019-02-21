@@ -23,9 +23,20 @@ BlockLocator::~BlockLocator()
 }
 
 //  =========================================================================================
+bool BlockLocator::IsValid()
+{
+	if (m_chunk == nullptr || m_blockIndex == -1)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+//  =========================================================================================
 Block* BlockLocator::GetBlock()
 {
-	if(m_chunk != nullptr)
+	if(m_chunk == nullptr)
 		return nullptr;
 
 	return &m_chunk->m_blocks[m_blockIndex];
@@ -34,40 +45,81 @@ Block* BlockLocator::GetBlock()
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToNorth()
 {
-	if (m_blockIndex & (BLOCKS_WIDE_X - 1))
+	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
+	if (yIndex != CHUNK_Y_MASK)
 	{
-		BlockLocator(m_chunk, (m_blockIndex + 1) % BLOCKS_WIDE_X);
+		return BlockLocator(m_chunk, (m_blockIndex + BLOCKS_WIDE_X));
 	}
-	
-	return BlockLocator(m_chunk->m_northNeighbor, m_blockIndex);
-}
+	else
+	{
+		return BlockLocator(m_chunk->m_northNeighbor, m_blockIndex & (~CHUNK_Y_MASK));
 
-//  ========================================================================================= 
-BlockLocator BlockLocator::GetBlockLocatorToWest()
-{
-	return BlockLocator();
+	}	
 }
 
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToSouth()
 {
-	return BlockLocator();
+	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
+	if (yIndex != 0)
+	{
+		return BlockLocator(m_chunk, (m_blockIndex - BLOCKS_WIDE_X));
+	}
+	else
+	{
+		return BlockLocator(m_chunk->m_southNeighbor,  m_blockIndex | CHUNK_Y_MASK);
+	}
 }
+
+//  ========================================================================================= 
+BlockLocator BlockLocator::GetBlockLocatorToWest()
+{
+	int xIndex = m_blockIndex & (CHUNK_X_MASK);
+	if (xIndex != 0)
+	{
+		return BlockLocator(m_chunk, (m_blockIndex - 1));
+	}
+	else
+	{
+		return BlockLocator(m_chunk->m_westNeighbor, m_blockIndex | CHUNK_X_MASK);
+	}
+}
+
 
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToEast()
 {
-	return BlockLocator();
+	int xIndex = m_blockIndex & (CHUNK_X_MASK);
+	if (xIndex != CHUNK_X_MASK)
+	{
+		return BlockLocator(m_chunk, (m_blockIndex + 1));
+	}
+	else
+	{
+		return BlockLocator(m_chunk->m_eastNeighbor, m_blockIndex & (~ CHUNK_X_MASK));
+	}
 }
 
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorAbove()
 {
-	return BlockLocator();
+	int zIndex = m_blockIndex & (CHUNK_Z_MASK);
+	if (zIndex != CHUNK_Z_MASK)
+	{
+		return BlockLocator(m_chunk, (m_blockIndex + (BLOCKS_WIDE_X * BLOCKS_WIDE_Y)));
+	}
+
+	return BlockLocator(nullptr, -1);
 }
 
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorBelow()
 {
-	return BlockLocator();
+	int zIndex = m_blockIndex & (CHUNK_Z_MASK);
+	if (zIndex != 0)
+	{
+		return BlockLocator(m_chunk, (m_blockIndex - (BLOCKS_WIDE_X * BLOCKS_WIDE_Y)));
+	}
+
+	return BlockLocator(nullptr, -1);
 }

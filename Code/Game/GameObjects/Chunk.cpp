@@ -2,6 +2,7 @@
 #include "Game\Definitions\BlockDefinition.hpp"
 #include "Game\GameCommon.hpp"
 #include "Game\Game.hpp"
+#include "Game\GameObjects\BlockLocator.hpp"
 #include "Engine\Renderer\MeshBuilder.hpp"
 #include "Engine\Renderer\Mesh.hpp"
 #include "Engine\Math\SmoothNoise.hpp"
@@ -29,9 +30,6 @@ Chunk::Chunk(const IntVector2& coordinates)
 
 	//randomization
 	GenerateBlockDataWithPerlin();
-
-	//generation
-	GenerateChunkMesh();
 }
 
 //  =========================================================================================
@@ -122,9 +120,11 @@ void Chunk::GenerateBlockDataWithPerlin()
 //  =========================================================================================
 void Chunk::GenerateChunkMesh()
 {
+	m_meshBuilder->FlushBuilder();
+
 	for (int blockIndex = 0; blockIndex < BLOCKS_PER_CHUNK; ++blockIndex)
 	{
-		AddBlockToMesh(GetBlockWorldCenterForBlockIndex(blockIndex), &m_blocks[blockIndex]);
+		AddBlockToMesh(blockIndex, GetBlockWorldCenterForBlockIndex(blockIndex), &m_blocks[blockIndex]);
 	}
 
 	m_gpuMesh = m_meshBuilder->CreateMesh<VertexPCU>();
@@ -161,7 +161,7 @@ Vector3 Chunk::GetBlockWorldCenterForBlockIndex(int blockIndex)
 }
 
 //  =========================================================================================
-void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
+void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* block)
 {
 	if(block->m_type == 0)
 		return;
@@ -185,167 +185,225 @@ void Chunk::AddBlockToMesh(const Vector3& center, Block* block)
 
 	m_meshBuilder->Begin(TRIANGLES_DRAW_PRIMITIVE, true); //begin is does use index buffer
 
+	//ASSERT_OR_DIE(DoesHaveAllNeighbors(), "SOME NEIGHBORS NOT FOUND WHEN TRYING TO BUILD MESH!!");
+
+	//get block locators for neighboring blocks
+	BlockLocator blockLocator = BlockLocator(this, blockIndex);
+	BlockLocator westLocator = blockLocator.GetBlockLocatorToWest();
+	BlockLocator southLocator = blockLocator.GetBlockLocatorToSouth();
+	BlockLocator eastLocator = blockLocator.GetBlockLocatorToEast();
+	BlockLocator northLocator = blockLocator.GetBlockLocatorToNorth();	
+	BlockLocator aboveLocator = blockLocator.GetBlockLocatorAbove();
+	BlockLocator bottomLocator = blockLocator.GetBlockLocatorBelow();
+
+	//west face
 	//front face
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
-	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
+	if (westLocator.GetBlock()->m_type == 0)
+	{
+		Rgba westTint = Rgba(1.0f, 0.0f, 0.0f, 1.f);
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.maxs.y);	
-	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
-	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
+		m_meshBuilder->SetColor(westTint);
+		m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
-	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
+		m_meshBuilder->SetColor(westTint);
+		m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.maxs.y);	
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, -1.f));
-	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
+		m_meshBuilder->SetColor(westTint);
+		m_meshBuilder->SetUV(frontTexCoords.mins.x, frontTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-	m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+		m_meshBuilder->SetColor(westTint);
+		m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
+		m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+	}
+
+	//south face
 	//right face
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(1.f, 0.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
+	if (southLocator.GetBlock()->m_type == 0)
+	{
+		Rgba southTint = Rgba(0.7f, 0.7f, 0.7f, 1.f);
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(rightTexCoords.mins.x, rightTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(1.f, 0.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
+		m_meshBuilder->SetColor(southTint);
+		m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(rightTexCoords.mins.x, rightTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(1.f, 0.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
+		m_meshBuilder->SetColor(southTint);
+		m_meshBuilder->SetUV(rightTexCoords.mins.x, rightTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(1.f, 0.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, -1.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
+		m_meshBuilder->SetColor(southTint);
+		m_meshBuilder->SetUV(rightTexCoords.mins.x, rightTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-	m_meshBuilder->AddQuadIndices(vertSize + 4, vertSize + 5, vertSize + 6, vertSize + 7);
+		m_meshBuilder->SetColor(southTint);
+		m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
+		m_meshBuilder->AddQuadIndices(vertSize + 4, vertSize + 5, vertSize + 6, vertSize + 7);
+	}
+
+	//east face
 	//back face
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, 1.f));
-	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
+	if (eastLocator.GetBlock()->m_type == 0)
+	{
+		Rgba eastTint = Rgba(0.5f, 0.5f, 0.5f, 1.f);
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(backTexCoords.mins.x, backTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, 1.f));
-	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
+		m_meshBuilder->SetColor(eastTint);
+		m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(backTexCoords.mins.x, backTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, 1.f));
-	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
+		m_meshBuilder->SetColor(eastTint);
+		m_meshBuilder->SetUV(backTexCoords.mins.x, backTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 0.f, 1.f));
-	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
+		m_meshBuilder->SetColor(eastTint);
+		m_meshBuilder->SetUV(backTexCoords.mins.x, backTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-	m_meshBuilder->AddQuadIndices(vertSize + 8, vertSize + 9, vertSize + 10, vertSize + 11);
+		m_meshBuilder->SetColor(eastTint);
+		m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
+		m_meshBuilder->AddQuadIndices(vertSize + 8, vertSize + 9, vertSize + 10, vertSize + 11);
+	}
+
+	//north face
 	//left face
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(-1.f, 0.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
+	if (northLocator.GetBlock()->m_type == 0)
+	{
+		Rgba northTint = Rgba(0.4f, 0.4f, 0.4f, 1.f);
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(leftTexCoords.mins.x, leftTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(-1.f, 0.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
+		m_meshBuilder->SetColor(northTint);
+		m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);	
-	m_meshBuilder->SetUV(leftTexCoords.mins.x, leftTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(-1.f, 0.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
+		m_meshBuilder->SetColor(northTint);
+		m_meshBuilder->SetUV(leftTexCoords.mins.x, leftTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(-1.f, 0.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(0.f, 0.f, 1.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
+		m_meshBuilder->SetColor(northTint);	
+		m_meshBuilder->SetUV(leftTexCoords.mins.x, leftTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
-	m_meshBuilder->AddQuadIndices(vertSize + 12, vertSize + 13, vertSize + 14, vertSize + 15);
+		m_meshBuilder->SetColor(northTint);
+		m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
+		m_meshBuilder->AddQuadIndices(vertSize + 12, vertSize + 13, vertSize + 14, vertSize + 15);
+	}
+
+	//up face
 	//top face
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 1.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
+	if (!aboveLocator.IsValid() || aboveLocator.GetBlock()->m_type == 0)
+	{
+		m_meshBuilder->SetColor(tint);
+		m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 1.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
+		m_meshBuilder->SetColor(tint);
+		m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
+		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-	m_meshBuilder->SetColor(tint);	
-	m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 1.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
+		m_meshBuilder->SetColor(tint);	
+		m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, 1.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
+		m_meshBuilder->SetColor(tint);
+		m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
+		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-	m_meshBuilder->AddQuadIndices(vertSize + 16, vertSize + 17, vertSize + 18, vertSize + 19);
+		m_meshBuilder->AddQuadIndices(vertSize + 16, vertSize + 17, vertSize + 18, vertSize + 19);
+	}
 
+	//down face
 	//bottom face
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, -1.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
+	if (bottomLocator.IsValid())
+	{
+		if (bottomLocator.GetBlock()->m_type == 0)
+		{
+			Rgba bottomTint = Rgba(0.3f, 0.3f, 0.3f, 1.f);
 
-	m_meshBuilder->SetColor(tint);
-	m_meshBuilder->SetUV(bottomTexCoords.mins.x, bottomTexCoords.maxs.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, -1.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
+			m_meshBuilder->SetColor(bottomTint);
+			m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.maxs.y);
+			m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);	
-	m_meshBuilder->SetUV(bottomTexCoords.mins.x, bottomTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, -1.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
+			m_meshBuilder->SetColor(bottomTint);
+			m_meshBuilder->SetUV(bottomTexCoords.mins.x, bottomTexCoords.maxs.y);
+			m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
-	m_meshBuilder->SetColor(tint);	
-	m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.mins.y);
-	m_meshBuilder->SetNormal(Vector3(0.f, -1.f, 0.f));
-	m_meshBuilder->SetTangent(Vector4(-1.f, 0.f, 0.f, 1.f));
-	m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
+			m_meshBuilder->SetColor(bottomTint);	
+			m_meshBuilder->SetUV(bottomTexCoords.mins.x, bottomTexCoords.mins.y);
+			m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	m_meshBuilder->AddQuadIndices(vertSize + 20, vertSize + 21, vertSize + 22, vertSize + 23);
+			m_meshBuilder->SetColor(bottomTint);	
+			m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.mins.y);
+			m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
+
+			m_meshBuilder->AddQuadIndices(vertSize + 20, vertSize + 21, vertSize + 22, vertSize + 23);
+		}
+	}
+}
+
+//  =========================================================================================
+void Chunk::AddNeighbor(Chunk* neighbor, eNeighborType neighborDirection)
+{
+	switch (neighborDirection)
+	{
+	case NORTH_NEIGHBOR_TYPE:
+		m_northNeighbor = neighbor;
+
+		//prevents infinite loop
+		if(neighbor->m_southNeighbor != nullptr)
+			break;
+
+		neighbor->AddNeighbor(this, SOUTH_NEIGHBOR_TYPE);
+		break;
+	case WEST_NEIGHBOR_TYPE:
+		m_westNeighbor = neighbor;
+
+		//prevents infinite loop
+		if(neighbor->m_eastNeighbor != nullptr)
+			break;
+
+		neighbor->AddNeighbor(this, EAST_NEIGHBOR_TYPE);
+		break;
+	case SOUTH_NEIGHBOR_TYPE:
+		m_southNeighbor = neighbor;
+
+		//prevents infinite loop
+		if(neighbor->m_northNeighbor != nullptr)
+			break;
+
+		neighbor->AddNeighbor(this, NORTH_NEIGHBOR_TYPE);
+		break;
+	case EAST_NEIGHBOR_TYPE:
+		m_eastNeighbor = neighbor;
+
+		//prevents infinite loop
+		if(neighbor->m_westNeighbor != nullptr)
+			break;
+
+		neighbor->AddNeighbor(this, WEST_NEIGHBOR_TYPE);
+		break;
+	}
+}
+
+//  =========================================================================================
+bool Chunk::DoesHaveAllNeighbors()
+{
+	if (m_northNeighbor == nullptr ||
+		m_westNeighbor == nullptr ||
+		m_southNeighbor == nullptr ||
+		m_eastNeighbor == nullptr)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 //  =========================================================================================

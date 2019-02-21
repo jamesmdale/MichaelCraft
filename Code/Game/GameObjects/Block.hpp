@@ -9,6 +9,10 @@ public:
 	~Block();
 
 public:
+	bool IsAir();
+	bool IsOpaque();
+
+public:
 	uchar8 m_type; //max 255 types
 	uchar8 m_bits; //state
 	//uchar8 m_lighting; //lighting state

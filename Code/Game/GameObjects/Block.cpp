@@ -11,3 +11,13 @@ Block::~Block()
 {
 
 }
+
+bool Block::IsAir()
+{
+	return false;
+}
+
+bool Block::IsOpaque()
+{
+	return false;
+}

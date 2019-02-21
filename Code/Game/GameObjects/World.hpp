@@ -43,6 +43,5 @@ public:
 };
 
 bool CompareDistanceFromZeroLessThan(const IntVector2& first, const IntVector2& second);
-bool CompareDistanceFromLocationToLocationLessThanRadius(const Vector2& startLocation, const Vector2& endLocation, const float radius);
-
-bool CompareDistanceFromLocationToLocationGreaterThanRadius(const Vector2 & startLocation, const Vector2 & endLocation, const float radius);
+bool CompareDistanceFromLocationToLocationLessThanRadius(float& outDistanceSquared, const Vector2& startLocation, const Vector2& endLocation, const float radius);
+bool CompareDistanceFromLocationToLocationGreaterThanRadius(float& outDistanceSquared, const Vector2 & startLocation, const Vector2 & endLocation, const float radius);

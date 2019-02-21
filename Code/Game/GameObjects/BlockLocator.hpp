@@ -17,11 +17,10 @@ public:
 	BlockLocator GetBlockLocatorToEast();
 	BlockLocator GetBlockLocatorAbove();
 	BlockLocator GetBlockLocatorBelow();
-
+	bool IsValid();
 
 public:
 	Chunk* m_chunk = nullptr;
-	int m_blockIndex;
-
+	int m_blockIndex = -1;
 };
 
