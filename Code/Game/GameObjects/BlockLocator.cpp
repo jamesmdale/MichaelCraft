@@ -48,16 +48,13 @@ void BlockLocator::StepNorth()
 	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
 	if (yIndex != CHUNK_Y_MASK)
 	{
-		m_chunk = m_chunk;
 		m_blockIndex = (m_blockIndex + BLOCKS_WIDE_X);
 		return;
 	}
 
 	//error case if north neighbor doesn't exist
-	if (m_chunk->m_northNeighbor == nullptr)
+	if (m_chunk == nullptr)
 	{
-		m_chunk = nullptr;
-		m_blockIndex = -1;
 		return;
 	}
 	else
@@ -104,10 +101,8 @@ void BlockLocator::StepSouth()
 	}
 
 	//error case if south neighbor doesn't exist
-	if (m_chunk->m_southNeighbor == nullptr)
+	if (m_chunk == nullptr)
 	{
-		m_chunk = nullptr;
-		m_blockIndex = -1;
 		return;
 	}
 	else
@@ -179,7 +174,7 @@ BlockLocator BlockLocator::GetBlockLocatorToNorth()
 	}
 
 	//error case if north neighbor doesn't exist
-	if (m_chunk->m_northNeighbor == nullptr)
+	if (m_chunk == nullptr)
 	{
 		return BlockLocator(nullptr, -1);
 	}
@@ -198,8 +193,8 @@ BlockLocator BlockLocator::GetBlockLocatorToSouth()
 		return BlockLocator(m_chunk, (m_blockIndex - BLOCKS_WIDE_X));
 	}
 
-	//error case if south neighbor doesn't exist
-	if (m_chunk->m_southNeighbor == nullptr)
+	//if we don't exist, return invalid blocklocator
+	if (m_chunk == nullptr)
 	{
 		return BlockLocator(nullptr, -1);
 	}

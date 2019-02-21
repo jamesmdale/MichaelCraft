@@ -210,11 +210,10 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	BlockLocator aboveLocator = blockLocator.GetBlockLocatorAbove();
 	BlockLocator bottomLocator = blockLocator.GetBlockLocatorBelow();
 
-	//west face
-	//front face
+	//west/front face
 	if (westLocator.GetBlock()->m_type == 0)
 	{
-		Rgba westTint = Rgba(1.0f, 0.0f, 0.0f, 1.f);
+		Rgba westTint = Rgba(0.7f, 0.7f, 0.7f, 1.f);
 
 		m_meshBuilder->SetColor(westTint);
 		m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.maxs.y);
@@ -233,13 +232,13 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
 		m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+		vertSize += 4;
 	}
 
-	//south face
-	//right face
+	//south/right face
 	if (southLocator.GetBlock()->m_type == 0)
 	{
-		Rgba southTint = Rgba(0.f, 1.f, 0.f, 1.f);
+		Rgba southTint = Rgba(0.6f, 0.6f, 0.6f, 1.f);
 
 		m_meshBuilder->SetColor(southTint);
 		m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
@@ -257,14 +256,15 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 		m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.mins.y);
 		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-		m_meshBuilder->AddQuadIndices(vertSize + 4, vertSize + 5, vertSize + 6, vertSize + 7);
+		m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+		vertSize += 4;
 	}
 
 	//east face
 	//back face
 	if (eastLocator.GetBlock()->m_type == 0)
 	{
-		Rgba eastTint = Rgba(0.f, 0.f, 1.f, 1.f);
+		Rgba eastTint = Rgba(0.5f, 0.5f, 0.5f, 1.f);
 
 		m_meshBuilder->SetColor(eastTint);
 		m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
@@ -282,7 +282,8 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 		m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.mins.y);
 		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-		m_meshBuilder->AddQuadIndices(vertSize + 8, vertSize + 9, vertSize + 10, vertSize + 11);
+		m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+		vertSize += 4;
 	}
 
 	//north face
@@ -307,30 +308,34 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 		m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.mins.y);
 		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-		m_meshBuilder->AddQuadIndices(vertSize + 12, vertSize + 13, vertSize + 14, vertSize + 15);
+		m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+		vertSize += 4;
 	}
 
 	//up face
 	//top face
 	if (!aboveLocator.IsValid() || aboveLocator.GetBlock()->m_type == 0)
 	{
-		m_meshBuilder->SetColor(tint);
+		Rgba upTint = Rgba(0.8f, 0.8f, 0.8f, 1.f);
+
+		m_meshBuilder->SetColor(upTint);
 		m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
 		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
-		m_meshBuilder->SetColor(tint);
+		m_meshBuilder->SetColor(upTint);
 		m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
 		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-		m_meshBuilder->SetColor(tint);	
+		m_meshBuilder->SetColor(upTint);	
 		m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
 		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-		m_meshBuilder->SetColor(tint);
+		m_meshBuilder->SetColor(upTint);
 		m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
 		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-		m_meshBuilder->AddQuadIndices(vertSize + 16, vertSize + 17, vertSize + 18, vertSize + 19);
+		m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+		vertSize += 4;
 	}
 
 	//down face
@@ -357,7 +362,8 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 			m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.mins.y);
 			m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
-			m_meshBuilder->AddQuadIndices(vertSize + 20, vertSize + 21, vertSize + 22, vertSize + 23);
+			m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+			vertSize += 4;
 		}
 	}
 }

@@ -48,7 +48,7 @@ void World::Initialize()
 	m_uiCamera = Game::GetInstance()->m_uiCamera;
 
 	m_gameCamera = new GameCamera();
-	m_gameCamera->Translate(Vector3(0.f, 0.f, 10.f));
+	m_gameCamera->Translate(Vector3(0.f, 0.f, 180.f));
 
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
@@ -112,13 +112,18 @@ void World::Render()
 		Vector3 blockCenter = m_raycastResult.m_impactBlockLocator.m_chunk->GetBlockWorldCenterForBlockIndex(m_raycastResult.m_impactBlockLocator.m_blockIndex);
 		raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, m_raycastResult.m_impactNormal);
 		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		//theRenderer->SetDrawMode(FRONT_AND_BACK_FACE_MODE, LINE_DRAW_MODE);
 		theRenderer->DrawMesh(raycastBlockHighlightMesh);
+		//theRenderer->SetDefaultDrawMode();
+
 	}
 
 	Vector3 blockCenter = Vector3(0.f, 0.f, 0.f);
-	raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, Vector3(0.f, -1.f, 0.f));
+	raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, Vector3(0.f, 0.f, 1.f));
 	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//theRenderer->SetDrawMode(FRONT_AND_BACK_FACE_MODE, LINE_DRAW_MODE);
 	theRenderer->DrawMesh(raycastBlockHighlightMesh);
+	//theRenderer->SetDefaultDrawMode();
 
 	//render all chunks
 	RenderChunks();
