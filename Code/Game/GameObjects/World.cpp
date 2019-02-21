@@ -173,8 +173,8 @@ void World::UpdateFromInput(float deltaSeconds)
 	/*Vector3 rotation = Vector3(clampedX, clampedY, 0.f);
 	m_camera->m_transform->SetLocalRotation(Vector3(rotation));*/
 
-	Vector3 cameraForward = Vector3(CosDegrees(m_gameCamera->m_yawDegreesZ), SinDegrees(m_gameCamera->m_yawDegreesZ), 0);
-	cameraForward.Normalize();
+	Vector3 cameraCardinalForward = Vector3(CosDegrees(m_gameCamera->m_yawDegreesZ), SinDegrees(m_gameCamera->m_yawDegreesZ), 0);
+	cameraCardinalForward.Normalize();
 	Vector3 cameraRight = Vector3(SinDegrees(m_gameCamera->m_yawDegreesZ), -CosDegrees(m_gameCamera->m_yawDegreesZ), 0);
 
 	Vector3 positionToAdd = Vector3::ZERO;
@@ -185,13 +185,13 @@ void World::UpdateFromInput(float deltaSeconds)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
 	{
 		//calculate movement for camera and use same movement for ship and light
-		positionToAdd = cameraForward * deltaSeconds * PLAYER_MOVEMENT_SPEED;
+		positionToAdd = cameraCardinalForward * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
 	//backward (-x)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
 	{
-		positionToAdd = -cameraForward * deltaSeconds * PLAYER_MOVEMENT_SPEED;
+		positionToAdd = -cameraCardinalForward * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
 	//left is north (y)
@@ -257,13 +257,12 @@ void World::UpdateFromInput(float deltaSeconds)
 
 	if (!IsCameraViewLocked())
 	{
-		/*m_gameCamera->CreateFliippedViewMatrix(m_engineCamera->m_viewMatrix);
-		Matrix44 transformMatrix = m_engineCamera->m_viewMatrix.InvertFastToNew();
-		Vector3 forward = transformMatrix.GetRotation();
-		forward.Normalize();*/
+		Vector3 cameraForward = Vector3(CosDegrees(m_gameCamera->m_yawDegreesZ) * CosDegrees(m_gameCamera->m_pitchDegreesY)
+			, SinDegrees(m_gameCamera->m_yawDegreesZ) * CosDegrees(m_gameCamera->m_pitchDegreesY),
+			-1.f * SinDegrees(m_gameCamera->m_pitchDegreesY));
+
 		CopyCameraDataToPlayerView(m_gameCamera->m_position, cameraForward);
-	}
-	
+	}	
 }
 
 //  =========================================================================================
