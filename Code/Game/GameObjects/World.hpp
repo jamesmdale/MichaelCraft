@@ -4,7 +4,7 @@
 #include "Engine\Camera\Camera.hpp"
 #include "Game\GameObjects\Chunk.hpp"
 #include "Game\GameObjects\GameCamera.hpp"
-
+#include "Game\Helpers\RaycastResult.hpp"
 
 typedef IntVector2 ChunkCoords;
 
@@ -25,12 +25,22 @@ public:
 	void ActivateChunks();
 	void GenerateDirtyChunks();
 	void DeactivateChunks();
+	void DeactivateAllChunks();
 
 	void ActivateChunk(const IntVector2& chunkCoordinates);
 	void DeactivateChunk(const IntVector2& keyVal);
 
 	void GenerateChunkBuildOrderCheatSheet();
-	Mesh* CreateBasis(const Vector3& center, float width, float scale = 1.f);
+
+	//Raycasting
+	RaycastResult Raycast(const Vector3& start, const Vector3& forward, float maxDistance);
+
+	//player actions
+	void DigBlock();
+	void PlaceBlock();
+	void ToggleCameraViewLocked();
+	bool IsCameraViewLocked(){return m_isCameraViewLocked;}
+	void CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vector3& cameraForward);
 
 public:
 	std::map<IntVector2, Chunk*> m_activeChunks;
@@ -40,6 +50,14 @@ public:
 	Camera* m_uiCamera = nullptr;
 	Camera* m_engineCamera = nullptr;
 	GameCamera* m_gameCamera = nullptr;
+
+	Vector3 m_playerViewPosition;
+	Vector3 m_playerViewForwardNormalized;
+
+	RaycastResult m_raycastResult;
+
+private:
+	bool m_isCameraViewLocked = false;
 };
 
 bool CompareDistanceFromZeroLessThan(const IntVector2& first, const IntVector2& second);

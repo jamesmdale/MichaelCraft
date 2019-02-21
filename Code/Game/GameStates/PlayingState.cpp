@@ -54,6 +54,7 @@ void PlayingState::PostRender()
 float PlayingState::UpdateFromInput(float deltaSeconds)
 {
 	m_world->UpdateFromInput(deltaSeconds);
+
 	return deltaSeconds;
 }
 

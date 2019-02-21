@@ -34,10 +34,13 @@ public:
 	IntVector3 GetBlockCoordsForBlockIndex(int blockIndex);
 	Vector3 GetBlockWorldCoordsForBlockIndex(int blockIndex);
 	Vector3 GetBlockWorldCenterForBlockIndex(int blockIndex);
+	bool GetBlockIndexForWorldPositionWithinBounds(uint& blockIndexOut, const Vector3 & worldPosition);
 	void AddBlockToMesh(const int blockIndex, const Vector3& center, Block* block);
 
 	void AddNeighbor(Chunk* neighbor, eNeighborType neighborDirection);
+	void RemoveNeighbor(eNeighborType neighborDirection);
 	bool DoesHaveAllNeighbors();
+	void UnhookNeighbors();
 
 public:
 	Block m_blocks[BLOCKS_PER_CHUNK];

@@ -161,6 +161,20 @@ Vector3 Chunk::GetBlockWorldCenterForBlockIndex(int blockIndex)
 }
 
 //  =========================================================================================
+bool Chunk::GetBlockIndexForWorldPositionWithinBounds(uint& blockIndexOut, const Vector3& worldPosition)
+{
+	if(!m_worldBounds.IsPointInside(worldPosition))
+		return false;
+
+	Vector3 relativePosition = Vector3(worldPosition.x - m_worldBounds.mins.x, worldPosition.y - m_worldBounds.mins.y, worldPosition.z);
+	IntVector3 relativeCoords = IntVector3((int)floorf(relativePosition.x), (int)floorf(relativePosition.y), (int)floorf(relativePosition.z));
+
+	blockIndexOut = GetBlockIndexForBlockCoords(relativeCoords);
+
+	return true;
+}
+
+//  =========================================================================================
 void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* block)
 {
 	if(block->m_type == 0)
@@ -357,7 +371,7 @@ void Chunk::AddNeighbor(Chunk* neighbor, eNeighborType neighborDirection)
 		m_northNeighbor = neighbor;
 
 		//prevents infinite loop
-		if(neighbor->m_southNeighbor != nullptr)
+		if(neighbor->m_southNeighbor == this)
 			break;
 
 		neighbor->AddNeighbor(this, SOUTH_NEIGHBOR_TYPE);
@@ -366,7 +380,7 @@ void Chunk::AddNeighbor(Chunk* neighbor, eNeighborType neighborDirection)
 		m_westNeighbor = neighbor;
 
 		//prevents infinite loop
-		if(neighbor->m_eastNeighbor != nullptr)
+		if(neighbor->m_eastNeighbor == this)
 			break;
 
 		neighbor->AddNeighbor(this, EAST_NEIGHBOR_TYPE);
@@ -375,7 +389,7 @@ void Chunk::AddNeighbor(Chunk* neighbor, eNeighborType neighborDirection)
 		m_southNeighbor = neighbor;
 
 		//prevents infinite loop
-		if(neighbor->m_northNeighbor != nullptr)
+		if(neighbor->m_northNeighbor == this)
 			break;
 
 		neighbor->AddNeighbor(this, NORTH_NEIGHBOR_TYPE);
@@ -384,10 +398,67 @@ void Chunk::AddNeighbor(Chunk* neighbor, eNeighborType neighborDirection)
 		m_eastNeighbor = neighbor;
 
 		//prevents infinite loop
-		if(neighbor->m_westNeighbor != nullptr)
+		if(neighbor->m_westNeighbor == this)
 			break;
 
 		neighbor->AddNeighbor(this, WEST_NEIGHBOR_TYPE);
+		break;
+	}
+}
+
+//  =========================================================================================
+void Chunk::RemoveNeighbor(eNeighborType neighborDirection)
+{
+	switch (neighborDirection)
+	{
+	case NORTH_NEIGHBOR_TYPE:
+		//if (m_northNeighbor->m_southNeighbor != nullptr)
+		//{
+		//	m_northNeighbor->RemoveNeighbor(SOUTH_NEIGHBOR_TYPE);
+		//}		
+		//m_northNeighbor = nullptr;
+		if(m_northNeighbor == nullptr)
+			break;
+
+		m_northNeighbor->m_southNeighbor = nullptr;
+		m_northNeighbor = nullptr;
+		break;
+	case SOUTH_NEIGHBOR_TYPE:
+		//if (m_southNeighbor->m_northNeighbor != nullptr)
+		//{
+		//	m_southNeighbor->RemoveNeighbor(NORTH_NEIGHBOR_TYPE);
+		//}
+		//m_southNeighbor = nullptr;
+		if(m_southNeighbor == nullptr)
+			break;
+
+		m_southNeighbor->m_northNeighbor = nullptr;
+		m_southNeighbor = nullptr;
+		break;
+	case EAST_NEIGHBOR_TYPE:
+		//if (m_eastNeighbor->m_westNeighbor != nullptr)
+		//{
+		//	m_eastNeighbor->RemoveNeighbor(WEST_NEIGHBOR_TYPE);
+		//}
+		//m_eastNeighbor = nullptr;
+		if(m_eastNeighbor == nullptr)
+			break;
+
+		m_eastNeighbor->m_westNeighbor = nullptr;
+		m_eastNeighbor = nullptr;
+		break;
+	case WEST_NEIGHBOR_TYPE:
+	/*	if (m_westNeighbor->m_eastNeighbor != nullptr)
+		{
+			m_westNeighbor->RemoveNeighbor(EAST_NEIGHBOR_TYPE);
+		}
+		m_westNeighbor = nullptr;
+		*/
+		if(m_westNeighbor == nullptr)
+			break;
+
+		m_westNeighbor->m_eastNeighbor = nullptr;
+		m_westNeighbor = nullptr;
 		break;
 	}
 }
@@ -404,6 +475,15 @@ bool Chunk::DoesHaveAllNeighbors()
 	}
 
 	return true;
+}
+
+//  =========================================================================================
+void Chunk::UnhookNeighbors()
+{
+	RemoveNeighbor(NORTH_NEIGHBOR_TYPE);
+	RemoveNeighbor(SOUTH_NEIGHBOR_TYPE);
+	RemoveNeighbor(EAST_NEIGHBOR_TYPE);
+	RemoveNeighbor(WEST_NEIGHBOR_TYPE);
 }
 
 //  =========================================================================================

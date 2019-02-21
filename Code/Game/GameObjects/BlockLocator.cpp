@@ -43,6 +43,133 @@ Block* BlockLocator::GetBlock()
 }
 
 //  =========================================================================================
+void BlockLocator::StepNorth()
+{
+	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
+	if (yIndex != CHUNK_Y_MASK)
+	{
+		m_chunk = m_chunk;
+		m_blockIndex = (m_blockIndex + BLOCKS_WIDE_X);
+		return;
+	}
+
+	//error case if north neighbor doesn't exist
+	if (m_chunk->m_northNeighbor == nullptr)
+	{
+		m_chunk = nullptr;
+		m_blockIndex = -1;
+		return;
+	}
+	else
+	{
+		m_chunk = m_chunk->m_northNeighbor;
+		m_blockIndex = m_blockIndex & (~CHUNK_Y_MASK);
+		return;
+	}	
+}
+
+//  =========================================================================================
+void BlockLocator::StepWest()
+{
+	int xIndex = m_blockIndex & (CHUNK_X_MASK);
+	if (xIndex != 0)
+	{
+		m_blockIndex = (m_blockIndex - 1);
+		return;
+	}
+
+	//error case if west neighbor doesn't exist
+	if (m_chunk->m_westNeighbor == nullptr)
+	{
+		m_chunk = nullptr;
+		m_blockIndex = -1;
+		return;
+	}
+	else
+	{
+		m_chunk = m_chunk->m_westNeighbor;
+		m_blockIndex = m_blockIndex | CHUNK_X_MASK;
+		return;
+	}
+}
+
+//  =========================================================================================
+void BlockLocator::StepSouth()
+{
+	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
+	if (yIndex != 0)
+	{
+		m_blockIndex = m_blockIndex - BLOCKS_WIDE_X;
+		return;
+	}
+
+	//error case if south neighbor doesn't exist
+	if (m_chunk->m_southNeighbor == nullptr)
+	{
+		m_chunk = nullptr;
+		m_blockIndex = -1;
+		return;
+	}
+	else
+	{
+		m_chunk = m_chunk->m_southNeighbor;
+		m_blockIndex = m_blockIndex | CHUNK_Y_MASK;
+	}
+}
+
+//  =========================================================================================
+void BlockLocator::StepEast()
+{
+	int xIndex = m_blockIndex & (CHUNK_X_MASK);
+	if (xIndex != CHUNK_X_MASK)
+	{
+		m_blockIndex = (m_blockIndex + 1);
+		return;
+	}
+
+	//error case if east neighbor doesn't exist
+	if (m_chunk->m_eastNeighbor == nullptr)
+	{
+		m_chunk = nullptr;
+		m_blockIndex = -1;
+		return;
+	}
+	else
+	{
+		m_chunk = m_chunk->m_eastNeighbor;
+		m_blockIndex = m_blockIndex & (~ CHUNK_X_MASK);
+		return;
+	}
+}
+
+//  =========================================================================================
+void BlockLocator::StepUp()
+{
+	int zIndex = m_blockIndex & (CHUNK_Z_MASK);
+	if (zIndex != CHUNK_Z_MASK)
+	{
+		m_blockIndex = m_blockIndex + (BLOCKS_WIDE_X * BLOCKS_WIDE_Y);
+		return;
+	}
+
+	m_chunk = nullptr;
+	m_blockIndex = -1;
+}
+
+//  =========================================================================================
+void BlockLocator::StepDown()
+{
+	int zIndex = m_blockIndex & (CHUNK_Z_MASK);
+	if (zIndex != 0)
+	{
+		m_blockIndex = m_blockIndex - (BLOCKS_WIDE_X * BLOCKS_WIDE_Y);
+	}
+
+	m_chunk = nullptr;
+	m_blockIndex = -1;
+}
+
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToNorth()
 {
 	int yIndex = m_blockIndex & (CHUNK_Y_MASK);

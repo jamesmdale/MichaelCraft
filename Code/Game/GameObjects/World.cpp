@@ -1,7 +1,10 @@
+#include "Game\GameObjects\World.hpp"
 #include "Game\Game.hpp"
 #include "Game\GameStates\PlayingState.hpp"
 #include "Game\ObjectMeshbuilder.hpp"
 #include "Game\GameCommon.hpp"
+#include "Game\Helpers\Ray.hpp"
+#include "Game\Helpers\GameRendererHelpers.hpp"
 #include "Engine\Window\Window.hpp"
 #include "Engine\Debug\DebugRender.hpp"
 #include "Engine\Core\LightObject.hpp"
@@ -50,6 +53,8 @@ void World::Initialize()
 	theRenderer->SetAmbientLightIntensity(0.15f);
 
 	GenerateChunkBuildOrderCheatSheet();
+
+	theRenderer->SetLineWidth(5.f);
 }
 
 //  =========================================================================================
@@ -61,6 +66,10 @@ void World::Update(float deltaSeconds)
 	//MarkUnrenderedChunksDirtyWithinRenderRadius();
 	GenerateDirtyChunks();
 	DeactivateChunks();
+
+	//player raycast
+	m_raycastResult = Raycast(m_playerViewPosition, m_playerViewForwardNormalized, RAYCAST_MAX_DISTANCE);
+	
 }
 
 //  =========================================================================================
@@ -78,18 +87,29 @@ void World::Render()
 
 	MeshBuilder builder;
 
-	//builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
-	//Mesh* axisMesh = builder.CreateMesh<VertexPCU>();
-
-	///*Mesh* axisMesh = CreateBasis(Vector3::ZERO, 1.f);*/
+	builder.CreateBasis(Matrix44::IDENTITY, Vector3( 19.375f, 2.582f, 107.458f ), 1.f);
+	Mesh* axisMesh = builder.CreateMesh<VertexPCU>();
 
 	////draw axis for debugging
-	//theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-	//theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default_always_depth"));
-	//theRenderer->DrawMesh(axisMesh);
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default_always_depth"));
+	theRenderer->DrawMesh(axisMesh);
 
-	//theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
-	//theRenderer->DrawMesh(axisMesh);
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+	theRenderer->DrawMesh(axisMesh);
+
+	Mesh* raycastBlockHighlightMesh = nullptr;
+	Mesh* raycastMesh = nullptr;
+	//draw impact highlight box for raycast
+	if (m_raycastResult.m_didImpact && m_raycastResult.m_impactBlockLocator.IsValid())
+	{
+		raycastMesh = CreateLine(m_raycastResult.m_ray.m_startPosition, m_raycastResult.m_impactWorldPosition);
+		theRenderer->DrawMesh(raycastMesh);
+
+		Vector3 blockCenter = m_raycastResult.m_impactBlockLocator.m_chunk->GetBlockWorldCenterForBlockIndex(m_raycastResult.m_impactBlockLocator.m_blockIndex);
+		raycastBlockHighlightMesh = CreateBlockHighlightBox(blockCenter, m_raycastResult.m_impactNormal);
+		theRenderer->DrawMesh(raycastBlockHighlightMesh);
+	}
 
 	//render all chunks
 	RenderChunks();
@@ -101,11 +121,22 @@ void World::Render()
 	Mesh* blockMesh = MakeBlockToMesh(Vector3(-2.f, -2.f, 0.f), 1);
 	theRenderer->DrawMesh(blockMesh);*/
 
-	/*delete(axisMesh);
+
+	TODO("later we need to just put these in the world or above it in the game so we aren't newing");
+	delete(axisMesh);
 	axisMesh = nullptr;
 
-	delete(blockMesh);
-	blockMesh = nullptr;*/
+	if (raycastMesh != nullptr)
+	{
+		delete(raycastMesh);
+		raycastMesh = nullptr;
+	}
+
+	if (raycastBlockHighlightMesh != nullptr)
+	{
+		delete(raycastBlockHighlightMesh);
+		raycastBlockHighlightMesh = nullptr;
+	}	
 }
 
 //  =========================================================================================
@@ -129,6 +160,7 @@ void World::UpdateFromInput(float deltaSeconds)
 	m_camera->m_transform->SetLocalRotation(Vector3(rotation));*/
 
 	Vector3 cameraForward = Vector3(CosDegrees(m_gameCamera->m_yawDegreesZ), SinDegrees(m_gameCamera->m_yawDegreesZ), 0);
+	cameraForward.Normalize();
 	Vector3 cameraRight = Vector3(SinDegrees(m_gameCamera->m_yawDegreesZ), -CosDegrees(m_gameCamera->m_yawDegreesZ), 0);
 
 	Vector3 positionToAdd = Vector3::ZERO;
@@ -139,48 +171,85 @@ void World::UpdateFromInput(float deltaSeconds)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
 	{
 		//calculate movement for camera and use same movement for ship and light
-		positionToAdd = cameraForward * deltaSeconds * 10.f;
-		m_gameCamera->Translate(positionToAdd);
+		positionToAdd = cameraForward * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
 	//backward (-x)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
 	{
-		positionToAdd = -cameraForward * deltaSeconds * 10.f;
-		m_gameCamera->Translate(positionToAdd);
+		positionToAdd = -cameraForward * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
 	//left is north (y)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_A))
 	{
-		positionToAdd = -cameraRight * deltaSeconds * 10.f;
-		m_gameCamera->Translate(positionToAdd);
+		positionToAdd = -cameraRight * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
 	//right is south (-y)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_D))
 	{
-		positionToAdd = cameraRight * deltaSeconds * 10.f;
-		m_gameCamera->Translate(positionToAdd);
+		positionToAdd = cameraRight * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE) || theInput->IsKeyPressed(theInput->KEYBOARD_E))
 	{
-		positionToAdd = g_worldUp * deltaSeconds * 10.f;
-		m_gameCamera->Translate(positionToAdd);
+		positionToAdd = g_worldUp * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL) || theInput->IsKeyPressed(theInput->KEYBOARD_Q))
 	{
-		positionToAdd = -g_worldUp * deltaSeconds * 10.f;
-		m_gameCamera->Translate(positionToAdd);
+		positionToAdd = -g_worldUp * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
-//deltaSeconds = m_player->UpdateFromInput(deltaSeconds);
-//deltaSeconds = UpdateFromInputDebug(deltaSeconds);
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_LEFT_SHIFT))
+	{
+		positionToAdd = positionToAdd * 2;
+	}
 
-// return 
-//return deltaSeconds; //new deltaSeconds
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_U))
+	{
+		DeactivateAllChunks();
+	}
+
+	if (theInput->WasKeyJustPressed(theInput->MOUSE_LEFT_CLICK))
+	{
+		DigBlock();
+	}
+
+	if (theInput->WasKeyJustPressed(theInput->MOUSE_RIGHT_CLICK))
+	{
+		PlaceBlock();
+	}
+
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_Y))
+	{
+		ToggleCameraViewLocked();
+	}
+
+	if(InputSystem::GetInstance()->WasKeyJustPressed(InputSystem::GetInstance()->KEYBOARD_ESCAPE))
+	{
+		DeactivateAllChunks();
+		g_isQuitting = true;
+	}
+
+	//deltaSeconds = m_player->UpdateFromInput(deltaSeconds);
+	//deltaSeconds = UpdateFromInputDebug(deltaSeconds);
+
+	// return 
+	//return deltaSeconds; //new deltaSeconds
+
+	m_gameCamera->Translate(positionToAdd);
+
+	if (!IsCameraViewLocked())
+	{
+		/*m_gameCamera->CreateFliippedViewMatrix(m_engineCamera->m_viewMatrix);
+		Matrix44 transformMatrix = m_engineCamera->m_viewMatrix.InvertFastToNew();
+		Vector3 forward = transformMatrix.GetRotation();
+		forward.Normalize();*/
+		CopyCameraDataToPlayerView(m_gameCamera->m_position, cameraForward);
+	}
+	
 }
 
 //  =========================================================================================
@@ -266,7 +335,7 @@ void World::ActivateChunks()
 //  =========================================================================================
 void World::GenerateDirtyChunks()
 {
-	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x / BLOCKS_WIDE_X), floorf(m_gameCamera->m_position.y / BLOCKS_WIDE_Y));
+	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x * BLOCKS_WIDE_X_DIVISOR), floorf(m_gameCamera->m_position.y / BLOCKS_WIDE_Y_DIVISOR));
 	Vector2 playerChunkCenter = Vector2(playerChunkCoords) + Vector2(0.5f, 0.5f);
 
 	//loop through my active chunk list and generate the mesh for anyone marked as dirty
@@ -288,7 +357,7 @@ void World::DeactivateChunks()
 {
 	//loop through my active chunk list and determine find the first active chunk out of range to be deactivated(saved if needed, unhooked, deleted)
 
-	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x / BLOCKS_WIDE_X), floorf(m_gameCamera->m_position.y / BLOCKS_WIDE_Y));
+	IntVector2 playerChunkCoords = IntVector2(floorf(m_gameCamera->m_position.x * BLOCKS_WIDE_X_DIVISOR), floorf(m_gameCamera->m_position.y * BLOCKS_WIDE_Y_DIVISOR));
 	Vector2 playerChunkCenter = Vector2(playerChunkCoords) + Vector2(0.5f, 0.5f);
 
 	//loop through my neighborhood and find the first chunk that needs activating(loaded or generated, hooked up)
@@ -317,6 +386,17 @@ void World::DeactivateChunks()
 }
 
 //  =========================================================================================
+void World::DeactivateAllChunks()
+{
+	std::map<IntVector2, Chunk*>::iterator activeChunkIterator = m_activeChunks.begin();
+	while(m_activeChunks.size() > 0)
+	{
+		DeactivateChunk(activeChunkIterator->first);
+		activeChunkIterator = m_activeChunks.begin();
+	}
+}
+
+//  =========================================================================================
 void World::ActivateChunk(const IntVector2& chunkCoordinates)
 {
 	Chunk* chunk = new Chunk(chunkCoordinates);
@@ -326,28 +406,28 @@ void World::ActivateChunk(const IntVector2& chunkCoordinates)
 	std::map<IntVector2, Chunk*>::iterator activeChunkIterator;
 
 	//find north neighbor and hook them if they exist
-	activeChunkIterator = m_activeChunks.find(chunkCoordinates + IntVector2(0, 1));
+	activeChunkIterator = m_activeChunks.find(chunkCoordinates + g_chunkNorth);
 	if (activeChunkIterator != m_activeChunks.end())
 	{
 		chunk->AddNeighbor(activeChunkIterator->second, NORTH_NEIGHBOR_TYPE);
 	}
 
 	//find west neighbor and hook them if they exist
-	activeChunkIterator = m_activeChunks.find(chunkCoordinates + IntVector2(-1, 0));
+	activeChunkIterator = m_activeChunks.find(chunkCoordinates + g_chunkWest);
 	if (activeChunkIterator != m_activeChunks.end())
 	{
 		chunk->AddNeighbor(activeChunkIterator->second, WEST_NEIGHBOR_TYPE);
 	}
 
 	//find south neighbor and hook them if they exist
-	activeChunkIterator = m_activeChunks.find(chunkCoordinates + IntVector2(0, -1));
+	activeChunkIterator = m_activeChunks.find(chunkCoordinates + g_chunkSouth);
 	if (activeChunkIterator != m_activeChunks.end())
 	{
 		chunk->AddNeighbor(activeChunkIterator->second, SOUTH_NEIGHBOR_TYPE);
 	}
 
 	//find east neighbor and hook them if they exist
-	activeChunkIterator = m_activeChunks.find(chunkCoordinates + IntVector2(1, 0));
+	activeChunkIterator = m_activeChunks.find(chunkCoordinates + g_chunkEast);
 	if (activeChunkIterator != m_activeChunks.end())
 	{
 		chunk->AddNeighbor(activeChunkIterator->second, EAST_NEIGHBOR_TYPE);
@@ -362,6 +442,8 @@ void World::DeactivateChunk(const IntVector2& keyVal)
 	//before deletion need to check saving and unhooking of neighbors
 
 	Chunk* chunk = m_activeChunks.at(keyVal);
+
+	chunk->UnhookNeighbors();
 
 	delete(chunk);
 	chunk = nullptr;
@@ -387,54 +469,158 @@ void World::GenerateChunkBuildOrderCheatSheet()
 }
 
 //  =========================================================================================
-Mesh* World::CreateBasis(const Vector3& center, float width, float scale)
+RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float maxDistance)
 {
-	UNUSED(width);
 
-	MeshBuilder builder;
+	// create ray that we are moving along line ----------------------------------------------
+	RaycastResult result;
+	Ray raycast = Ray(start, forward, maxDistance);
 
-	builder.Begin(TRIANGLES_DRAW_PRIMITIVE, true);
+	// get chunk information we need for  ----------------------------------------------
+	IntVector2 chunkCoordsOfWorldPosition = IntVector2((int)floorf(raycast.m_startPosition.x * BLOCKS_WIDE_X_DIVISOR), (int)floorf(raycast.m_startPosition.y * BLOCKS_WIDE_Y_DIVISOR));
 
-	//up - z
-	builder.SetColor(Rgba::BLUE);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z));
+	std::map<IntVector2, Chunk*>::iterator activeChunkIterator = m_activeChunks.find(chunkCoordsOfWorldPosition);
 
-	builder.SetColor(Rgba::BLUE);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z) + (scale * g_worldUp));
+	if (activeChunkIterator == m_activeChunks.end())
+	{
+		return result;
+	}
 
-	builder.SetColor(Rgba::BLUE);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z));
+	Chunk* currentRayChunk = activeChunkIterator->second;
 
-	//forward - x
-	builder.SetColor(Rgba::RED);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z));
+	uint outBlockIndex;
+	bool success = currentRayChunk->GetBlockIndexForWorldPositionWithinBounds(outBlockIndex, raycast.m_startPosition);
+	
+	//we are out of bounds of the chunk bounds
+	if (!success)
+	{
+		return result;
+	}
+	
+	BlockLocator blockLocator = BlockLocator(currentRayChunk, outBlockIndex);
+	
+	// ready to begin step and sample to find impact ----------------------------------------------
+	bool isRaycastComplete = false;
+	Vector3 currentPosition = raycast.m_startPosition;
+	IntVector3 currentCoordinates = currentPosition.FloorAndCastToInt();
+	float totalStepDistance = 0.f;
+	IntVector3 movementDirection = IntVector3::ZERO;
+	bool didImpact = false;
 
-	builder.SetColor(Rgba::RED);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z) + (scale * g_east));
+	//early out if we started from inside a blcok that is impassable
+	if(blockLocator.GetBlock()->m_type != 0)
+	{
+		isRaycastComplete = true;
+		didImpact = true;
+	}
+	
+	while (!isRaycastComplete)
+	{		
+		bool didStepDuringIteration = false;
 
-	builder.SetColor(Rgba::RED);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z));
+		totalStepDistance += RAYCAST_STEP_AMOUNT;
+		ClampFloat(totalStepDistance, 0.f, raycast.m_maxDistance);
 
-	//left - y
-	builder.SetColor(Rgba::GREEN);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z));
+		currentPosition += raycast.m_direction * RAYCAST_STEP_AMOUNT;
+		IntVector3 newCoordinates = currentPosition.FloorAndCastToInt();
 
-	builder.SetColor(Rgba::GREEN);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z) + (scale * g_north));
+		if (newCoordinates.x > currentCoordinates.x)
+		{
+			blockLocator.StepEast();
+			movementDirection = IntVector3(1, 0, 0); 
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+		}
+		else if (newCoordinates.x < currentCoordinates.x)
+		{
+			blockLocator.StepWest();
+			movementDirection = IntVector3(-1, 0, 0);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+		}
+		else if (newCoordinates.y > currentCoordinates.y)
+		{
+			blockLocator.StepNorth();
+			movementDirection = IntVector3(0, 1, 0);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+		}
+		else if (newCoordinates.y < currentCoordinates.y)
+		{
+			blockLocator.StepSouth();
+			movementDirection = IntVector3(0, -1, 0);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+		}
+		else if (newCoordinates.z > currentCoordinates.z)
+		{
+			blockLocator.StepUp();
+			movementDirection = IntVector3(0, 0, 1);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+		}
+		else if (newCoordinates.z > currentCoordinates.z)
+		{
+			blockLocator.StepDown();
+			movementDirection = IntVector3(0, 0, -1);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+		}
 
-	builder.SetColor(Rgba::GREEN);
-	builder.SetUV(0, 0);
-	builder.PushVertex(Vector3(center.x, center.y, center.z));
+		//check to see if your current block is solid.
+		if (didStepDuringIteration)
+		{
+			if (blockLocator.IsValid())
+			{
+				if(blockLocator.GetBlock()->m_type != 0)
+				{
+					isRaycastComplete = true;
+					didImpact = true;
+				}
+			}
+			else
+			{
+				isRaycastComplete = true;
+				didImpact = false;
+			}
+		}
 
-	return builder.CreateMesh<VertexPCU>();
+		//if we've walked the length of the cast, we didn't hit anything
+		if (totalStepDistance > raycast.m_maxDistance)
+		{
+			isRaycastComplete = true;
+		}
+
+		didStepDuringIteration = false;
+	}
+
+	result = RaycastResult(raycast, blockLocator, didImpact, currentPosition, totalStepDistance, -1 * Vector3(movementDirection));	
+	return result;
+}
+
+//  =========================================================================================
+void World::DigBlock()
+{
+
+}
+
+//  =========================================================================================
+void World::PlaceBlock()
+{
+
+}
+
+//  =========================================================================================
+void World::ToggleCameraViewLocked()
+{
+	m_isCameraViewLocked = !m_isCameraViewLocked;
+}
+
+//  =========================================================================================
+void World::CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vector3& cameraForward)
+{
+	m_playerViewPosition = cameraPosition;
+	m_playerViewForwardNormalized = cameraForward;
 }
 
 //  =========================================================================================

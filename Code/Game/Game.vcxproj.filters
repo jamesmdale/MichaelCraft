@@ -55,6 +55,15 @@
     <ClCompile Include="GameObjects\BlockLocator.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Helpers\RaycastResult.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\Ray.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\GameRendererHelpers.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.hpp">
@@ -82,5 +91,8 @@
     <ClInclude Include="Definitions\BlockDefinition.hpp" />
     <ClInclude Include="ObjectMeshbuilder.hpp" />
     <ClInclude Include="GameObjects\BlockLocator.hpp" />
+    <ClInclude Include="Helpers\RaycastResult.hpp" />
+    <ClInclude Include="Helpers\Ray.hpp" />
+    <ClInclude Include="Helpers\GameRendererHelpers.hpp" />
   </ItemGroup>
 </Project>

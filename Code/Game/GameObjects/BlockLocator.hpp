@@ -11,6 +11,14 @@ public:
 	~BlockLocator();
 
 	Block* GetBlock();
+
+	void StepNorth();
+	void StepWest();
+	void StepSouth();
+	void StepEast();
+	void StepUp();
+	void StepDown();
+
 	BlockLocator GetBlockLocatorToNorth();
 	BlockLocator GetBlockLocatorToWest();
 	BlockLocator GetBlockLocatorToSouth();
