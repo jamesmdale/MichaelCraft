@@ -8,7 +8,7 @@ class RaycastResult
 public:
 
 	RaycastResult();
-	RaycastResult(const Ray& ray, const BlockLocator& blockLocator, const bool didImpact, const Vector3& impactWorldPosition, float impactDistance, const Vector3& impactNormal);
+	RaycastResult(const Ray& ray, const BlockLocator& blockLocator, const bool didImpact, const Vector3& impactWorldPosition, const Vector3& endPosition, float impactDistance, const Vector3& impactNormal);
 	~RaycastResult();
 
 public:
@@ -16,8 +16,9 @@ public:
 	BlockLocator m_impactBlockLocator;
 	bool m_didImpact = false;
 	Vector3 m_impactWorldPosition;
+	Vector3 m_endPosition;
 	float m_impactDistance;
-	Vector3 m_impactNormal;
+	Vector3 m_impactNormal;	
 	float m_impactFraction;
 	
 };

@@ -62,9 +62,9 @@ void World::Initialize()
 void World::Update(float deltaSeconds)
 {
 	UpdateFromInput(deltaSeconds);
+	UpdatePlayerViewPosition();
 
 	ActivateChunks();
-	//MarkUnrenderedChunksDirtyWithinRenderRadius();
 	GenerateDirtyChunks();
 	DeactivateChunks();
 
@@ -86,71 +86,12 @@ void World::Render()
 	//hammer over camera view matrix
 	m_gameCamera->CreateFliippedViewMatrix(m_engineCamera->m_viewMatrix);
 
-	MeshBuilder builder;
-
-	builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
-	Mesh* axisMesh = builder.CreateMesh<VertexPCU>();
-
-	//draw axis for debugging
-	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default_always_depth"));
-	theRenderer->DrawMesh(axisMesh);	
-
-	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
-	theRenderer->DrawMesh(axisMesh);
-
-	Mesh* raycastBlockHighlightMesh = nullptr;
-	Mesh* raycastMesh = nullptr;
-	//draw impact highlight box for raycast
-
-	raycastMesh = CreateLine(m_raycastResult.m_ray.m_startPosition, m_raycastResult.m_impactWorldPosition);
-	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-	theRenderer->DrawMesh(raycastMesh);
-
-	if (m_raycastResult.m_didImpact && m_raycastResult.m_impactBlockLocator.IsValid())
-	{
-		Vector3 blockCenter = m_raycastResult.m_impactBlockLocator.m_chunk->GetBlockWorldCenterForBlockIndex(m_raycastResult.m_impactBlockLocator.m_blockIndex);
-		raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, m_raycastResult.m_impactNormal);
-		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-		//theRenderer->SetDrawMode(FRONT_AND_BACK_FACE_MODE, LINE_DRAW_MODE);
-		theRenderer->DrawMesh(raycastBlockHighlightMesh);
-		//theRenderer->SetDefaultDrawMode();
-
-	}
-
-	Vector3 blockCenter = Vector3(0.f, 0.f, 0.f);
-	raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, Vector3(0.f, 0.f, 1.f));
-	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-	//theRenderer->SetDrawMode(FRONT_AND_BACK_FACE_MODE, LINE_DRAW_MODE);
-	theRenderer->DrawMesh(raycastBlockHighlightMesh);
-	//theRenderer->SetDefaultDrawMode();
-
 	//render all chunks
 	RenderChunks();
 
-	//generate and render test mesh
-	/*theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
-	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
-
-	Mesh* blockMesh = MakeBlockToMesh(Vector3(-2.f, -2.f, 0.f), 1);
-	theRenderer->DrawMesh(blockMesh);*/
+	RenderDebug();
 
 
-	TODO("later we need to just put these in the world or above it in the game so we aren't newing");
-	delete(axisMesh);
-	axisMesh = nullptr;
-
-	if (raycastMesh != nullptr)
-	{
-		delete(raycastMesh);
-		raycastMesh = nullptr;
-	}
-
-	if (raycastBlockHighlightMesh != nullptr)
-	{
-		delete(raycastBlockHighlightMesh);
-		raycastBlockHighlightMesh = nullptr;
-	}	
 }
 
 //  =========================================================================================
@@ -236,9 +177,13 @@ void World::UpdateFromInput(float deltaSeconds)
 		PlaceBlock();
 	}
 
-	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_Y))
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_PAGEUP))
 	{
-		ToggleCameraViewLocked();
+		LockCamera();
+	}
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_PAGEDOWN))
+	{
+		UnlockCamera();
 	}
 
 	if(InputSystem::GetInstance()->WasKeyJustPressed(InputSystem::GetInstance()->KEYBOARD_ESCAPE))
@@ -254,7 +199,11 @@ void World::UpdateFromInput(float deltaSeconds)
 	//return deltaSeconds; //new deltaSeconds
 
 	m_gameCamera->Translate(positionToAdd);
+}
 
+//  =========================================================================================
+void World::UpdatePlayerViewPosition()
+{
 	if (!IsCameraViewLocked())
 	{
 		Vector3 cameraForward = Vector3(CosDegrees(m_gameCamera->m_yawDegreesZ) * CosDegrees(m_gameCamera->m_pitchDegreesY)
@@ -287,6 +236,152 @@ void World::RenderChunks()
 		if(chunk->m_gpuMesh != nullptr)
 			chunk->Render();
 	}
+}
+
+//  =========================================================================================
+void World::RenderDebug()
+{
+	Renderer* theRenderer = Renderer::GetInstance();
+
+	// debug drawing ----------------------------------------------
+	MeshBuilder builder;
+
+	builder.CreateBasis(Matrix44::IDENTITY, Vector3::ZERO, 1.f);
+	Mesh* axisMesh = builder.CreateMesh<VertexPCU>();
+
+	//draw axis for debugging
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default_always_depth"));
+	theRenderer->DrawMesh(axisMesh);	
+
+	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+	theRenderer->DrawMesh(axisMesh);
+
+	Mesh* raycastBlockHighlightMesh = nullptr;
+	Mesh* raycastMesh = nullptr;
+
+	//draw raycastline
+	raycastMesh = CreateLine(m_raycastResult.m_ray.m_startPosition, m_raycastResult.m_impactWorldPosition, Rgba::BLUE);
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->DrawMesh(raycastMesh);
+
+	raycastMesh = CreateLine(m_raycastResult.m_impactWorldPosition, m_raycastResult.m_endPosition, Rgba::PINK);
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->DrawMesh(raycastMesh);
+
+	raycastMesh = CreateDebugStar(m_raycastResult.m_impactWorldPosition, Rgba::BLUE, 0.05f);
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->DrawMesh(raycastMesh);
+
+	raycastMesh = CreateDebugStar(m_raycastResult.m_endPosition, Rgba::PINK, 0.05f);
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->DrawMesh(raycastMesh);
+
+	// DEBUG =========================================================================================
+
+	IntVector2 chunkCoordsOfWorldPosition = IntVector2((int)floorf(m_raycastResult.m_ray.m_startPosition.x * BLOCKS_WIDE_X_DIVISOR), (int)floorf(m_raycastResult.m_ray.m_startPosition.y * BLOCKS_WIDE_Y_DIVISOR));
+
+	std::map<IntVector2, Chunk*>::iterator activeChunkIterator = m_activeChunks.find(chunkCoordsOfWorldPosition);
+	Chunk* currentRayChunk = activeChunkIterator->second;
+
+	uint outBlockIndex;
+	bool success = currentRayChunk->GetBlockIndexForWorldPositionWithinBounds(outBlockIndex, m_raycastResult.m_ray.m_startPosition);
+	
+	//render me
+	BlockLocator locator = BlockLocator(currentRayChunk, outBlockIndex);
+	Vector3 worldCenter = currentRayChunk->GetBlockWorldCenterForBlockIndex(outBlockIndex);
+	raycastMesh = CreateBoxOutline(worldCenter, Rgba::WHITE);
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->DrawMesh(raycastMesh);
+
+	//render above
+	BlockLocator aboveLocator = locator.GetBlockLocatorAbove();
+	if (aboveLocator.IsValid())
+	{	
+		worldCenter = aboveLocator.m_chunk->GetBlockWorldCenterForBlockIndex(aboveLocator.m_blockIndex);
+		raycastMesh = CreateBoxOutline(worldCenter, Rgba::BLUE);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(raycastMesh);
+	}
+
+	BlockLocator belowLocator = locator.GetBlockLocatorBelow();
+	if (belowLocator.IsValid())
+	{
+		worldCenter = belowLocator.m_chunk->GetBlockWorldCenterForBlockIndex(belowLocator.m_blockIndex);
+		raycastMesh = CreateBoxOutline(worldCenter, Rgba::LIGHT_BLUE);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(raycastMesh);
+	}
+	
+	BlockLocator eastLocator = locator.GetBlockLocatorToEast();
+	if (eastLocator.IsValid())
+	{
+		worldCenter = eastLocator.m_chunk->GetBlockWorldCenterForBlockIndex(eastLocator.m_blockIndex);
+		raycastMesh = CreateBoxOutline(worldCenter, Rgba::RED);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(raycastMesh);
+	}
+
+	BlockLocator westLocator = locator.GetBlockLocatorToWest();
+	if (westLocator.IsValid())
+	{
+		worldCenter = westLocator.m_chunk->GetBlockWorldCenterForBlockIndex(westLocator.m_blockIndex);
+		raycastMesh = CreateBoxOutline(worldCenter, Rgba::LIGHT_RED);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(raycastMesh);
+	}
+
+	BlockLocator northLocator = locator.GetBlockLocatorToNorth();
+	if (northLocator.IsValid())
+	{
+		worldCenter = northLocator.m_chunk->GetBlockWorldCenterForBlockIndex(northLocator.m_blockIndex);
+		raycastMesh = CreateBoxOutline(worldCenter, Rgba::GREEN);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(raycastMesh);
+	}
+
+	BlockLocator southLocator = locator.GetBlockLocatorToSouth();
+	if (southLocator.IsValid())
+	{
+		worldCenter = southLocator.m_chunk->GetBlockWorldCenterForBlockIndex(southLocator.m_blockIndex);
+		raycastMesh = CreateBoxOutline(worldCenter, Rgba::LIGHT_GREEN);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(raycastMesh);
+	}
+
+	//  =========================================================================================
+
+	//draw raycast block highlighting
+	if (m_raycastResult.m_didImpact && m_raycastResult.m_impactBlockLocator.IsValid())
+	{
+		Vector3 blockCenter = m_raycastResult.m_impactBlockLocator.m_chunk->GetBlockWorldCenterForBlockIndex(m_raycastResult.m_impactBlockLocator.m_blockIndex);
+		raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, m_raycastResult.m_impactNormal);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(raycastBlockHighlightMesh);
+	}
+
+	//draw block highlight mesh at world zero
+	Vector3 blockCenter = Vector3(0.f, 0.f, 0.f);
+	raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, Vector3(0.f, 0.f, 1.f));
+	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	theRenderer->DrawMesh(raycastBlockHighlightMesh);
+
+	//cleanup
+	TODO("later we need to just put these in the world or above it in the game so we aren't newing");
+	delete(axisMesh);
+	axisMesh = nullptr;
+
+	if (raycastMesh != nullptr)
+	{
+		delete(raycastMesh);
+		raycastMesh = nullptr;
+	}
+
+	if (raycastBlockHighlightMesh != nullptr)
+	{
+		delete(raycastBlockHighlightMesh);
+		raycastBlockHighlightMesh = nullptr;
+	}	
 }
 
 //  =========================================================================================
@@ -512,6 +607,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 	BlockLocator blockLocator = BlockLocator(currentRayChunk, outBlockIndex);
 	
 	// ready to begin step and sample to find impact ----------------------------------------------
+	Vector3 endPosition = raycast.m_startPosition + (forward * maxDistance);
 	bool isRaycastComplete = false;
 	Vector3 currentPosition = raycast.m_startPosition;
 	IntVector3 currentCoordinates = currentPosition.FloorAndCastToInt();
@@ -606,7 +702,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 		didStepDuringIteration = false;
 	}
 
-	result = RaycastResult(raycast, blockLocator, didImpact, currentPosition, totalStepDistance, -1 * Vector3(movementDirection));	
+	result = RaycastResult(raycast, blockLocator, didImpact, currentPosition, endPosition, totalStepDistance, -1 * Vector3(movementDirection));	
 	return result;
 }
 
@@ -626,6 +722,18 @@ void World::PlaceBlock()
 void World::ToggleCameraViewLocked()
 {
 	m_isCameraViewLocked = !m_isCameraViewLocked;
+}
+
+//  =========================================================================================
+void World::LockCamera()
+{
+	m_isCameraViewLocked = true;
+}
+
+//  =========================================================================================
+void World::UnlockCamera()
+{
+	m_isCameraViewLocked = false;
 }
 
 //  =========================================================================================

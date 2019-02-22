@@ -19,8 +19,11 @@ public:
 	void Render();
 	void UpdateFromInput(float deltaSeconds);
 
+	void UpdatePlayerViewPosition();
 	void UpdateChunks();
+
 	void RenderChunks();
+	void RenderDebug();
 
 	void ActivateChunks();
 	void GenerateDirtyChunks();
@@ -39,7 +42,9 @@ public:
 	void DigBlock();
 	void PlaceBlock();
 	void ToggleCameraViewLocked();
+	void LockCamera();
 	bool IsCameraViewLocked(){return m_isCameraViewLocked;}
+	void UnlockCamera();
 	void CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vector3& cameraForward);
 
 public:
