@@ -158,6 +158,7 @@ void BlockLocator::StepDown()
 	if (zIndex != 0)
 	{
 		m_blockIndex = m_blockIndex - (BLOCKS_WIDE_X * BLOCKS_WIDE_Y);
+		return;
 	}
 
 	m_chunk = nullptr;

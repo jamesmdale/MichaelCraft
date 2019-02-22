@@ -103,146 +103,149 @@ Mesh* CreateBlockHighlightBox(const Vector3& center, const Vector3& impactNormal
 	float yVal = 0.5f * scale;
 	float zVal = 0.5f * scale;
 
-	Rgba westTint = Rgba::WHITE;
-	Rgba eastTint = Rgba::WHITE;
-	Rgba northTint = Rgba::WHITE;
-	Rgba southTint = Rgba::WHITE;
-	Rgba topTint = Rgba::WHITE;
-	Rgba bottomTint = Rgba::WHITE;
-
-	//set the box color for the impact normal
-	if (impactNormal == Vector3(-1.f, 0.f, 0.f))
-		westTint = Rgba::PINK;
-	else if (impactNormal == Vector3(1.f, 0.f, 0.f))
-		eastTint = Rgba::PINK;
-	else if (impactNormal == Vector3(0.f, 1.f, 0.f))
-		northTint = Rgba::PINK;
-	else if (impactNormal == Vector3(0.f, -1.f, 0.f))
-		southTint = Rgba::PINK;
-	else if (impactNormal == Vector3(0.f, 0.f, 1.f))
-		topTint = Rgba::PINK;
-	else if (impactNormal == Vector3(0.f, 0.f, -1.f))
-		bottomTint = Rgba::PINK;
+	Rgba tint = Rgba::LIGHT_WHITE_TRANSPARENT;
 	
 	//west face
-	//front face	
-	builder.SetColor(westTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
+	//front face
+	if (impactNormal == g_west)
+	{
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
-	builder.SetColor(westTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	builder.SetColor(westTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-	builder.SetColor(westTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
-	builder.AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+		builder.AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+	}
+	
 	
 	//south face
 	//right face
-	builder.SetColor(southTint);
-	builder.SetUV(0.f, 0.f);;
-	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
+	else if (impactNormal == g_south)
+	{
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);;
+		builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	builder.SetColor(southTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
-	builder.SetColor(southTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-	builder.SetColor(southTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-	builder.AddQuadIndices(vertSize + 4, vertSize + 5, vertSize + 6, vertSize + 7);	
+		builder.AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+	}
+	
 
 	//east face
 	//back face	
-	builder.SetColor(eastTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
+	else if (impactNormal == g_east)
+	{
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
-	builder.SetColor(eastTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
-	builder.SetColor(eastTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-	builder.SetColor(eastTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-	builder.AddQuadIndices(vertSize + 8, vertSize + 9, vertSize + 10, vertSize + 11);
+		builder.AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+	}	
 	
 	//north face
 	//left face
-	builder.SetColor(northTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
+	else if (impactNormal == g_north)
+	{
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
-	builder.SetColor(northTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
-	builder.SetColor(northTint);	
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
+		builder.SetColor(tint);	
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
-	builder.SetColor(northTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-	builder.AddQuadIndices(vertSize + 12, vertSize + 13, vertSize + 14, vertSize + 15);
+		builder.AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+	}
+	
 
 	//up face
 	//top face
-	builder.SetColor(topTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
+	else if (impactNormal == g_worldUp)
+	{
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
-	builder.SetColor(topTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-	builder.SetColor(topTint);	
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
+		builder.SetColor(tint);	
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-	builder.SetColor(topTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-	builder.AddQuadIndices(vertSize + 16, vertSize + 17, vertSize + 18, vertSize + 19);
+		builder.AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+	}
+
 	
 	//down face
 	//bottom face
-	builder.SetColor(bottomTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
+	else if (impactNormal == -g_worldUp)
+	{
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z - zVal));
 
-	builder.SetColor(bottomTint);
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
+		builder.SetColor(tint);
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z - zVal));
 
-	builder.SetColor(bottomTint);	
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
+		builder.SetColor(tint);	
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z - zVal));
 
-	builder.SetColor(bottomTint);	
-	builder.SetUV(0.f, 0.f);
-	builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
+		builder.SetColor(tint);	
+		builder.SetUV(0.f, 0.f);
+		builder.PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z - zVal));
 
-	builder.AddQuadIndices(vertSize + 20, vertSize + 21, vertSize + 22, vertSize + 23);
+		builder.AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+	}
 
 	return builder.CreateMesh<VertexPCU>();
 }
@@ -578,7 +581,7 @@ Mesh* CreateGameBasis(const Vector3& center, float width, float scale)
 
 
 //  =========================================================================================
-Mesh* CreateBoxOutline(const Vector3& center, Rgba tint, float scale)
+Mesh* CreateBlockOutline(const Vector3& center, Rgba tint, float scale)
 {
 	MeshBuilder builder;
 	builder.Begin(LINES_DRAW_PRIMITIVE, false);

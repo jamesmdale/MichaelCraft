@@ -86,11 +86,9 @@ void World::Render()
 	//hammer over camera view matrix
 	m_gameCamera->CreateFliippedViewMatrix(m_engineCamera->m_viewMatrix);
 
-	//render all chunks
+	//render
 	RenderChunks();
-
 	RenderDebug();
-
 
 }
 
@@ -265,89 +263,122 @@ void World::RenderDebug()
 	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
 	theRenderer->DrawMesh(raycastMesh);
 
+	delete(raycastMesh);
+	raycastMesh = nullptr;
+
 	raycastMesh = CreateLine(m_raycastResult.m_impactWorldPosition, m_raycastResult.m_endPosition, Rgba::PINK);
 	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
 	theRenderer->DrawMesh(raycastMesh);
+
+	delete(raycastMesh);
+	raycastMesh = nullptr;
 
 	raycastMesh = CreateDebugStar(m_raycastResult.m_impactWorldPosition, Rgba::BLUE, 0.05f);
 	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
 	theRenderer->DrawMesh(raycastMesh);
 
+	delete(raycastMesh);
+	raycastMesh = nullptr;
+
 	raycastMesh = CreateDebugStar(m_raycastResult.m_endPosition, Rgba::PINK, 0.05f);
 	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
 	theRenderer->DrawMesh(raycastMesh);
 
-	// DEBUG =========================================================================================
+	delete(raycastMesh);
+	raycastMesh = nullptr;
 
-	IntVector2 chunkCoordsOfWorldPosition = IntVector2((int)floorf(m_raycastResult.m_ray.m_startPosition.x * BLOCKS_WIDE_X_DIVISOR), (int)floorf(m_raycastResult.m_ray.m_startPosition.y * BLOCKS_WIDE_Y_DIVISOR));
+	// NEIGHBORING BLOCK LOCATOR DEBUG =========================================================================================
 
-	std::map<IntVector2, Chunk*>::iterator activeChunkIterator = m_activeChunks.find(chunkCoordsOfWorldPosition);
-	Chunk* currentRayChunk = activeChunkIterator->second;
+	//IntVector2 chunkCoordsOfWorldPosition = IntVector2((int)floorf(m_raycastResult.m_ray.m_startPosition.x * BLOCKS_WIDE_X_DIVISOR), (int)floorf(m_raycastResult.m_ray.m_startPosition.y * BLOCKS_WIDE_Y_DIVISOR));
 
-	uint outBlockIndex;
-	bool success = currentRayChunk->GetBlockIndexForWorldPositionWithinBounds(outBlockIndex, m_raycastResult.m_ray.m_startPosition);
-	
-	//render me
-	BlockLocator locator = BlockLocator(currentRayChunk, outBlockIndex);
-	Vector3 worldCenter = currentRayChunk->GetBlockWorldCenterForBlockIndex(outBlockIndex);
-	raycastMesh = CreateBoxOutline(worldCenter, Rgba::WHITE);
-	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-	theRenderer->DrawMesh(raycastMesh);
+	//std::map<IntVector2, Chunk*>::iterator activeChunkIterator = m_activeChunks.find(chunkCoordsOfWorldPosition);
+	//Chunk* currentRayChunk = activeChunkIterator->second;
 
-	//render above
-	BlockLocator aboveLocator = locator.GetBlockLocatorAbove();
-	if (aboveLocator.IsValid())
-	{	
-		worldCenter = aboveLocator.m_chunk->GetBlockWorldCenterForBlockIndex(aboveLocator.m_blockIndex);
-		raycastMesh = CreateBoxOutline(worldCenter, Rgba::BLUE);
-		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-		theRenderer->DrawMesh(raycastMesh);
-	}
+	//uint outBlockIndex;
+	//bool success = currentRayChunk->GetBlockIndexForWorldPositionWithinBounds(outBlockIndex, m_raycastResult.m_ray.m_startPosition);
+	//
+	////render me
+	//BlockLocator locator = BlockLocator(currentRayChunk, outBlockIndex);
+	//Vector3 worldCenter = currentRayChunk->GetBlockWorldCenterForBlockIndex(outBlockIndex);
+	//raycastMesh = CreateBlockOutline(worldCenter, Rgba::WHITE);
+	//theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//theRenderer->DrawMesh(raycastMesh);
 
-	BlockLocator belowLocator = locator.GetBlockLocatorBelow();
-	if (belowLocator.IsValid())
-	{
-		worldCenter = belowLocator.m_chunk->GetBlockWorldCenterForBlockIndex(belowLocator.m_blockIndex);
-		raycastMesh = CreateBoxOutline(worldCenter, Rgba::LIGHT_BLUE);
-		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-		theRenderer->DrawMesh(raycastMesh);
-	}
-	
-	BlockLocator eastLocator = locator.GetBlockLocatorToEast();
-	if (eastLocator.IsValid())
-	{
-		worldCenter = eastLocator.m_chunk->GetBlockWorldCenterForBlockIndex(eastLocator.m_blockIndex);
-		raycastMesh = CreateBoxOutline(worldCenter, Rgba::RED);
-		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-		theRenderer->DrawMesh(raycastMesh);
-	}
+	//delete(raycastMesh);
+	//raycastMesh = nullptr;
 
-	BlockLocator westLocator = locator.GetBlockLocatorToWest();
-	if (westLocator.IsValid())
-	{
-		worldCenter = westLocator.m_chunk->GetBlockWorldCenterForBlockIndex(westLocator.m_blockIndex);
-		raycastMesh = CreateBoxOutline(worldCenter, Rgba::LIGHT_RED);
-		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-		theRenderer->DrawMesh(raycastMesh);
-	}
+	////render above
+	//BlockLocator aboveLocator = locator.GetBlockLocatorAbove();
+	//if (aboveLocator.IsValid())
+	//{	
+	//	worldCenter = aboveLocator.m_chunk->GetBlockWorldCenterForBlockIndex(aboveLocator.m_blockIndex);
+	//	raycastMesh = CreateBlockOutline(worldCenter, Rgba::BLUE);
+	//	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//	theRenderer->DrawMesh(raycastMesh);
 
-	BlockLocator northLocator = locator.GetBlockLocatorToNorth();
-	if (northLocator.IsValid())
-	{
-		worldCenter = northLocator.m_chunk->GetBlockWorldCenterForBlockIndex(northLocator.m_blockIndex);
-		raycastMesh = CreateBoxOutline(worldCenter, Rgba::GREEN);
-		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-		theRenderer->DrawMesh(raycastMesh);
-	}
+	//	delete(raycastMesh);
+	//	raycastMesh = nullptr;
+	//}
 
-	BlockLocator southLocator = locator.GetBlockLocatorToSouth();
-	if (southLocator.IsValid())
-	{
-		worldCenter = southLocator.m_chunk->GetBlockWorldCenterForBlockIndex(southLocator.m_blockIndex);
-		raycastMesh = CreateBoxOutline(worldCenter, Rgba::LIGHT_GREEN);
-		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-		theRenderer->DrawMesh(raycastMesh);
-	}
+	//BlockLocator belowLocator = locator.GetBlockLocatorBelow();
+	//if (belowLocator.IsValid())
+	//{
+	//	worldCenter = belowLocator.m_chunk->GetBlockWorldCenterForBlockIndex(belowLocator.m_blockIndex);
+	//	raycastMesh = CreateBlockOutline(worldCenter, Rgba::LIGHT_BLUE);
+	//	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//	theRenderer->DrawMesh(raycastMesh);
+
+	//	delete(raycastMesh);
+	//	raycastMesh = nullptr;
+	//}
+	//
+	//BlockLocator eastLocator = locator.GetBlockLocatorToEast();
+	//if (eastLocator.IsValid())
+	//{
+	//	worldCenter = eastLocator.m_chunk->GetBlockWorldCenterForBlockIndex(eastLocator.m_blockIndex);
+	//	raycastMesh = CreateBlockOutline(worldCenter, Rgba::RED);
+	//	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//	theRenderer->DrawMesh(raycastMesh);
+
+	//	delete(raycastMesh);
+	//	raycastMesh = nullptr;
+	//}
+
+	//BlockLocator westLocator = locator.GetBlockLocatorToWest();
+	//if (westLocator.IsValid())
+	//{
+	//	worldCenter = westLocator.m_chunk->GetBlockWorldCenterForBlockIndex(westLocator.m_blockIndex);
+	//	raycastMesh = CreateBlockOutline(worldCenter, Rgba::LIGHT_RED);
+	//	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//	theRenderer->DrawMesh(raycastMesh);
+
+	//	delete(raycastMesh);
+	//	raycastMesh = nullptr;
+	//}
+
+	//BlockLocator northLocator = locator.GetBlockLocatorToNorth();
+	//if (northLocator.IsValid())
+	//{
+	//	worldCenter = northLocator.m_chunk->GetBlockWorldCenterForBlockIndex(northLocator.m_blockIndex);
+	//	raycastMesh = CreateBlockOutline(worldCenter, Rgba::GREEN);
+	//	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//	theRenderer->DrawMesh(raycastMesh);
+
+	//	delete(raycastMesh);
+	//	raycastMesh = nullptr;
+	//}
+
+	//BlockLocator southLocator = locator.GetBlockLocatorToSouth();
+	//if (southLocator.IsValid())
+	//{
+	//	worldCenter = southLocator.m_chunk->GetBlockWorldCenterForBlockIndex(southLocator.m_blockIndex);
+	//	raycastMesh = CreateBlockOutline(worldCenter, Rgba::LIGHT_GREEN);
+	//	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+	//	theRenderer->DrawMesh(raycastMesh);
+
+	//	delete(raycastMesh);
+	//	raycastMesh = nullptr;
+	//}
 
 	//  =========================================================================================
 
@@ -355,16 +386,22 @@ void World::RenderDebug()
 	if (m_raycastResult.m_didImpact && m_raycastResult.m_impactBlockLocator.IsValid())
 	{
 		Vector3 blockCenter = m_raycastResult.m_impactBlockLocator.m_chunk->GetBlockWorldCenterForBlockIndex(m_raycastResult.m_impactBlockLocator.m_blockIndex);
-		raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, m_raycastResult.m_impactNormal);
+		raycastBlockHighlightMesh = CreateBlockOutline(blockCenter, Rgba::WHITE, 1.01f);
 		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
 		theRenderer->DrawMesh(raycastBlockHighlightMesh);
-	}
 
-	//draw block highlight mesh at world zero
-	Vector3 blockCenter = Vector3(0.f, 0.f, 0.f);
-	raycastBlockHighlightMesh = CreateBlockHighlightBoxOutline(blockCenter, Vector3(0.f, 0.f, 1.f));
-	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
-	theRenderer->DrawMesh(raycastBlockHighlightMesh);
+		delete(raycastBlockHighlightMesh);
+		raycastBlockHighlightMesh = nullptr;
+
+		raycastBlockHighlightMesh = CreateBlockHighlightBox(blockCenter, m_raycastResult.m_impactNormal, 1.01f);
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+		theRenderer->DrawMesh(raycastBlockHighlightMesh);
+		theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+
+		delete(raycastBlockHighlightMesh);
+		raycastBlockHighlightMesh = nullptr;
+	}	
 
 	//cleanup
 	TODO("later we need to just put these in the world or above it in the game so we aren't newing");
@@ -581,6 +618,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 {
 	// create ray that we are moving along line ----------------------------------------------
 	RaycastResult result;
+	
 	Ray raycast = Ray(start, forward, maxDistance);
 
 	// get chunk information we need for  ----------------------------------------------
@@ -607,8 +645,8 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 	BlockLocator blockLocator = BlockLocator(currentRayChunk, outBlockIndex);
 	
 	// ready to begin step and sample to find impact ----------------------------------------------
-	Vector3 endPosition = raycast.m_startPosition + (forward * maxDistance);
 	bool isRaycastComplete = false;
+	Vector3 endPosition = raycast.m_startPosition + (forward * maxDistance);	
 	Vector3 currentPosition = raycast.m_startPosition;
 	IntVector3 currentCoordinates = currentPosition.FloorAndCastToInt();
 	float totalStepDistance = 0.f;
@@ -627,7 +665,6 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 		bool didStepDuringIteration = false;
 
 		totalStepDistance += RAYCAST_STEP_AMOUNT;
-		ClampFloat(totalStepDistance, 0.f, raycast.m_maxDistance);
 
 		currentPosition += raycast.m_direction * RAYCAST_STEP_AMOUNT;
 		IntVector3 newCoordinates = currentPosition.FloorAndCastToInt();
@@ -694,7 +731,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 		}
 
 		//if we've walked the length of the cast, we didn't hit anything
-		if (totalStepDistance > raycast.m_maxDistance)
+		if (totalStepDistance >= raycast.m_maxDistance)
 		{
 			isRaycastComplete = true;
 		}
@@ -702,8 +739,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 		didStepDuringIteration = false;
 	}
 
-	result = RaycastResult(raycast, blockLocator, didImpact, currentPosition, endPosition, totalStepDistance, -1 * Vector3(movementDirection));	
-	return result;
+	return RaycastResult(raycast, blockLocator, didImpact, currentPosition, endPosition, totalStepDistance, -1 * Vector3(movementDirection));
 }
 
 //  =========================================================================================
