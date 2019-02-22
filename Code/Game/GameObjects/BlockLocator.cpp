@@ -34,6 +34,40 @@ bool BlockLocator::IsValid()
 }
 
 //  =========================================================================================
+bool BlockLocator::IsBlockIndexOnEdge(std::vector<Chunk*>& outConnectingChunks)
+{
+	bool isBlockOnEdge = false;
+
+	BlockLocator northLocator = GetBlockLocatorToNorth();
+	BlockLocator southLocator = GetBlockLocatorToSouth();
+	BlockLocator eastLocator = GetBlockLocatorToEast();
+	BlockLocator westLocator = GetBlockLocatorToWest();
+
+	if (northLocator.m_chunk != m_chunk)
+	{
+		outConnectingChunks.push_back(northLocator.m_chunk);
+		isBlockOnEdge = true;
+	}
+	if (southLocator.m_chunk != m_chunk)
+	{
+		outConnectingChunks.push_back(southLocator.m_chunk);
+		isBlockOnEdge = true;
+	}
+	if (eastLocator.m_chunk != m_chunk)
+	{
+		outConnectingChunks.push_back(eastLocator.m_chunk);
+		isBlockOnEdge = true;
+	}
+	if (westLocator.m_chunk != m_chunk)
+	{
+		outConnectingChunks.push_back(westLocator.m_chunk);
+		isBlockOnEdge = true;
+	}
+
+	return isBlockOnEdge;
+}
+
+//  =========================================================================================
 Block* BlockLocator::GetBlock()
 {
 	if(m_chunk == nullptr)

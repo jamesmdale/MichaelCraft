@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 class Chunk;
 class Block;
@@ -26,6 +27,8 @@ public:
 	BlockLocator GetBlockLocatorAbove();
 	BlockLocator GetBlockLocatorBelow();
 	bool IsValid();
+
+	bool IsBlockIndexOnEdge(std::vector<Chunk*>& outConnectingChunks);
 
 public:
 	Chunk* m_chunk = nullptr;

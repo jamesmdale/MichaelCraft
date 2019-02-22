@@ -55,7 +55,7 @@ void World::Initialize()
 
 	GenerateChunkBuildOrderCheatSheet();
 
-	theRenderer->SetLineWidth(5.f);
+	theRenderer->SetLineWidth(3.f);
 }
 
 //  =========================================================================================
@@ -287,7 +287,7 @@ void World::RenderDebug()
 	delete(raycastMesh);
 	raycastMesh = nullptr;
 
-	// NEIGHBORING BLOCK LOCATOR DEBUG =========================================================================================
+	/* NEIGHBORING BLOCK LOCATOR DEBUG =========================================================================================
 
 	//IntVector2 chunkCoordsOfWorldPosition = IntVector2((int)floorf(m_raycastResult.m_ray.m_startPosition.x * BLOCKS_WIDE_X_DIVISOR), (int)floorf(m_raycastResult.m_ray.m_startPosition.y * BLOCKS_WIDE_Y_DIVISOR));
 
@@ -381,6 +381,7 @@ void World::RenderDebug()
 	//}
 
 	//  =========================================================================================
+	*/
 
 	//draw raycast block highlighting
 	if (m_raycastResult.m_didImpact && m_raycastResult.m_impactBlockLocator.IsValid())
@@ -745,13 +746,79 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 //  =========================================================================================
 void World::DigBlock()
 {
+	//early out if we don't have a block to remmove
+	if (!m_raycastResult.m_didImpact)
+		return;
 
+	BlockLocator impactLocator = m_raycastResult.m_impactBlockLocator;
+	if (impactLocator.IsValid())
+	{
+		Block* impactBlock = impactLocator.GetBlock();
+		impactBlock->m_type = 0;
+		impactLocator.m_chunk->m_isMeshDirty = true;
+		
+		//check to see if we need to set the neighboring chunks to dirty
+		std::vector<Chunk*> outNeighboringChunks;
+		if (impactLocator.IsBlockIndexOnEdge(outNeighboringChunks))
+		{
+			for (int chunkIndex = 0; chunkIndex < (int)outNeighboringChunks.size(); ++chunkIndex)
+			{
+				outNeighboringChunks[chunkIndex]->m_isMeshDirty = true;
+			}
+		}
+	}
 }
 
 //  =========================================================================================
 void World::PlaceBlock()
 {
+	//early out if we don't have a place to put the block
+	if (!m_raycastResult.m_didImpact)
+		return;
 
+	BlockLocator targetedBlockLocator;
+
+	if (m_raycastResult.m_impactNormal == g_north)
+	{
+		targetedBlockLocator = m_raycastResult.m_impactBlockLocator.GetBlockLocatorToNorth();
+	}
+	else if (m_raycastResult.m_impactNormal == g_south)
+	{
+		targetedBlockLocator = m_raycastResult.m_impactBlockLocator.GetBlockLocatorToSouth();
+	}
+	else if (m_raycastResult.m_impactNormal == g_east)
+	{
+		targetedBlockLocator = m_raycastResult.m_impactBlockLocator.GetBlockLocatorToEast();
+	}
+	else if (m_raycastResult.m_impactNormal == g_west)
+	{
+		targetedBlockLocator = m_raycastResult.m_impactBlockLocator.GetBlockLocatorToWest();
+	}
+	else if (m_raycastResult.m_impactNormal == g_worldUp)
+	{
+		targetedBlockLocator = m_raycastResult.m_impactBlockLocator.GetBlockLocatorAbove();
+	}
+	else if (m_raycastResult.m_impactNormal == -g_worldUp)
+	{
+		targetedBlockLocator = m_raycastResult.m_impactBlockLocator.GetBlockLocatorBelow();
+	}
+
+	if (targetedBlockLocator.IsValid())
+	{
+		Block* targetedBlock = targetedBlockLocator.GetBlock();
+		targetedBlock->m_type = 2;
+		targetedBlockLocator.m_chunk->m_isMeshDirty = true;
+
+		//check to see if we need to set the neighboring chunks to dirty
+		std::vector<Chunk*> outNeighboringChunks;
+		if (targetedBlockLocator.IsBlockIndexOnEdge(outNeighboringChunks))
+		{
+			for (int chunkIndex = 0; chunkIndex < (int)outNeighboringChunks.size(); ++chunkIndex)
+			{
+				outNeighboringChunks[chunkIndex]->m_isMeshDirty = true;
+			}
+		}
+	}
 }
 
 //  =========================================================================================

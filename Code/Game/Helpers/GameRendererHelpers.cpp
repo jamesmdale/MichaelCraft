@@ -103,7 +103,7 @@ Mesh* CreateBlockHighlightBox(const Vector3& center, const Vector3& impactNormal
 	float yVal = 0.5f * scale;
 	float zVal = 0.5f * scale;
 
-	Rgba tint = Rgba::LIGHT_WHITE_TRANSPARENT;
+	Rgba tint = Rgba(255, 255, 255, 50);
 	
 	//west face
 	//front face
