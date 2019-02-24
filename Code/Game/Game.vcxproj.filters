@@ -64,6 +64,9 @@
     <ClCompile Include="Helpers\GameRendererHelpers.cpp">
       <Filter>General</Filter>
     </ClCompile>
+    <ClCompile Include="Helpers\ChunkFileLoader.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.hpp">
@@ -94,5 +97,6 @@
     <ClInclude Include="Helpers\RaycastResult.hpp" />
     <ClInclude Include="Helpers\Ray.hpp" />
     <ClInclude Include="Helpers\GameRendererHelpers.hpp" />
+    <ClInclude Include="Helpers\ChunkFileLoader.hpp" />
   </ItemGroup>
 </Project>

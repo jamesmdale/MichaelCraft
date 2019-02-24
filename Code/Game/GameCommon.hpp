@@ -23,9 +23,9 @@ constexpr uint16 CHUNK_X_MASK = BLOCKS_WIDE_X - 1;
 constexpr uint16 CHUNK_Y_MASK = (BLOCKS_WIDE_Y - 1) << BITS_WIDE_X;
 constexpr uint16 CHUNK_Z_MASK = (BLOCKS_HIGH_Z - 1) << (BITS_WIDE_X + BITS_WIDE_Y);
 
-constexpr int CHUNK_DISTANCE_RENDER = 1;
-constexpr int CHUNK_DISTANCE_ACTIVATION = 2;
-constexpr int CHUNK_DISTANCE_DEACTIVATION = 7;
+constexpr int CHUNK_DISTANCE_RENDER = 2;
+constexpr int CHUNK_DISTANCE_ACTIVATION = 3;
+constexpr int CHUNK_DISTANCE_DEACTIVATION = 5;
 
 constexpr float BLOCKS_WIDE_X_DIVISOR =  1.f / (float)BLOCKS_WIDE_X;
 constexpr float BLOCKS_WIDE_Y_DIVISOR =  1.f / (float)BLOCKS_WIDE_Y;
@@ -35,14 +35,15 @@ constexpr float CHUNK_RENDER_RADIUS = (float)BLOCKS_WIDE_X * (float)CHUNK_DISTAN
 constexpr float CHUNK_ACTIVATION_RADIUS = (float)BLOCKS_WIDE_X * (float)CHUNK_DISTANCE_ACTIVATION;
 constexpr float CHUNK_DEACTIVATION_RADIUS = (float)BLOCKS_WIDE_X * (float)CHUNK_DISTANCE_DEACTIVATION;
 
+constexpr uint8 CHUNK_SAVE_VERSION = 1;
+
 //block data
 constexpr uint8 IS_BLOCK_SOLID_MASK = 0b0000'0001;
-
 
 //gameplay globals
 constexpr float PLAYER_MOVEMENT_SPEED = 10.f;
 constexpr float RAYCAST_MAX_DISTANCE = 8.f;
-constexpr float RAYCAST_STEP_AMOUNT = 0.05f;
+constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
 
 //convenience directions
 extern Vector3 g_worldUp;
@@ -60,6 +61,5 @@ extern IntVector2 g_chunkEast;
 extern IntVector2 g_chunkWest;
 
 extern Matrix44 g_flipMatrix;
-
 
 

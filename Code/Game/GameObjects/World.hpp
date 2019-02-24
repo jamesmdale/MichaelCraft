@@ -34,6 +34,7 @@ public:
 	void DeactivateChunk(const IntVector2& keyVal);
 
 	void GenerateChunkBuildOrderCheatSheet();
+	void LoadSavedChunkReferences();
 
 	//Raycasting
 	RaycastResult Raycast(const Vector3& start, const Vector3& forward, float maxDistance);
@@ -49,7 +50,7 @@ public:
 
 public:
 	std::map<IntVector2, Chunk*> m_activeChunks;
-
+	std::vector<IntVector2> m_chunksOnDisk;
 	std::vector<IntVector2> m_neighborHoodBuildOrder;
 
 	Camera* m_uiCamera = nullptr;

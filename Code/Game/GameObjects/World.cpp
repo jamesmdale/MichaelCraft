@@ -5,6 +5,7 @@
 #include "Game\GameCommon.hpp"
 #include "Game\Helpers\Ray.hpp"
 #include "Game\Helpers\GameRendererHelpers.hpp"
+#include "Game\Helpers\ChunkFileLoader.hpp"
 #include "Engine\Window\Window.hpp"
 #include "Engine\Debug\DebugRender.hpp"
 #include "Engine\Core\LightObject.hpp"
@@ -54,6 +55,7 @@ void World::Initialize()
 	theRenderer->SetAmbientLightIntensity(0.15f);
 
 	GenerateChunkBuildOrderCheatSheet();
+	LoadSavedChunkReferences();
 
 	theRenderer->SetLineWidth(3.f);
 }
@@ -70,7 +72,6 @@ void World::Update(float deltaSeconds)
 
 	//player raycast
 	m_raycastResult = Raycast(m_playerViewPosition, m_playerViewForwardNormalized, RAYCAST_MAX_DISTANCE);
-	
 }
 
 //  =========================================================================================
@@ -548,6 +549,18 @@ void World::ActivateChunk(const IntVector2& chunkCoordinates)
 	Chunk* chunk = new Chunk(chunkCoordinates);
 	m_activeChunks.insert(std::pair<IntVector2, Chunk*>(chunk->m_chunkCoords, chunk));
 
+	bool success = ReadChunkDataFromFile(chunk);
+
+	if (!success)
+	{
+		//randomization
+		chunk->GenerateBlockDataWithPerlin();
+	}
+	else
+	{
+		int i = 0;
+	}
+
 	// hook neighbors if they exist ----------------------------------------------
 	std::map<IntVector2, Chunk*>::iterator activeChunkIterator;
 
@@ -589,6 +602,13 @@ void World::DeactivateChunk(const IntVector2& keyVal)
 
 	Chunk* chunk = m_activeChunks.at(keyVal);
 
+	if (chunk->m_doesRequireSave)
+	{
+		bool success = WriteChunkDataToFile(chunk);
+
+		ASSERT_OR_DIE(success, "CHUNK SAVE INVALID");
+	}
+
 	chunk->UnhookNeighbors();
 
 	delete(chunk);
@@ -612,6 +632,12 @@ void World::GenerateChunkBuildOrderCheatSheet()
 
 	//now that we have all the indices we want relative to their distance from zero, let's sort them so we have our list
 	std::sort(m_neighborHoodBuildOrder.begin(), m_neighborHoodBuildOrder.end(), CompareDistanceFromZeroLessThan);
+}
+
+//  =========================================================================================
+void World::LoadSavedChunkReferences()
+{
+	TODO("Load chunks from start so we have a list");
 }
 
 //  =========================================================================================
@@ -669,6 +695,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 
 		currentPosition += raycast.m_direction * RAYCAST_STEP_AMOUNT;
 		IntVector3 newCoordinates = currentPosition.FloorAndCastToInt();
+		IntVector3 coordinateDifference = currentCoordinates - newCoordinates;
 
 		if (newCoordinates.x > currentCoordinates.x)
 		{
@@ -676,52 +703,124 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 			movementDirection = IntVector3(1, 0, 0); 
 			didStepDuringIteration = true;
 			currentCoordinates = newCoordinates;
-		}
-		else if (newCoordinates.x < currentCoordinates.x)
-		{
-			blockLocator.StepWest();
-			movementDirection = IntVector3(-1, 0, 0);
-			didStepDuringIteration = true;
-			currentCoordinates = newCoordinates;
-		}
-		else if (newCoordinates.y > currentCoordinates.y)
-		{
-			blockLocator.StepNorth();
-			movementDirection = IntVector3(0, 1, 0);
-			didStepDuringIteration = true;
-			currentCoordinates = newCoordinates;
-		}
-		else if (newCoordinates.y < currentCoordinates.y)
-		{
-			blockLocator.StepSouth();
-			movementDirection = IntVector3(0, -1, 0);
-			didStepDuringIteration = true;
-			currentCoordinates = newCoordinates;
-		}
-		else if (newCoordinates.z > currentCoordinates.z)
-		{
-			blockLocator.StepUp();
-			movementDirection = IntVector3(0, 0, 1);
-			didStepDuringIteration = true;
-			currentCoordinates = newCoordinates;
-		}
-		else if (newCoordinates.z < currentCoordinates.z)
-		{
-			blockLocator.StepDown();
-			movementDirection = IntVector3(0, 0, -1);
-			didStepDuringIteration = true;
-			currentCoordinates = newCoordinates;
-		}
 
-		//check to see if your current block is solid.
-		if (didStepDuringIteration)
-		{
 			if (blockLocator.IsValid())
 			{
 				if(blockLocator.GetBlock()->m_type != 0)
 				{
 					isRaycastComplete = true;
 					didImpact = true;
+					break;
+				}
+			}
+			else
+			{
+				isRaycastComplete = true;
+				didImpact = false;
+			}
+		}
+		if (newCoordinates.x < currentCoordinates.x)
+		{
+			blockLocator.StepWest();
+			movementDirection = IntVector3(-1, 0, 0);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+
+			if (blockLocator.IsValid())
+			{
+				if(blockLocator.GetBlock()->m_type != 0)
+				{
+					isRaycastComplete = true;
+					didImpact = true;
+					break;
+				}
+			}
+			else
+			{
+				isRaycastComplete = true;
+				didImpact = false;
+			}
+		}
+		if (newCoordinates.y > currentCoordinates.y)
+		{
+			blockLocator.StepNorth();
+			movementDirection = IntVector3(0, 1, 0);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+
+			if (blockLocator.IsValid())
+			{
+				if(blockLocator.GetBlock()->m_type != 0)
+				{
+					isRaycastComplete = true;
+					didImpact = true;
+					break;
+				}
+			}
+			else
+			{
+				isRaycastComplete = true;
+				didImpact = false;
+			}
+		}
+		if (newCoordinates.y < currentCoordinates.y)
+		{
+			blockLocator.StepSouth();
+			movementDirection = IntVector3(0, -1, 0);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+
+			if (blockLocator.IsValid())
+			{
+				if(blockLocator.GetBlock()->m_type != 0)
+				{
+					isRaycastComplete = true;
+					didImpact = true;
+					break;
+				}
+			}
+			else
+			{
+				isRaycastComplete = true;
+				didImpact = false;
+			}
+		}
+		if (newCoordinates.z > currentCoordinates.z)
+		{
+			blockLocator.StepUp();
+			movementDirection = IntVector3(0, 0, 1);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+
+			if (blockLocator.IsValid())
+			{
+				if(blockLocator.GetBlock()->m_type != 0)
+				{
+					isRaycastComplete = true;
+					didImpact = true;
+					break;
+				}
+			}
+			else
+			{
+				isRaycastComplete = true;
+				didImpact = false;
+			}
+		}
+		if (newCoordinates.z < currentCoordinates.z)
+		{
+			blockLocator.StepDown();
+			movementDirection = IntVector3(0, 0, -1);
+			didStepDuringIteration = true;
+			currentCoordinates = newCoordinates;
+
+			if (blockLocator.IsValid())
+			{
+				if(blockLocator.GetBlock()->m_type != 0)
+				{
+					isRaycastComplete = true;
+					didImpact = true;
+					break;
 				}
 			}
 			else
@@ -756,6 +855,7 @@ void World::DigBlock()
 		Block* impactBlock = impactLocator.GetBlock();
 		impactBlock->m_type = 0;
 		impactLocator.m_chunk->m_isMeshDirty = true;
+		impactLocator.m_chunk->m_doesRequireSave = true;
 		
 		//check to see if we need to set the neighboring chunks to dirty
 		std::vector<Chunk*> outNeighboringChunks;
@@ -808,6 +908,7 @@ void World::PlaceBlock()
 		Block* targetedBlock = targetedBlockLocator.GetBlock();
 		targetedBlock->m_type = 2;
 		targetedBlockLocator.m_chunk->m_isMeshDirty = true;
+		targetedBlockLocator.m_chunk->m_doesRequireSave = true;
 
 		//check to see if we need to set the neighboring chunks to dirty
 		std::vector<Chunk*> outNeighboringChunks;

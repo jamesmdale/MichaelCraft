@@ -1,8 +1,10 @@
 #pragma once
 #include "Engine\Math\AABB3.hpp"
 #include "Engine\Math\IntVector3.hpp"
+#include "Engine\Core\BytePacker.hpp"
 #include "Game\GameObjects\Block.hpp"
 #include "Game\GameCommon.hpp"
+#include "Game\Helpers\ChunkFileLoader.hpp"
 
 class Meshbuilder;
 class Mesh;
@@ -15,6 +17,7 @@ enum eNeighborType
 	EAST_NEIGHBOR_TYPE,
 	NUM_NEIGHBOR_TYPES
 };
+
 
 class Chunk
 {
@@ -56,4 +59,6 @@ public:
 	
 	bool m_isMeshDirty = false;
 	bool m_doesRequireSave = false;
+
+	static ChunkFileHeader s_chunkFileHeader;
 };

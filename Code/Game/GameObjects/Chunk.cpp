@@ -27,9 +27,6 @@ Chunk::Chunk(const IntVector2& coordinates)
 	m_worldBounds = AABB3(minsWorldCoordinates, maxsWorldCoordinates);
 
 	m_meshBuilder = new MeshBuilder();
-
-	//randomization
-	GenerateBlockDataWithPerlin();
 }
 
 //  =========================================================================================
