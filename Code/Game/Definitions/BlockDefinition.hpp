@@ -15,7 +15,11 @@ public:
 	static BlockDefinition* GetDefinitionById(const uchar8 id);
 
 private:
+
+	static void SetGlobalBlockIdNameVariables();
+
 	void ConstructBitsFromBools();
+
 
 public:
 	std::string m_name = "";
@@ -40,4 +44,11 @@ public:
 	bool m_doesTarget = false;
 
 	static std::map<uchar8, BlockDefinition*> s_blockDefinitions;
+
+	//block data - 255 potential
+	static uint8 AIR_BLOCK_ID;
+	static uint8 GRASS_BLOCK_ID;
+	static uint8 STONE_BLOCK_ID;
+	static uint8 DIRT_BLOCK_ID;
 };
+

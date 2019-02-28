@@ -6,14 +6,17 @@
 	</BlockDefinition>
 
 	<BlockDefinition id="1" name="grass">
+		<BitSettings isFullOpaque="true" isVisible="true" isSolid="true" />
 		<TextureCoords front="3,3" right="3,3" back="3,3" left="3,3" top="21,0," bottom="4,3" />
 	</BlockDefinition>
 
 	<BlockDefinition id="2" name="dirt">
+		<BitSettings isFullOpaque="true" isVisible="true" isSolid="true" />
 		<TextureCoords front="4,3" right="4,3" back="4,3" left="4,3" top="4,3" bottom="4,3" />
 	</BlockDefinition>
 
 	<BlockDefinition id="3" name="stone">
+		<BitSettings isFullOpaque="true" isVisible="true" isSolid="true"/>
 		<TextureCoords front="7,4" right="7,4" back="7,4" left="7,4" top="7,4" bottom="7,4" />
 	</BlockDefinition>
 

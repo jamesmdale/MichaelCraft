@@ -91,21 +91,27 @@ void Chunk::GenerateBlockDataWithPerlin()
 			//make the block grass if it is on top
 			else if (blockIndexInColumn == heightAsInt)
 			{
-				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = 1;
+				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(BlockDefinition::GRASS_BLOCK_ID);
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = blockDefinitionForType->m_type;
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_bits = blockDefinitionForType->m_defaultBits;
 				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
 			}
 
 			//else make the block dirt
 			else if (blockIndexInColumn < heightAsInt && blockIndexInColumn >= heightAsInt - 3)
 			{
-				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = 2;
+				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(BlockDefinition::DIRT_BLOCK_ID);
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = blockDefinitionForType->m_type;
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_bits = blockDefinitionForType->m_defaultBits;
 				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
 			}
 
 			//make the block stone if it is lower than 7 below the half point line of the chunk
 			else
 			{
-				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = 3;
+				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(BlockDefinition::STONE_BLOCK_ID);
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = blockDefinitionForType->m_type;
+				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_bits = blockDefinitionForType->m_defaultBits;
 				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
 			}			
 
@@ -174,7 +180,7 @@ bool Chunk::GetBlockIndexForWorldPositionWithinBounds(uint& blockIndexOut, const
 //  =========================================================================================
 void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* block)
 {
-	if(block->m_type == 0)
+	if(!block->IsVisible())
 		return;
 
 	float xVal = 0.5f;
@@ -208,7 +214,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	BlockLocator bottomLocator = blockLocator.GetBlockLocatorBelow();
 
 	//west/front face
-	if (westLocator.GetBlock()->m_type == 0)
+	if (!westLocator.GetBlock()->IsVisible())
 	{
 		Rgba westTint = Rgba(0.7f, 0.7f, 0.7f, 1.f);
 
@@ -233,7 +239,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	}
 
 	//south/right face
-	if (southLocator.GetBlock()->m_type == 0)
+	if (!southLocator.GetBlock()->IsVisible())
 	{
 		Rgba southTint = Rgba(0.6f, 0.6f, 0.6f, 1.f);
 
@@ -259,7 +265,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 
 	//east face
 	//back face
-	if (eastLocator.GetBlock()->m_type == 0)
+	if (!eastLocator.GetBlock()->IsVisible())
 	{
 		Rgba eastTint = Rgba(0.5f, 0.5f, 0.5f, 1.f);
 
@@ -285,7 +291,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 
 	//north face
 	//left face
-	if (northLocator.GetBlock()->m_type == 0)
+	if (!northLocator.GetBlock()->IsVisible())
 	{
 		Rgba northTint = Rgba(0.4f, 0.4f, 0.4f, 1.f);
 
@@ -311,35 +317,38 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 
 	//up face
 	//top face
-	if (!aboveLocator.IsValid() || aboveLocator.GetBlock()->m_type == 0)
+	if (aboveLocator.IsValid())
 	{
-		Rgba upTint = Rgba(0.8f, 0.8f, 0.8f, 1.f);
+		if (!aboveLocator.GetBlock()->IsVisible())
+		{
+			Rgba upTint = Rgba(0.8f, 0.8f, 0.8f, 1.f);
 
-		m_meshBuilder->SetColor(upTint);
-		m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
-		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
+			m_meshBuilder->SetColor(upTint);
+			m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
+			m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y + yVal, center.z + zVal));
 
-		m_meshBuilder->SetColor(upTint);
-		m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
-		m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
+			m_meshBuilder->SetColor(upTint);
+			m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.maxs.y);
+			m_meshBuilder->PushVertex(Vector3(center.x - xVal, center.y - yVal, center.z + zVal));
 
-		m_meshBuilder->SetColor(upTint);	
-		m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
-		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
+			m_meshBuilder->SetColor(upTint);	
+			m_meshBuilder->SetUV(topTexCoords.mins.x, topTexCoords.mins.y);
+			m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y - yVal, center.z + zVal));
 
-		m_meshBuilder->SetColor(upTint);
-		m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
-		m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
+			m_meshBuilder->SetColor(upTint);
+			m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.mins.y);
+			m_meshBuilder->PushVertex(Vector3(center.x + xVal, center.y + yVal, center.z + zVal));
 
-		m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
-		vertSize += 4;
+			m_meshBuilder->AddQuadIndices(vertSize, vertSize + 1, vertSize + 2, vertSize + 3);
+			vertSize += 4;
+		}
 	}
 
 	//down face
 	//bottom face
 	if (bottomLocator.IsValid())
 	{
-		if (bottomLocator.GetBlock()->m_type == 0)
+		if (!bottomLocator.GetBlock()->IsVisible())
 		{
 			Rgba bottomTint = Rgba(0.3f, 0.3f, 0.3f, 1.f);
 

@@ -1,7 +1,9 @@
 #include "Game\Helpers\ChunkFileLoader.hpp"
 #include "Engine\File\File.hpp"
 #include "Engine\Core\StringUtils.hpp"
+#include "Engine\Core\EngineCommon.hpp"
 #include "Game\GameObjects\Chunk.hpp"
+#include "Game\Definitions\BlockDefinition.hpp"
 
 //  =========================================================================================
 bool ReadChunkDataFromFile(Chunk* outChunk)
@@ -58,9 +60,14 @@ bool ReadChunkDataFromFile(Chunk* outChunk)
 		//used for checking the number of actual blocks that get set
 		blockCount += runLength;
 
+		BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(type);
+
+		ASSERT_OR_DIE(blockDefinitionForType != nullptr, "INVALID BLOCK TYPE LOADED FROM DATA!!!");
+
 		for (uint runIndex = 0; runIndex < runLength; ++runIndex)
-		{
-			outChunk->m_blocks[blockIndex].m_type = type;
+		{		
+			outChunk->m_blocks[blockIndex].m_type = blockDefinitionForType->m_type;
+			outChunk->m_blocks[blockIndex].m_bits = blockDefinitionForType->m_defaultBits;
 			++blockIndex;
 		}
 
