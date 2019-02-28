@@ -17,18 +17,22 @@ public:
 	inline bool IsVisible();
 	inline bool IsSolid();
 	inline bool IsSky();
-	inline bool IsLightingDirty();
+	inline bool IsLightingInDirtyList();
+
+	//helpers for lighting
+	inline void SetIndoorLightingValue(const uchar8 lightingValue);
+	inline void SetOutdoorLightingValue(const uchar8 lightingValue);
+	inline uchar8 GetIndoorLightingValue();
+	inline uchar8 GetOutDoorLightingValue();
 
 	//setters for bit fields
 	inline void SetSkyFlag(bool isSky);
-	inline void SetLightingFlag(bool isLightingDirty); 
-
-
+	inline void SetLightingInDirtyListFlag(bool isLightingInDirtyList); 
 
 public:
 	uchar8 m_type = 0; //max 255 types
 	uchar8 m_bits = 0; //state
-	//uchar8 m_lighting; //lighting state
+	uchar8 m_lighting = 0; //lighting value
 };
 
 
@@ -71,9 +75,9 @@ bool Block::IsSky()
 }
 
 //  =========================================================================================
-bool Block::IsLightingDirty()
+bool Block::IsLightingInDirtyList()
 {
-	return (m_bits & IS_BLOCK_LIGHT_DIRTY_MASK) == IS_BLOCK_LIGHT_DIRTY_MASK;
+	return (m_bits & IS_BLOCK_IN_LIGHT_DIRTY_LIST_MASK) == IS_BLOCK_IN_LIGHT_DIRTY_LIST_MASK;
 }
 
 //  =========================================================================================
@@ -90,14 +94,47 @@ void Block::SetSkyFlag(bool isSky)
 }
 
 //  =========================================================================================
-void Block::SetLightingFlag(bool isLightingDirty)
+void Block::SetLightingInDirtyListFlag(bool isLightingDirty)
 {
 	if (isLightingDirty == true)
 	{
-		m_bits |= IS_BLOCK_LIGHT_DIRTY_MASK;
+		m_bits |= IS_BLOCK_IN_LIGHT_DIRTY_LIST_MASK;
 	}
 	else
 	{
-		m_bits &= (~IS_BLOCK_LIGHT_DIRTY_MASK);
+		m_bits &= (~IS_BLOCK_IN_LIGHT_DIRTY_LIST_MASK);
 	}
+}
+
+//  =========================================================================================
+void Block::SetIndoorLightingValue(const uchar8 lightingValue)
+{
+	//make sure the lighting value isn't greater than 15
+	uchar8 lightingValueClamped = lightingValue & (~OUTDOOR_LIGHTING_MASK);
+
+	m_lighting &= (~INDOOR_LIGHTING_MASK);
+	m_lighting |= lightingValueClamped;
+}
+
+//  =========================================================================================
+void Block::SetOutdoorLightingValue(const uchar8 lightingValue)
+{
+	uchar8 lightingValueShifted = lightingValue << BITS_WIDE_INDOOR_LIGHTING_MASK;
+
+	m_lighting &= (~OUTDOOR_LIGHTING_MASK);
+	m_lighting |= lightingValueShifted;
+}
+
+//  =========================================================================================
+uchar8 Block::GetIndoorLightingValue()
+{
+	uchar8 indoorLightingValue = m_lighting & (~OUTDOOR_LIGHTING_MASK);
+	return indoorLightingValue;
+}
+
+//  =========================================================================================
+uchar8 Block::GetOutDoorLightingValue()
+{
+	uchar8 outDoorLightingValue = m_lighting >> BITS_WIDE_INDOOR_LIGHTING_MASK;
+	return outDoorLightingValue;
 }

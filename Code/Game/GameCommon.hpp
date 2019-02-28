@@ -42,7 +42,12 @@ constexpr uint8 IS_BLOCK_SOLID_MASK = 0b0000'0001;
 constexpr uint8 IS_BLOCK_FULL_OPAQUE_MASK = 0b0000'0010;
 constexpr uint8 IS_BLOCK_VISIBLE_MASK = 0b0000'0100;
 constexpr uint8 IS_BLOCK_SKY_MASK = 0b0000'1000;
-constexpr uint8 IS_BLOCK_LIGHT_DIRTY_MASK = 0b0001'0000;
+constexpr uint8 IS_BLOCK_IN_LIGHT_DIRTY_LIST_MASK = 0b0001'0000;
+
+constexpr uint8 INDOOR_LIGHTING_MASK = 0b0000'1111;
+constexpr uint8 OUTDOOR_LIGHTING_MASK = 0b1111'0000;
+constexpr uint8 BITS_WIDE_INDOOR_LIGHTING_MASK = 4;
+constexpr uint8 BITS_WIDE_OUTDOOR_LIGHTING_MASK = 4;
 
 //gameplay globals
 constexpr float PLAYER_MOVEMENT_SPEED = 10.f;
