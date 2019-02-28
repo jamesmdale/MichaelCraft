@@ -1,6 +1,7 @@
 <BlockDefinitions>
 
 	<BlockDefinition id="0" name="air">
+		<BitSettings isFullOpaque="false" isVisible="false" isSolid="false" />
 		<TextureCoords front="1,2" right="1,2," back="1,2" left="1,2" top="1,2" bottom="1,2" />
 	</BlockDefinition>
 

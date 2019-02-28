@@ -10,6 +10,17 @@ BlockDefinition::BlockDefinition(const tinyxml2::XMLElement& element)
 	m_type = ParseXmlAttribute(element, "id", m_type);
 	m_name = ParseXmlAttribute(element, "name", m_name);
 
+	//get default bit settings
+	const tinyxml2::XMLElement* texcoordElement = element.FirstChildElement("BitSettings");
+	if (texcoordElement)
+	{
+		m_isFullOpaque = ParseXmlAttribute(*texcoordElement, "isFullOpaque", m_isFullOpaque);
+		m_isSolid = ParseXmlAttribute(*texcoordElement, "isSolid", m_isSolid);
+		m_isVisible = ParseXmlAttribute(*texcoordElement, "isVisible", m_isVisible);
+
+		//other bits are set dynamically
+	}
+
 	//get image value
 	const tinyxml2::XMLElement* texcoordElement = element.FirstChildElement("TextureCoords");
 	if (texcoordElement)
@@ -21,6 +32,8 @@ BlockDefinition::BlockDefinition(const tinyxml2::XMLElement& element)
 		m_topTexCoords = ParseXmlAttribute(*texcoordElement, "top", m_topTexCoords);	
 		m_bottomTexCoords = ParseXmlAttribute(*texcoordElement, "bottom", m_bottomTexCoords);		
 	}
+
+	ConstructBitsFromBools();
 }
 
 //  =========================================================================================
@@ -49,6 +62,19 @@ BlockDefinition* BlockDefinition::GetDefinitionById(const uchar8 id)
 	{
 		return mapIterator->second;
 	}
+}
+
+//  =========================================================================================
+void BlockDefinition::ConstructBitsFromBools()
+{
+	if (m_isFullOpaque)
+		m_defaultBits |= IS_BLOCK_FULL_OPAQUE_MASK;
+
+	if(m_isVisible)
+		m_defaultBits |= IS_BLOCK_SOLID_MASK;
+
+	if(m_isSolid)
+		m_defaultBits |= IS_BLOCK_VISIBLE_MASK;
 }
 
 

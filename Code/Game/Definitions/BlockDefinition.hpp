@@ -14,10 +14,20 @@ public:
 	static void Initialize(const std::string& filePath);
 	static BlockDefinition* GetDefinitionById(const uchar8 id);
 
+private:
+	void ConstructBitsFromBools();
+
 public:
 	std::string m_name = "";
 	uchar8 m_type = 0;
-	uint8_t m_state = UINT8_MAX;
+	uint8_t m_defaultBits = 0;
+
+	bool m_isFullOpaque = false;
+	bool m_isSolid = false;
+	bool m_isVisible = false;
+	/*
+	the other flags are set dynamically
+	*/
 
 	//texture coordinates for block
 	IntVector2 m_frontTexCoords = IntVector2::ZERO;

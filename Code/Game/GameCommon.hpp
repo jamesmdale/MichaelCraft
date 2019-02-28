@@ -24,7 +24,7 @@ constexpr uint16 CHUNK_Y_MASK = (BLOCKS_WIDE_Y - 1) << BITS_WIDE_X;
 constexpr uint16 CHUNK_Z_MASK = (BLOCKS_HIGH_Z - 1) << (BITS_WIDE_X + BITS_WIDE_Y);
 
 constexpr int CHUNK_DISTANCE_RENDER = 2;
-constexpr int CHUNK_DISTANCE_ACTIVATION = 3;
+constexpr int CHUNK_DISTANCE_ACTIVATION = 4;
 constexpr int CHUNK_DISTANCE_DEACTIVATION = 5;
 
 constexpr float BLOCKS_WIDE_X_DIVISOR =  1.f / (float)BLOCKS_WIDE_X;
@@ -39,6 +39,10 @@ constexpr uint8 CHUNK_SAVE_VERSION = 1;
 
 //block data
 constexpr uint8 IS_BLOCK_SOLID_MASK = 0b0000'0001;
+constexpr uint8 IS_BLOCK_FULL_OPAQUE_MASK = 0b0000'0010;
+constexpr uint8 IS_BLOCK_VISIBLE_MASK = 0b0000'0100;
+constexpr uint8 IS_BLOCK_SKY_MASK = 0b0000'1000;
+constexpr uint8 IS_BLOCK_LIGHT_DIRTY_MASK = 0b0001'0000;
 
 //gameplay globals
 constexpr float PLAYER_MOVEMENT_SPEED = 10.f;
