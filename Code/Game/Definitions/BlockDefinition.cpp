@@ -4,11 +4,10 @@
 
 std::map<uchar8, BlockDefinition*> BlockDefinition::s_blockDefinitions;
 
-uint8 BlockDefinition::AIR_BLOCK_ID = UINT8_MAX;
-uint8 BlockDefinition::GRASS_BLOCK_ID = UINT8_MAX;
-uint8 BlockDefinition::STONE_BLOCK_ID = UINT8_MAX;
-uint8 BlockDefinition::DIRT_BLOCK_ID = UINT8_MAX;
-
+uint8 AIR_BLOCK_ID = UINT8_MAX;
+uint8 GRASS_BLOCK_ID = UINT8_MAX;
+uint8 STONE_BLOCK_ID = UINT8_MAX;
+uint8 DIRT_BLOCK_ID = UINT8_MAX;
 
 //  =========================================================================================
 BlockDefinition::BlockDefinition(const tinyxml2::XMLElement& element)

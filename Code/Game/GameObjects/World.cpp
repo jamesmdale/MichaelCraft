@@ -6,6 +6,7 @@
 #include "Game\Helpers\Ray.hpp"
 #include "Game\Helpers\GameRendererHelpers.hpp"
 #include "Game\Helpers\ChunkFileLoader.hpp"
+#include "Game\Definitions\BlockDefinition.hpp"
 #include "Engine\Window\Window.hpp"
 #include "Engine\Debug\DebugRender.hpp"
 #include "Engine\Core\LightObject.hpp"
@@ -681,7 +682,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 	bool didImpact = false;
 
 	//early out if we started from inside a blcok that is impassable
-	if(blockLocator.GetBlock()->m_type != 0)
+	if(blockLocator.GetBlock()->IsSolid())
 	{
 		isRaycastComplete = true;
 		didImpact = true;
@@ -706,7 +707,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 
 			if (blockLocator.IsValid())
 			{
-				if(blockLocator.GetBlock()->m_type != 0)
+				if(blockLocator.GetBlock()->IsSolid())
 				{
 					isRaycastComplete = true;
 					didImpact = true;
@@ -728,7 +729,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 
 			if (blockLocator.IsValid())
 			{
-				if(blockLocator.GetBlock()->m_type != 0)
+				if(blockLocator.GetBlock()->IsSolid())
 				{
 					isRaycastComplete = true;
 					didImpact = true;
@@ -750,7 +751,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 
 			if (blockLocator.IsValid())
 			{
-				if(blockLocator.GetBlock()->m_type != 0)
+				if(blockLocator.GetBlock()->IsSolid())
 				{
 					isRaycastComplete = true;
 					didImpact = true;
@@ -772,7 +773,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 
 			if (blockLocator.IsValid())
 			{
-				if(blockLocator.GetBlock()->m_type != 0)
+				if(blockLocator.GetBlock()->IsSolid())
 				{
 					isRaycastComplete = true;
 					didImpact = true;
@@ -794,7 +795,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 
 			if (blockLocator.IsValid())
 			{
-				if(blockLocator.GetBlock()->m_type != 0)
+				if(blockLocator.GetBlock()->IsSolid())
 				{
 					isRaycastComplete = true;
 					didImpact = true;
@@ -816,7 +817,7 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 
 			if (blockLocator.IsValid())
 			{
-				if(blockLocator.GetBlock()->m_type != 0)
+				if(blockLocator.GetBlock()->IsSolid())
 				{
 					isRaycastComplete = true;
 					didImpact = true;
@@ -853,7 +854,7 @@ void World::DigBlock()
 	if (impactLocator.IsValid())
 	{
 		Block* impactBlock = impactLocator.GetBlock();
-		impactBlock->m_type = 0;
+		SetBlockToType(impactBlock, AIR_BLOCK_ID);
 		impactLocator.m_chunk->m_isMeshDirty = true;
 		impactLocator.m_chunk->m_doesRequireSave = true;
 		
@@ -906,7 +907,7 @@ void World::PlaceBlock()
 	if (targetedBlockLocator.IsValid())
 	{
 		Block* targetedBlock = targetedBlockLocator.GetBlock();
-		targetedBlock->m_type = 2;
+		SetBlockToType(targetedBlock, DIRT_BLOCK_ID);
 		targetedBlockLocator.m_chunk->m_isMeshDirty = true;
 		targetedBlockLocator.m_chunk->m_doesRequireSave = true;
 

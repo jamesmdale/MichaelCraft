@@ -1,9 +1,8 @@
 #pragma once
 #include "Engine\Math\IntVector2.hpp"
 #include "Engine\Core\EngineCommon.hpp"
+#include "Game\Definitions\BlockDefinition.hpp"
 #include "Game\GameCommon.hpp"
-
-class BlockDefinition;
 
 class Block
 {
@@ -12,7 +11,6 @@ public:
 	Block(BlockDefinition* definition);
 	~Block();
 
-public:
 	//helpers for bitfields
 	inline bool IsAir();
 	inline bool IsOpaque();
@@ -25,6 +23,8 @@ public:
 	inline void SetSkyFlag(bool isSky);
 	inline void SetLightingFlag(bool isLightingDirty); 
 
+
+
 public:
 	uchar8 m_type = 0; //max 255 types
 	uchar8 m_bits = 0; //state
@@ -32,10 +32,15 @@ public:
 };
 
 
+// global statics =========================================================================================
+void SetBlockToType(Block* block, const uchar8 id);
+
+//  =========================================================================================
+//  INLINE FUNCTIONS
 //  =========================================================================================
 bool Block::IsAir()
 {
-	if(m_type == 0)
+	if(m_type == AIR_BLOCK_ID)
 		return true;
 
 	return false;

@@ -6,7 +6,6 @@
 #include <map>
 #include <vector>
 
-
 class BlockDefinition
 {
 public:
@@ -44,11 +43,10 @@ public:
 	bool m_doesTarget = false;
 
 	static std::map<uchar8, BlockDefinition*> s_blockDefinitions;
-
-	//block data - 255 potential
-	static uint8 AIR_BLOCK_ID;
-	static uint8 GRASS_BLOCK_ID;
-	static uint8 STONE_BLOCK_ID;
-	static uint8 DIRT_BLOCK_ID;
 };
 
+//block data - 255 potential
+extern uchar8 AIR_BLOCK_ID;
+extern uchar8 GRASS_BLOCK_ID;
+extern uchar8 STONE_BLOCK_ID;
+extern uchar8 DIRT_BLOCK_ID;

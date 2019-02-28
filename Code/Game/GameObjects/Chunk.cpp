@@ -15,7 +15,7 @@ Chunk::Chunk(const IntVector2& coordinates)
 {
 	m_chunkCoords = coordinates;
 
-	BlockDefinition* airBlockDef = BlockDefinition::GetDefinitionById(0);
+	BlockDefinition* airBlockDef = BlockDefinition::GetDefinitionById(AIR_BLOCK_ID);
 	for (int blockIndex = 0; blockIndex < BLOCKS_PER_CHUNK; ++blockIndex)
 	{
 		m_blocks[blockIndex].m_type = airBlockDef->m_type;
@@ -91,7 +91,7 @@ void Chunk::GenerateBlockDataWithPerlin()
 			//make the block grass if it is on top
 			else if (blockIndexInColumn == heightAsInt)
 			{
-				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(BlockDefinition::GRASS_BLOCK_ID);
+				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(GRASS_BLOCK_ID);
 				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = blockDefinitionForType->m_type;
 				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_bits = blockDefinitionForType->m_defaultBits;
 				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
@@ -100,7 +100,7 @@ void Chunk::GenerateBlockDataWithPerlin()
 			//else make the block dirt
 			else if (blockIndexInColumn < heightAsInt && blockIndexInColumn >= heightAsInt - 3)
 			{
-				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(BlockDefinition::DIRT_BLOCK_ID);
+				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(DIRT_BLOCK_ID);
 				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = blockDefinitionForType->m_type;
 				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_bits = blockDefinitionForType->m_defaultBits;
 				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
@@ -109,7 +109,7 @@ void Chunk::GenerateBlockDataWithPerlin()
 			//make the block stone if it is lower than 7 below the half point line of the chunk
 			else
 			{
-				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(BlockDefinition::STONE_BLOCK_ID);
+				BlockDefinition* blockDefinitionForType = BlockDefinition::GetDefinitionById(STONE_BLOCK_ID);
 				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_type = blockDefinitionForType->m_type;
 				m_blocks[GetBlockIndexForBlockCoords(IntVector3(columnCoordinates.x, columnCoordinates.y, blockIndexInColumn))].m_bits = blockDefinitionForType->m_defaultBits;
 				//BlockDefinition::UpdateBitsBasedOnType(block.m_type, &block.m_bits);
