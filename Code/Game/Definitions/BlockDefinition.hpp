@@ -11,7 +11,7 @@ class BlockDefinition
 public:
 	explicit BlockDefinition(const tinyxml2::XMLElement& element);
 	static void Initialize(const std::string& filePath);
-	static BlockDefinition* GetDefinitionById(const uchar8 id);
+	static BlockDefinition* GetDefinitionById(const uint8 id);
 
 private:
 
@@ -22,12 +22,13 @@ private:
 
 public:
 	std::string m_name = "";
-	uchar8 m_type = 0;
-	uint8_t m_defaultBits = 0;
+	uint8 m_type = 0;
+	uint8 m_defaultBits = 0;
 
 	bool m_isFullOpaque = false;
 	bool m_isSolid = false;
 	bool m_isVisible = false;
+	bool m_isLightSource = false;
 	/*
 	the other flags are set dynamically
 	*/
@@ -41,12 +42,14 @@ public:
 	IntVector2 m_topTexCoords = IntVector2::ZERO;
 
 	bool m_doesTarget = false;
+	uint8 m_minimumLightingValue = 0;
 
-	static std::map<uchar8, BlockDefinition*> s_blockDefinitions;
+	static std::map<uint8, BlockDefinition*> s_blockDefinitions;
 };
 
 //block data - 255 potential
-extern uchar8 AIR_BLOCK_ID;
-extern uchar8 GRASS_BLOCK_ID;
-extern uchar8 STONE_BLOCK_ID;
-extern uchar8 DIRT_BLOCK_ID;
+extern uint8 AIR_BLOCK_ID;
+extern uint8 GRASS_BLOCK_ID;
+extern uint8 STONE_BLOCK_ID;
+extern uint8 DIRT_BLOCK_ID;
+extern uint8 GLOWSTONE_BLOCK_ID;

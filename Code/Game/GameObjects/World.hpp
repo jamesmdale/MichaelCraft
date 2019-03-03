@@ -5,6 +5,7 @@
 #include "Game\GameObjects\Chunk.hpp"
 #include "Game\GameObjects\GameCamera.hpp"
 #include "Game\Helpers\RaycastResult.hpp"
+#include <deque>
 
 typedef IntVector2 ChunkCoords;
 
@@ -20,6 +21,7 @@ public:
 	void UpdateFromInput(float deltaSeconds);
 
 	void UpdatePlayerViewPosition();
+	void UpdateDirtyLighting();
 	void UpdateChunks();
 
 	void RenderChunks();
@@ -35,6 +37,10 @@ public:
 
 	void GenerateChunkBuildOrderCheatSheet();
 	void LoadSavedChunkReferences();
+
+	//Lighting
+	void ProcessLightingForBlock(BlockLocator blockLocator);
+	void AddBlockLocatorToDirtyLightingQueue(BlockLocator blockLocator);
 
 	//Raycasting
 	RaycastResult Raycast(const Vector3& start, const Vector3& forward, float maxDistance);
@@ -52,6 +58,8 @@ public:
 	std::map<IntVector2, Chunk*> m_activeChunks;
 	std::vector<IntVector2> m_chunksOnDisk;
 	std::vector<IntVector2> m_neighborHoodBuildOrder;
+
+	std::deque<BlockLocator> m_blocksWithDirtyLighting;
 
 	Camera* m_uiCamera = nullptr;
 	Camera* m_engineCamera = nullptr;

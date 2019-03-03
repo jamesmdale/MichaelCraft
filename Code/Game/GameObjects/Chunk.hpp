@@ -33,6 +33,7 @@ public:
 	void GenerateChunkMesh();
 
 	//block helpers
+	Rgba GetVertexColorFromBlockLightingValue(Block* block);
 	int GetBlockIndexForBlockCoords(const IntVector3& blockCoords);
 	IntVector3 GetBlockCoordsForBlockIndex(int blockIndex);
 	Vector3 GetBlockWorldCoordsForBlockIndex(int blockIndex);

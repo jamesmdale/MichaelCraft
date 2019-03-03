@@ -2,12 +2,18 @@
 #include "Engine\Core\EngineCommon.hpp"
 #include "Engine\Core\StringUtils.hpp"
 
-std::map<uchar8, BlockDefinition*> BlockDefinition::s_blockDefinitions;
+std::map<uint8, BlockDefinition*> BlockDefinition::s_blockDefinitions;
 
-uint8 AIR_BLOCK_ID = UINT8_MAX;
-uint8 GRASS_BLOCK_ID = UINT8_MAX;
-uint8 STONE_BLOCK_ID = UINT8_MAX;
-uint8 DIRT_BLOCK_ID = UINT8_MAX;
+//block types
+
+#pragma region "Block IDs"
+	uint8 AIR_BLOCK_ID = UINT8_MAX;
+	uint8 GRASS_BLOCK_ID = UINT8_MAX;
+	uint8 STONE_BLOCK_ID = UINT8_MAX;
+	uint8 DIRT_BLOCK_ID = UINT8_MAX;
+	uint8 GLOWSTONE_BLOCK_ID = UINT8_MAX;
+#pragma endregion
+	
 
 //  =========================================================================================
 BlockDefinition::BlockDefinition(const tinyxml2::XMLElement& element)
@@ -22,8 +28,16 @@ BlockDefinition::BlockDefinition(const tinyxml2::XMLElement& element)
 		m_isFullOpaque = ParseXmlAttribute(*bitSettingsElement, "isFullOpaque", m_isFullOpaque);
 		m_isSolid = ParseXmlAttribute(*bitSettingsElement, "isSolid", m_isSolid);
 		m_isVisible = ParseXmlAttribute(*bitSettingsElement, "isVisible", m_isVisible);
+		m_isLightSource = ParseXmlAttribute(*bitSettingsElement, "isLightSource", m_isLightSource);
 
 		//other bits are set dynamically
+	}
+
+	//lighting
+	const tinyxml2::XMLElement* defaultLightSettingsElement = element.FirstChildElement("Lighting");
+	if (defaultLightSettingsElement)
+	{
+		m_minimumLightingValue = ParseXmlAttribute(*defaultLightSettingsElement, "minimumLightingValue", m_minimumLightingValue);
 	}
 
 	//get image value
@@ -52,7 +66,7 @@ void BlockDefinition::Initialize(const std::string& filePath)
 	for (const tinyxml2::XMLElement* definitionNode = pRoot->FirstChildElement(); definitionNode; definitionNode = definitionNode->NextSiblingElement())
 	{
 		BlockDefinition* newDef = new BlockDefinition(*definitionNode);
-		s_blockDefinitions.insert(std::pair<uchar8, BlockDefinition*>(newDef->m_type, newDef));
+		s_blockDefinitions.insert(std::pair<uint8, BlockDefinition*>(newDef->m_type, newDef));
 	}
 
 	SetGlobalBlockIdNameVariables();
@@ -60,9 +74,9 @@ void BlockDefinition::Initialize(const std::string& filePath)
 }
 
 //  =========================================================================================
-BlockDefinition* BlockDefinition::GetDefinitionById(const uchar8 id)
+BlockDefinition* BlockDefinition::GetDefinitionById(const uint8 id)
 {
-	std::map<uchar8, BlockDefinition*>::iterator mapIterator = s_blockDefinitions.find(id);
+	std::map<uint8, BlockDefinition*>::iterator mapIterator = s_blockDefinitions.find(id);
 	if (mapIterator == s_blockDefinitions.end()) {
 		return nullptr;
 	}
@@ -114,6 +128,12 @@ void BlockDefinition::SetGlobalBlockIdNameVariables()
 		if (def->m_name == "stone")
 		{
 			STONE_BLOCK_ID = def->m_type;
+			continue;
+		}
+
+		if (def->m_name == "glowstone")
+		{
+			GLOWSTONE_BLOCK_ID = def->m_type;
 			continue;
 		}
 	}

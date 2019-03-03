@@ -3,4 +3,4 @@
 
 class Mesh;
 
-Mesh* MakeBlockToMesh(const Vector3& center, const uchar8 type);
+Mesh* MakeBlockToMesh(const Vector3& center, const uint8 type);

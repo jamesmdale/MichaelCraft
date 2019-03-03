@@ -7,6 +7,8 @@
 #include "Game\Helpers\GameRendererHelpers.hpp"
 #include "Game\Helpers\ChunkFileLoader.hpp"
 #include "Game\Definitions\BlockDefinition.hpp"
+#include "Game\GameObjects\Block.hpp"
+#include "Game\GameObjects\BlockLocator.hpp"
 #include "Engine\Window\Window.hpp"
 #include "Engine\Debug\DebugRender.hpp"
 #include "Engine\Core\LightObject.hpp"
@@ -59,6 +61,15 @@ void World::Initialize()
 	LoadSavedChunkReferences();
 
 	theRenderer->SetLineWidth(3.f);
+
+	//int test1 = CountNumWordsInString(nullptr);
+
+	//char str[] = { 'h', 'i'};
+
+	//int test2 = CountNumWordsInString(str);
+	//int value = CountNumWordsInString(" hello");
+	//int value1 = CountNumWordsInString("a");
+	//int value2 = CountNumWordsInString("A BIG DOG");
 }
 
 //  =========================================================================================
@@ -68,6 +79,9 @@ void World::Update(float deltaSeconds)
 	UpdatePlayerViewPosition();
 
 	ActivateChunks();
+
+	UpdateDirtyLighting();
+
 	GenerateDirtyChunks();
 	DeactivateChunks();
 
@@ -91,7 +105,6 @@ void World::Render()
 	//render
 	RenderChunks();
 	RenderDebug();
-
 }
 
 //  =========================================================================================
@@ -212,6 +225,19 @@ void World::UpdatePlayerViewPosition()
 
 		CopyCameraDataToPlayerView(m_gameCamera->m_position, cameraForward);
 	}	
+}
+
+//  =========================================================================================
+void World::UpdateDirtyLighting()
+{
+	//process until no blocks are dirty
+	while (m_blocksWithDirtyLighting.size() > 0)
+	{
+		BlockLocator blockToProcess = m_blocksWithDirtyLighting.front();
+		m_blocksWithDirtyLighting.pop_front();
+
+		ProcessLightingForBlock(blockToProcess);
+	}
 }
 
 //  =========================================================================================
@@ -642,6 +668,160 @@ void World::LoadSavedChunkReferences()
 }
 
 //  =========================================================================================
+void World::ProcessLightingForBlock(BlockLocator blockLocator)
+{
+	//get all neighbors ----------------------------------------------
+	BlockLocator northNeighbor = blockLocator.GetBlockLocatorToNorth();
+	Block* northBlock = northNeighbor.GetBlock();
+
+	BlockLocator southNeighbor = blockLocator.GetBlockLocatorToSouth();
+	Block* southBlock = southNeighbor.GetBlock();
+
+	BlockLocator eastNeighbor = blockLocator.GetBlockLocatorToEast();
+	Block* eastBlock = eastNeighbor.GetBlock();
+
+	BlockLocator westNeighbor = blockLocator.GetBlockLocatorToWest();
+	Block* westBlock = westNeighbor.GetBlock();
+
+	BlockLocator aboveNeighbor = blockLocator.GetBlockLocatorAbove();
+	Block* aboveBlock = aboveNeighbor.GetBlock();
+
+	BlockLocator belowNeighbor = blockLocator.GetBlockLocatorBelow();
+	Block* belowBlock = belowNeighbor.GetBlock();
+
+	Block* block = blockLocator.GetBlock();
+	BlockDefinition* blockDef = BlockDefinition::GetDefinitionById(block->m_type);
+
+	//remove the bit flag for the block saying it's dirty ----------------------------------------------
+	block->SetLightingInDirtyListFlag(false);
+
+	uint8 minLightingValue = blockDef->m_minimumLightingValue;
+	uint8 currentLightingValue = block->GetIndoorLightingValue();;
+	uint8 newLightingValue = currentLightingValue;
+
+	uint8 brightestNeighborLightingValue = 0;
+
+	//process north neighbor ----------------------------------------------	
+	if (northNeighbor.IsValid())
+	{
+		//if the block is opaque we don't consider it's lighting level
+		if (!northBlock->IsFullOpaque())
+		{
+			uint8 neighborLightingValue = northBlock->GetIndoorLightingValue();
+
+			if(neighborLightingValue > brightestNeighborLightingValue)
+				brightestNeighborLightingValue = neighborLightingValue;
+		}
+	}
+
+	//process south neighbor ----------------------------------------------
+	if (southNeighbor.IsValid())
+	{
+		//if the block is opaque we don't consider it's lighting level
+		if (!southBlock->IsFullOpaque())
+		{
+			uint8 neighborLightingValue = southBlock->GetIndoorLightingValue();
+
+			if(neighborLightingValue > brightestNeighborLightingValue)
+				brightestNeighborLightingValue = neighborLightingValue;
+		}
+	}
+
+	//process east neighbor ----------------------------------------------
+	if (eastNeighbor.IsValid())
+	{
+		//if the block is opaque we don't consider it's lighting level
+		if (!eastBlock->IsFullOpaque())
+		{
+			uint8 neighborLightingValue = eastBlock->GetIndoorLightingValue();
+
+			if(neighborLightingValue > brightestNeighborLightingValue)
+				brightestNeighborLightingValue = neighborLightingValue;
+		}
+	}
+
+	//process west neighbor ----------------------------------------------
+	if (westNeighbor.IsValid())
+	{
+		//if the block is opaque we don't consider it's lighting level
+		if (!westBlock->IsFullOpaque())
+		{
+			uint8 neighborLightingValue = westBlock->GetIndoorLightingValue();
+
+			if(neighborLightingValue > brightestNeighborLightingValue)
+				brightestNeighborLightingValue = neighborLightingValue;
+		}
+	}
+
+	//process above neighbor ----------------------------------------------
+	if (aboveNeighbor.IsValid())
+	{
+		//if the block is opaque we don't consider it's lighting level
+		if (!aboveBlock->IsFullOpaque())
+		{
+			uint8 neighborLightingValue = aboveBlock->GetIndoorLightingValue();
+
+			if(neighborLightingValue > brightestNeighborLightingValue)
+				brightestNeighborLightingValue = neighborLightingValue;
+		}
+	}
+
+	// process below neighbor ----------------------------------------------
+	if (belowNeighbor.IsValid())
+	{
+		//if the block is opaque we don't consider it's lighting level
+		if (!belowBlock->IsFullOpaque())
+		{
+			uint8 neighborLightingValue = belowBlock->GetIndoorLightingValue();
+
+			if(neighborLightingValue > brightestNeighborLightingValue)
+				brightestNeighborLightingValue = neighborLightingValue;
+		}
+	}
+
+	//now that we have checked all the neighbors, change the value to 1 less than the highest neighbor ----------------------------------------------
+	if ((brightestNeighborLightingValue - 1) > minLightingValue)
+		newLightingValue = brightestNeighborLightingValue - 1;
+	else
+		newLightingValue = minLightingValue;
+
+	//if we have a change, update the value to the new lighting value and dirty my neighbors
+	if (newLightingValue != currentLightingValue)
+	{
+		block->SetIndoorLightingValue(newLightingValue);
+
+		//foreach neighbor, if they AREN'T opaque, add them to the dirty list
+
+		if(!northBlock->IsFullOpaque())
+			AddBlockLocatorToDirtyLightingQueue(northNeighbor);
+		if(!southBlock->IsFullOpaque())
+			AddBlockLocatorToDirtyLightingQueue(southNeighbor);
+		if(!eastBlock->IsFullOpaque())
+			AddBlockLocatorToDirtyLightingQueue(eastNeighbor);
+		if(!westBlock->IsFullOpaque())
+			AddBlockLocatorToDirtyLightingQueue(westNeighbor);
+		if(!aboveBlock->IsFullOpaque())
+			AddBlockLocatorToDirtyLightingQueue(aboveNeighbor);
+		if(!belowBlock->IsFullOpaque())
+			AddBlockLocatorToDirtyLightingQueue(belowNeighbor);
+	}
+}
+
+//  =========================================================================================
+void World::AddBlockLocatorToDirtyLightingQueue(BlockLocator blockLocator)
+{
+	Block* block = blockLocator.GetBlock();
+
+	//if the block is fully opaque OR it's already in the list, there is no need to add it to the dirty list
+	if(block->IsLightingInDirtyList())
+		return;
+
+	block->SetLightingInDirtyListFlag(true);
+
+	m_blocksWithDirtyLighting.emplace_back(blockLocator);
+}
+
+//  =========================================================================================
 RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float maxDistance)
 {
 	// create ray that we are moving along line ----------------------------------------------
@@ -907,9 +1087,11 @@ void World::PlaceBlock()
 	if (targetedBlockLocator.IsValid())
 	{
 		Block* targetedBlock = targetedBlockLocator.GetBlock();
-		SetBlockToType(targetedBlock, DIRT_BLOCK_ID);
+		SetBlockToType(targetedBlock, GLOWSTONE_BLOCK_ID);
 		targetedBlockLocator.m_chunk->m_isMeshDirty = true;
 		targetedBlockLocator.m_chunk->m_doesRequireSave = true;
+
+		AddBlockLocatorToDirtyLightingQueue(targetedBlockLocator);
 
 		//check to see if we need to set the neighboring chunks to dirty
 		std::vector<Chunk*> outNeighboringChunks;

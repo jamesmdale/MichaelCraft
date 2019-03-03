@@ -48,11 +48,20 @@ constexpr uint8 INDOOR_LIGHTING_MASK = 0b0000'1111;
 constexpr uint8 OUTDOOR_LIGHTING_MASK = 0b1111'0000;
 constexpr uint8 BITS_WIDE_INDOOR_LIGHTING_MASK = 4;
 constexpr uint8 BITS_WIDE_OUTDOOR_LIGHTING_MASK = 4;
+constexpr int MAX_INDOOR_LIGHTING_VALUE = 15;
+constexpr int MAX_OUTDOOR_LIGHTING_VALUE = 15;
 
 //gameplay globals
 constexpr float PLAYER_MOVEMENT_SPEED = 10.f;
 constexpr float RAYCAST_MAX_DISTANCE = 8.f;
 constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
+
+//lighting defaults
+constexpr float MIN_LIGHT_EXPOSURE_PERCENTAGE = 0.15f;
+constexpr float MAX_LIGHT_EXPOSURE_PERCENTAGE = 1.f;
+
+extern Rgba g_minLightColor;
+extern Rgba g_maxLightColor;
 
 //convenience directions
 extern Vector3 g_worldUp;

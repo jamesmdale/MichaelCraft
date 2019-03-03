@@ -2,6 +2,8 @@
 #include "Game\Definitions\BlockDefinition.hpp"
 #include "Game\GameCommon.hpp"
 
+Block* g_invalidBlock = new Block();
+
 //  =========================================================================================
 Block::Block()
 {
@@ -23,7 +25,7 @@ Block::~Block()
 
 
 //  =========================================================================================
-void SetBlockToType(Block* block, const uchar8 id)
+void SetBlockToType(Block* block, const uint8 id)
 {
 	BlockDefinition* newDefinition = BlockDefinition::GetDefinitionById(id);
 
