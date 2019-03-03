@@ -107,6 +107,16 @@ bool AppMessageHandler( unsigned int wmMessageCode, size_t wParam, size_t lParam
 			InputSystem::GetInstance()->GetMouse()->m_doubleClickRight = true;
 			break;
 		}
+
+		// handle mouse wheel =========================================================================================
+		case WM_MOUSEWHEEL:
+		{
+			short zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+			//if the delta is POSITIVE, we wheeled up. if the delta is NEGATIVE, we wheeled down
+			zDelta > 0 ? InputSystem::GetInstance()->GetMouse()->m_mouseWheelUp = true : InputSystem::GetInstance()->GetMouse()->m_mouseWheelDown = true;
+			break;
+		}
 	}
 
 	return true; 

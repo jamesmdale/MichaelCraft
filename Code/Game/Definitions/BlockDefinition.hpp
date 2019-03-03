@@ -16,9 +16,7 @@ public:
 private:
 
 	static void SetGlobalBlockIdNameVariables();
-
 	void ConstructBitsFromBools();
-
 
 public:
 	std::string m_name = "";

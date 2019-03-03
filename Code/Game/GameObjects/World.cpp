@@ -62,6 +62,8 @@ void World::Initialize()
 
 	theRenderer->SetLineWidth(3.f);
 
+	InitializeSelectableBlockList();
+
 	//int test1 = CountNumWordsInString(nullptr);
 
 	//char str[] = { 'h', 'i'};
@@ -105,6 +107,7 @@ void World::Render()
 	//render
 	RenderChunks();
 	RenderDebug();
+	RenderUI();
 }
 
 //  =========================================================================================
@@ -199,6 +202,24 @@ void World::UpdateFromInput(float deltaSeconds)
 		theGame->m_inputDelayTimer->Reset();
 	}
 
+	//mouse wheel scrolling for changing blocks
+	if ((theInput->GetMouseWheelUp() || theInput->GetMouseWheelDown()) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		if (theInput->GetMouseWheelUp())
+		{
+			m_selectedBlockIndex++;
+			m_selectedBlockIndex = m_selectedBlockIndex % ((int)m_selectableBlockTypes.size());
+		}
+		else if (theInput->GetMouseWheelDown())
+		{
+			m_selectedBlockIndex--;
+			if(m_selectedBlockIndex < 0)
+				m_selectedBlockIndex = UINT8_MAX;
+
+			m_selectedBlockIndex = m_selectedBlockIndex % ((int)m_selectableBlockTypes.size());
+		}
+	}
+
 	//exit player position and freelook
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_PAGEUP) && theGame->m_inputDelayTimer->HasElapsed())
 	{
@@ -255,6 +276,33 @@ void World::UpdateChunks()
 	for (chunkIterator = m_activeChunks.begin(); chunkIterator != m_activeChunks.end(); ++chunkIterator)
 	{
 		chunkIterator->second->Update();
+	}
+}
+
+//  =========================================================================================
+void World::RenderUI()
+{
+	Renderer* theRenderer = Renderer::GetInstance();
+	theRenderer->SetCamera(m_uiCamera);
+
+	Mesh* texturedUIMesh = CreateTexturedUIMesh();
+	if (texturedUIMesh != nullptr)
+	{
+		theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+		theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
+		theRenderer->m_defaultShader->SetFrontFace(WIND_COUNTER_CLOCKWISE);
+
+		theRenderer->DrawMesh(texturedUIMesh);
+		delete(texturedUIMesh);
+	}
+
+	//handle text
+	Mesh* textMesh = CreateUITextMesh();
+	if (textMesh != nullptr)
+	{
+		theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("text"));
+		theRenderer->DrawMesh(textMesh);
+		delete(textMesh);
 	}
 }
 
@@ -802,11 +850,13 @@ void World::ProcessLightingForBlock(BlockLocator blockLocator)
 	//if we have a change, update the value to the new lighting value and dirty my neighbors
 	if (newLightingValue != currentLightingValue)
 	{
-		block->SetIndoorLightingValue(newLightingValue);
-		blockLocator.m_chunk->m_isMeshDirty = true;
+		if (!block->IsFullOpaque() || block->DoesEmitLight())
+		{
+			block->SetIndoorLightingValue(newLightingValue);
+			blockLocator.m_chunk->m_isMeshDirty = true;
+		}	
 
 		//foreach neighbor, if they AREN'T opaque, add them to the dirty list
-
 		if(northBlock->IsValid() && !northBlock->IsFullOpaque())
 			AddBlockLocatorToDirtyLightingQueue(northNeighbor);
 		if(northBlock->IsValid() &&!southBlock->IsFullOpaque())
@@ -1039,6 +1089,15 @@ RaycastResult World::Raycast(const Vector3& start, const Vector3& forward, float
 }
 
 //  =========================================================================================
+void World::InitializeSelectableBlockList()
+{
+	m_selectableBlockTypes.emplace_back(GRASS_BLOCK_ID);
+	m_selectableBlockTypes.emplace_back(DIRT_BLOCK_ID);
+	m_selectableBlockTypes.emplace_back(STONE_BLOCK_ID);
+	m_selectableBlockTypes.emplace_back(GLOWSTONE_BLOCK_ID);
+}
+
+//  =========================================================================================
 void World::DigBlock()
 {
 	//early out if we don't have a block to remmove
@@ -1055,14 +1114,14 @@ void World::DigBlock()
 		impactLocator.m_chunk->m_doesRequireSave = true;
 		
 		//check to see if we need to set the neighboring chunks to dirty
-		std::vector<Chunk*> outNeighboringChunks;
+	/*	std::vector<Chunk*> outNeighboringChunks;
 		if (impactLocator.IsBlockIndexOnEdge(outNeighboringChunks))
 		{
 			for (int chunkIndex = 0; chunkIndex < (int)outNeighboringChunks.size(); ++chunkIndex)
 			{
 				outNeighboringChunks[chunkIndex]->m_isMeshDirty = true;
 			}
-		}
+		}*/
 	}
 }
 
@@ -1103,21 +1162,21 @@ void World::PlaceBlock()
 	if (targetedBlockLocator.IsValid())
 	{
 		Block* targetedBlock = targetedBlockLocator.GetBlock();
-		SetBlockToType(targetedBlock, GLOWSTONE_BLOCK_ID);
+		SetBlockToType(targetedBlock, m_selectableBlockTypes[m_selectedBlockIndex]);
 		AddBlockLocatorToDirtyLightingQueue(targetedBlockLocator);
 
 		targetedBlockLocator.m_chunk->m_isMeshDirty = true;
 		targetedBlockLocator.m_chunk->m_doesRequireSave = true;
 
 		//check to see if we need to set the neighboring chunks to dirty
-		std::vector<Chunk*> outNeighboringChunks;
+	/*	std::vector<Chunk*> outNeighboringChunks;
 		if (targetedBlockLocator.IsBlockIndexOnEdge(outNeighboringChunks))
 		{
 			for (int chunkIndex = 0; chunkIndex < (int)outNeighboringChunks.size(); ++chunkIndex)
 			{
 				outNeighboringChunks[chunkIndex]->m_isMeshDirty = true;
 			}
-		}
+		}*/
 	}
 }
 
@@ -1132,6 +1191,50 @@ void World::CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vect
 {
 	m_playerViewPosition = cameraPosition;
 	m_playerViewForwardNormalized = cameraForward;
+}
+
+//  =========================================================================================
+Mesh* World::CreateTexturedUIMesh()
+{
+	MeshBuilder builder = MeshBuilder();
+	Mesh* textMesh = nullptr;
+	Window* theWindow = Window::GetInstance();
+
+	// fps counter ----------------------------------------------		
+	AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.95f, 0.9f), Vector2(0.99f, 0.975f));
+
+	BlockDefinition* blockDef = BlockDefinition::GetDefinitionById(m_selectableBlockTypes[m_selectedBlockIndex]);
+	AABB2 frontTexCoords = GetTerrainSprites()->GetTexCoordsForSpriteCoords(blockDef->m_frontTexCoords);
+
+	builder.CreateTexturedQuad2D( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), frontTexCoords.maxs, frontTexCoords.mins, Rgba::WHITE);
+
+	// create mesh ----------------------------------------------
+	if (builder.m_vertices.size() > 0)
+	{
+		textMesh = builder.CreateMesh<VertexPCU>();
+	}
+
+	return textMesh;
+}
+
+//  =========================================================================================
+Mesh* World::CreateUITextMesh()
+{
+	MeshBuilder builder = MeshBuilder();
+	Mesh* textMesh = nullptr;
+	Window* theWindow = Window::GetInstance();
+
+	// fps counter ----------------------------------------------		
+	AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.9f, 0.8f), Vector2(0.99f, 0.89f));
+	builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("CurrentBlockType:"), Rgba::WHITE);
+
+	// create mesh ----------------------------------------------
+	if (builder.m_vertices.size() > 0)
+	{
+		textMesh = builder.CreateMesh<VertexPCU>();
+	}
+
+	return textMesh;
 }
 
 //  =========================================================================================

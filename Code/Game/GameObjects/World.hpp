@@ -24,9 +24,11 @@ public:
 	void UpdateDirtyLighting();
 	void UpdateChunks();
 
+	void RenderUI();
 	void RenderChunks();
 	void RenderDebug();
 
+	//Chunk Logic
 	void ActivateChunks();
 	void GenerateDirtyChunks();
 	void DeactivateChunks();
@@ -47,12 +49,16 @@ public:
 	RaycastResult Raycast(const Vector3& start, const Vector3& forward, float maxDistance);
 
 	//player actions
+	void InitializeSelectableBlockList();
 	void DigBlock();
 	void PlaceBlock();
 	void ToggleCameraViewLocked();
-	//void ToggleCameraLock();
 	bool IsCameraViewLocked(){return m_isCameraViewLocked;}
 	void CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vector3& cameraForward);
+
+	//UI
+	Mesh* CreateTexturedUIMesh();
+	Mesh* CreateUITextMesh();
 
 public:
 	std::map<IntVector2, Chunk*> m_activeChunks;
@@ -69,6 +75,9 @@ public:
 	Vector3 m_playerViewForwardNormalized;
 
 	RaycastResult m_raycastResult;
+
+	int m_selectedBlockIndex = 0;
+	std::vector<uint8> m_selectableBlockTypes;
 
 private:
 	bool m_isCameraViewLocked = false;
