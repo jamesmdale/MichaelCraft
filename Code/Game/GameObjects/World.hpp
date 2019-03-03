@@ -33,6 +33,7 @@ public:
 	void DeactivateAllChunks();
 
 	void ActivateChunk(const IntVector2& chunkCoordinates);
+	void InitializeChunkLighting(Chunk* chunk);
 	void DeactivateChunk(const IntVector2& keyVal);
 
 	void GenerateChunkBuildOrderCheatSheet();

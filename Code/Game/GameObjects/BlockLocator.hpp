@@ -29,6 +29,7 @@ public:
 	bool IsValid();
 
 	bool IsBlockIndexOnEdge(std::vector<Chunk*>& outConnectingChunks);
+	bool IsBlockIndexOnEdgeFast();
 
 public:
 	Chunk* m_chunk = nullptr;

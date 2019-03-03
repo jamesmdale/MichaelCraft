@@ -28,7 +28,7 @@ public:
 	bool m_isFullOpaque = false;
 	bool m_isSolid = false;
 	bool m_isVisible = false;
-	bool m_isLightSource = false;
+	bool m_doesEmitLight = false;
 	/*
 	the other flags are set dynamically
 	*/

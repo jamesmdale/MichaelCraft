@@ -18,6 +18,7 @@ public:
 	inline bool IsFullOpaque();
 	inline bool IsVisible();
 	inline bool IsSolid();
+	inline bool DoesEmitLight();
 
 	//dynamic bitfields
 	inline bool IsSky();
@@ -50,7 +51,7 @@ void SetBlockToType(Block* block, const uint8 id);
 //  =========================================================================================
 bool Block::IsValid()
 {
-	if(m_type == UINT8_MAX)
+	if(m_type != UINT8_MAX)
 		return true;
 
 	return false;
@@ -81,6 +82,11 @@ bool Block::IsVisible()
 bool Block::IsSolid()
 {
 	return (m_bits & IS_BLOCK_SOLID_MASK) == IS_BLOCK_SOLID_MASK;
+}
+
+bool Block::DoesEmitLight()
+{
+	return (m_bits & DOES_BLOCK_EMIT_LIGHT) == DOES_BLOCK_EMIT_LIGHT;
 }
 
 //  =========================================================================================

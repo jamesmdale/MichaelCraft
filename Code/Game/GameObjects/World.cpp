@@ -206,13 +206,6 @@ void World::UpdateFromInput(float deltaSeconds)
 		theGame->m_inputDelayTimer->Reset();
 	}
 
-	//set player position to current freelook position 
-	//if (theInput->WasKeyJustPressed(theInput->KEYBOARD_PAGEDOWN) && theGame->m_inputDelayTimer->HasElapsed())
-	//{
-	//	//UnlockCamera();
-	//	theGame->m_inputDelayTimer->Reset();
-	//}
-
 	if(InputSystem::GetInstance()->WasKeyJustPressed(InputSystem::GetInstance()->KEYBOARD_ESCAPE))
 	{
 		DeactivateAllChunks();
@@ -634,6 +627,32 @@ void World::ActivateChunk(const IntVector2& chunkCoordinates)
 	}
 
 	chunk->m_isMeshDirty = true;
+
+	//handle lighting
+	InitializeChunkLighting(chunk);
+}
+
+//  =========================================================================================
+void World::InitializeChunkLighting(Chunk* chunk)
+{
+	ASSERT_OR_DIE(chunk != nullptr, "INVALID CHUNK PASSED TO 'INITIALIZECHUNKLIGHTING'!!!");
+	
+	for (int blockIndex = 0; blockIndex < BLOCKS_PER_CHUNK; ++blockIndex)
+	{
+		BlockLocator block = BlockLocator(chunk, blockIndex);
+
+		//if the block emits light, mark it as dirty
+		if (chunk->m_blocks[blockIndex].DoesEmitLight())
+		{
+			AddBlockLocatorToDirtyLightingQueue(block);
+		}
+
+		//if the block is on an edge and is not visible, mark it as dirty
+		if (block.IsBlockIndexOnEdgeFast() && !block.GetBlock()->IsVisible())
+		{
+			AddBlockLocatorToDirtyLightingQueue(block);
+		}		
+	}
 }
 
 //  =========================================================================================
@@ -684,6 +703,14 @@ void World::LoadSavedChunkReferences()
 //  =========================================================================================
 void World::ProcessLightingForBlock(BlockLocator blockLocator)
 {
+	Block* block = blockLocator.GetBlock();
+
+	//if this is the invalid block, do not process
+	if(!block->IsValid())
+		return;
+
+	BlockDefinition* blockDef = BlockDefinition::GetDefinitionById(block->m_type);
+
 	//get all neighbors ----------------------------------------------
 	BlockLocator northNeighbor = blockLocator.GetBlockLocatorToNorth();
 	Block* northBlock = northNeighbor.GetBlock();
@@ -703,9 +730,6 @@ void World::ProcessLightingForBlock(BlockLocator blockLocator)
 	BlockLocator belowNeighbor = blockLocator.GetBlockLocatorBelow();
 	Block* belowBlock = belowNeighbor.GetBlock();
 
-	Block* block = blockLocator.GetBlock();
-	BlockDefinition* blockDef = BlockDefinition::GetDefinitionById(block->m_type);
-
 	//remove the bit flag for the block saying it's dirty ----------------------------------------------
 	block->SetLightingInDirtyListFlag(false);
 
@@ -718,79 +742,55 @@ void World::ProcessLightingForBlock(BlockLocator blockLocator)
 	//process north neighbor ----------------------------------------------	
 	if (northNeighbor.IsValid())
 	{
-		//if the block is opaque we don't consider it's lighting level
-		//if (!northBlock->IsFullOpaque())
-		//{
-			uint8 neighborLightingValue = northBlock->GetIndoorLightingValue();
+		uint8 neighborLightingValue = northBlock->GetIndoorLightingValue();
 
-			if(neighborLightingValue > brightestNeighborLightingValue)
-				brightestNeighborLightingValue = neighborLightingValue;
-		//}
+		if(neighborLightingValue > brightestNeighborLightingValue)
+			brightestNeighborLightingValue = neighborLightingValue;
 	}
 
 	//process south neighbor ----------------------------------------------
 	if (southNeighbor.IsValid())
 	{
-		//if the block is opaque we don't consider it's lighting level
-		/*if (!southBlock->IsFullOpaque())
-		{*/
-			uint8 neighborLightingValue = southBlock->GetIndoorLightingValue();
+		uint8 neighborLightingValue = southBlock->GetIndoorLightingValue();
 
-			if(neighborLightingValue > brightestNeighborLightingValue)
-				brightestNeighborLightingValue = neighborLightingValue;
-		//}
+		if(neighborLightingValue > brightestNeighborLightingValue)
+			brightestNeighborLightingValue = neighborLightingValue;
 	}
 
 	//process east neighbor ----------------------------------------------
 	if (eastNeighbor.IsValid())
 	{
-		//if the block is opaque we don't consider it's lighting level
-		/*if (!eastBlock->IsFullOpaque())
-		{*/
-			uint8 neighborLightingValue = eastBlock->GetIndoorLightingValue();
+		uint8 neighborLightingValue = eastBlock->GetIndoorLightingValue();
 
-			if(neighborLightingValue > brightestNeighborLightingValue)
-				brightestNeighborLightingValue = neighborLightingValue;
-		//}
+		if(neighborLightingValue > brightestNeighborLightingValue)
+			brightestNeighborLightingValue = neighborLightingValue;
 	}
 
 	//process west neighbor ----------------------------------------------
 	if (westNeighbor.IsValid())
 	{
-		//if the block is opaque we don't consider it's lighting level
-		/*if (!westBlock->IsFullOpaque())
-		{*/
-			uint8 neighborLightingValue = westBlock->GetIndoorLightingValue();
+		uint8 neighborLightingValue = westBlock->GetIndoorLightingValue();
 
-			if(neighborLightingValue > brightestNeighborLightingValue)
-				brightestNeighborLightingValue = neighborLightingValue;
-		//}
+		if(neighborLightingValue > brightestNeighborLightingValue)
+			brightestNeighborLightingValue = neighborLightingValue;
 	}
 
 	//process above neighbor ----------------------------------------------
 	if (aboveNeighbor.IsValid())
 	{
-		//if the block is opaque we don't consider it's lighting level
-		/*if (!aboveBlock->IsFullOpaque())
-		{*/
-			uint8 neighborLightingValue = aboveBlock->GetIndoorLightingValue();
+		uint8 neighborLightingValue = aboveBlock->GetIndoorLightingValue();
 
-			if(neighborLightingValue > brightestNeighborLightingValue)
-				brightestNeighborLightingValue = neighborLightingValue;
-		//}
+		if(neighborLightingValue > brightestNeighborLightingValue)
+			brightestNeighborLightingValue = neighborLightingValue;
 	}
 
 	// process below neighbor ----------------------------------------------
 	if (belowNeighbor.IsValid())
 	{
-		//if the block is opaque we don't consider it's lighting level
-		/*if (!belowBlock->IsFullOpaque())
-		{*/
-			uint8 neighborLightingValue = belowBlock->GetIndoorLightingValue();
+		uint8 neighborLightingValue = belowBlock->GetIndoorLightingValue();
 
-			if(neighborLightingValue > brightestNeighborLightingValue)
-				brightestNeighborLightingValue = neighborLightingValue;
-		//}
+		if(neighborLightingValue > brightestNeighborLightingValue)
+			brightestNeighborLightingValue = neighborLightingValue;
 	}
 
 	//now that we have checked all the neighbors, change the value to 1 less than the highest neighbor ----------------------------------------------
@@ -807,17 +807,17 @@ void World::ProcessLightingForBlock(BlockLocator blockLocator)
 
 		//foreach neighbor, if they AREN'T opaque, add them to the dirty list
 
-		if(!northBlock->IsFullOpaque())
+		if(northBlock->IsValid() && !northBlock->IsFullOpaque())
 			AddBlockLocatorToDirtyLightingQueue(northNeighbor);
-		if(!southBlock->IsFullOpaque())
+		if(northBlock->IsValid() &&!southBlock->IsFullOpaque())
 			AddBlockLocatorToDirtyLightingQueue(southNeighbor);
-		if(!eastBlock->IsFullOpaque())
+		if(northBlock->IsValid() &&!eastBlock->IsFullOpaque())
 			AddBlockLocatorToDirtyLightingQueue(eastNeighbor);
-		if(!westBlock->IsFullOpaque())
+		if(northBlock->IsValid() &&!westBlock->IsFullOpaque())
 			AddBlockLocatorToDirtyLightingQueue(westNeighbor);
-		if(!aboveBlock->IsFullOpaque())
+		if(northBlock->IsValid() &&!aboveBlock->IsFullOpaque())
 			AddBlockLocatorToDirtyLightingQueue(aboveNeighbor);
-		if(!belowBlock->IsFullOpaque())
+		if(northBlock->IsValid() &&!belowBlock->IsFullOpaque())
 			AddBlockLocatorToDirtyLightingQueue(belowNeighbor);
 	}
 }

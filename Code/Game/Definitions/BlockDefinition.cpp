@@ -28,7 +28,7 @@ BlockDefinition::BlockDefinition(const tinyxml2::XMLElement& element)
 		m_isFullOpaque = ParseXmlAttribute(*bitSettingsElement, "isFullOpaque", m_isFullOpaque);
 		m_isSolid = ParseXmlAttribute(*bitSettingsElement, "isSolid", m_isSolid);
 		m_isVisible = ParseXmlAttribute(*bitSettingsElement, "isVisible", m_isVisible);
-		m_isLightSource = ParseXmlAttribute(*bitSettingsElement, "isLightSource", m_isLightSource);
+		m_doesEmitLight = ParseXmlAttribute(*bitSettingsElement, "doesEmitLight", m_doesEmitLight);
 
 		//other bits are set dynamically
 	}
@@ -97,6 +97,9 @@ void BlockDefinition::ConstructBitsFromBools()
 
 	if(m_isSolid)
 		m_defaultBits |= IS_BLOCK_VISIBLE_MASK;
+
+	if(m_doesEmitLight)
+		m_defaultBits |= DOES_BLOCK_EMIT_LIGHT;
 }
 
 //  =========================================================================================
