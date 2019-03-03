@@ -15,6 +15,7 @@ Block::Block(BlockDefinition* definition)
 {
 	m_type = definition->m_type;
 	m_bits = definition->m_defaultBits;
+	m_lighting = 0; //set all of our lighting bits off for now
 }
 
 //  =========================================================================================
@@ -31,4 +32,5 @@ void SetBlockToType(Block* block, const uint8 id)
 
 	block->m_type = newDefinition->m_type;
 	block->m_bits = newDefinition->m_defaultBits;
+	block->m_lighting = 0; //reset the lighting values
 }

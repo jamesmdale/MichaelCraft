@@ -141,7 +141,8 @@ Rgba Chunk::GetVertexColorFromBlockLightingValue(Block* block)
 	uint8 highestLightingValue = 0;
 	uint8 indoorLightingValue = block->GetIndoorLightingValue();
 	uint8 outdoorLightingValue = block->GetOutDoorLightingValue();
-	uint8 highestLightingValue = indoorLightingValue;
+	
+	highestLightingValue = indoorLightingValue;
 
 	if (indoorLightingValue < outdoorLightingValue)
 	{
@@ -150,7 +151,7 @@ Rgba Chunk::GetVertexColorFromBlockLightingValue(Block* block)
 
 	float percentageExposure = RangeMapFloat((float)highestLightingValue, 0.f, 15.f, MIN_LIGHT_EXPOSURE_PERCENTAGE, MAX_LIGHT_EXPOSURE_PERCENTAGE);
 
-	vertexColor.ScaleRGB(percentageExposure);
+	vertexColor.ScaleRGBByPercentage(percentageExposure);
 	return vertexColor;
 }
 
@@ -234,11 +235,10 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	BlockLocator aboveLocator = blockLocator.GetBlockLocatorAbove();
 	BlockLocator bottomLocator = blockLocator.GetBlockLocatorBelow();
 
-
 	//west/front face
 	if (!westLocator.GetBlock()->IsVisible())
 	{
-		Rgba westTint = westLocator.GetBlock;
+		Rgba westTint = GetVertexColorFromBlockLightingValue(westLocator.GetBlock());
 
 		m_meshBuilder->SetColor(westTint);
 		m_meshBuilder->SetUV(frontTexCoords.maxs.x, frontTexCoords.maxs.y);
@@ -263,7 +263,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	//south/right face
 	if (!southLocator.GetBlock()->IsVisible())
 	{
-		Rgba southTint = g_minLightColor;
+		Rgba southTint = GetVertexColorFromBlockLightingValue(southLocator.GetBlock());
 
 		m_meshBuilder->SetColor(southTint);
 		m_meshBuilder->SetUV(rightTexCoords.maxs.x, rightTexCoords.maxs.y);
@@ -289,7 +289,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	//back face
 	if (!eastLocator.GetBlock()->IsVisible())
 	{
-		Rgba eastTint = g_minLightColor;
+		Rgba eastTint = GetVertexColorFromBlockLightingValue(eastLocator.GetBlock());
 
 		m_meshBuilder->SetColor(eastTint);
 		m_meshBuilder->SetUV(backTexCoords.maxs.x, backTexCoords.maxs.y);
@@ -315,7 +315,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	//left face
 	if (!northLocator.GetBlock()->IsVisible())
 	{
-		Rgba northTint = g_minLightColor;
+		Rgba northTint = GetVertexColorFromBlockLightingValue(northLocator.GetBlock());
 
 		m_meshBuilder->SetColor(northTint);
 		m_meshBuilder->SetUV(leftTexCoords.maxs.x, leftTexCoords.maxs.y);
@@ -343,7 +343,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	{
 		if (!aboveLocator.GetBlock()->IsVisible())
 		{
-			Rgba topTint = g_minLightColor;
+			Rgba topTint = GetVertexColorFromBlockLightingValue(aboveLocator.GetBlock());
 
 			m_meshBuilder->SetColor(topTint);
 			m_meshBuilder->SetUV(topTexCoords.maxs.x, topTexCoords.maxs.y);
@@ -372,7 +372,7 @@ void Chunk::AddBlockToMesh(const int blockIndex, const Vector3& center, Block* b
 	{
 		if (!bottomLocator.GetBlock()->IsVisible())
 		{
-			Rgba bottomTint = g_minLightColor;
+			Rgba bottomTint = GetVertexColorFromBlockLightingValue(bottomLocator.GetBlock());
 
 			m_meshBuilder->SetColor(bottomTint);
 			m_meshBuilder->SetUV(bottomTexCoords.maxs.x, bottomTexCoords.maxs.y);

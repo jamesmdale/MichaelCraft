@@ -8,6 +8,7 @@ class NetMessage;
 class NetConnection;
 enum eNetMessageFlag;
 class Spritesheet;
+class Stopwatch;
 
 class Game
 {
@@ -20,6 +21,8 @@ public:
 	Clock* m_gameClock = nullptr;
 
 	SpriteSheet* m_terrainSprites = nullptr;
+
+	Stopwatch* m_inputDelayTimer = nullptr;
 
 public:
 	Game();

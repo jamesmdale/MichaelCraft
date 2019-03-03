@@ -49,9 +49,8 @@ public:
 	void DigBlock();
 	void PlaceBlock();
 	void ToggleCameraViewLocked();
-	void LockCamera();
+	//void ToggleCameraLock();
 	bool IsCameraViewLocked(){return m_isCameraViewLocked;}
-	void UnlockCamera();
 	void CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vector3& cameraForward);
 
 public:

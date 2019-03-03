@@ -17,6 +17,7 @@
 #include "Engine\Core\EngineCommon.hpp"
 #include "Engine\Core\DevConsole.hpp"
 #include "Engine\Renderer\SpriteSheet.hpp"
+#include "Engine\Time\Stopwatch.hpp"
 #include "Game\Game.hpp"
 #include "Game\GameCommon.hpp"
 #include "Game\GameStates\GameState.hpp"
@@ -105,6 +106,9 @@ void Game::Initialize()
 	//initialize definitions
 	BlockDefinition::Initialize("Data/Definitions/BlockDefinitions.xml");
 	g_terrainSprites = new SpriteSheet(*theRenderer->CreateOrGetTexture("Data/Images/Terrain_32x32.png"), 32, 32);
+
+	m_inputDelayTimer = new Stopwatch(GetMasterClock());
+	m_inputDelayTimer->SetTimer(PLAYER_INPUT_DELAY_IN_SECONDS);
 
 	// cleanup
 	theRenderer = nullptr;

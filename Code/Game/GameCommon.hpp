@@ -7,8 +7,17 @@
 #include "Engine\Input\InputSystem.hpp"
 
 // game related globals =========================================================================================
+
 extern bool g_isDebug;
 extern bool g_isQuitting;
+
+//gameplay globals  ----------------------------------------------
+constexpr float PLAYER_MOVEMENT_SPEED = 10.f;
+constexpr float RAYCAST_MAX_DISTANCE = 8.f;
+constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
+constexpr float PLAYER_INPUT_DELAY_IN_SECONDS = 0.25f;
+
+// chunk data ----------------------------------------------
 
 constexpr uint BITS_WIDE_X = 4;
 constexpr uint BITS_WIDE_Y = 4;
@@ -37,7 +46,7 @@ constexpr float CHUNK_DEACTIVATION_RADIUS = (float)BLOCKS_WIDE_X * (float)CHUNK_
 
 constexpr uint8 CHUNK_SAVE_VERSION = 1;
 
-//block data
+//block data ----------------------------------------------
 constexpr uint8 IS_BLOCK_SOLID_MASK = 0b0000'0001;
 constexpr uint8 IS_BLOCK_FULL_OPAQUE_MASK = 0b0000'0010;
 constexpr uint8 IS_BLOCK_VISIBLE_MASK = 0b0000'0100;
@@ -51,19 +60,14 @@ constexpr uint8 BITS_WIDE_OUTDOOR_LIGHTING_MASK = 4;
 constexpr int MAX_INDOOR_LIGHTING_VALUE = 15;
 constexpr int MAX_OUTDOOR_LIGHTING_VALUE = 15;
 
-//gameplay globals
-constexpr float PLAYER_MOVEMENT_SPEED = 10.f;
-constexpr float RAYCAST_MAX_DISTANCE = 8.f;
-constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
-
-//lighting defaults
+//lighting defaults ----------------------------------------------
 constexpr float MIN_LIGHT_EXPOSURE_PERCENTAGE = 0.15f;
 constexpr float MAX_LIGHT_EXPOSURE_PERCENTAGE = 1.f;
 
 extern Rgba g_minLightColor;
 extern Rgba g_maxLightColor;
 
-//convenience directions
+//convenience directions ----------------------------------------------
 extern Vector3 g_worldUp;
 extern Vector3 g_worldForward;
 extern Vector3 g_worldRight;

@@ -111,6 +111,7 @@ void World::Render()
 void World::UpdateFromInput(float deltaSeconds)
 {
 	InputSystem* theInput = InputSystem::GetInstance();
+	Game* theGame = Game::GetInstance();
 
 	Vector2 mouseDelta = Vector2::ZERO;
 	mouseDelta = InputSystem::GetInstance()->GetMouse()->GetMouseDelta();
@@ -160,44 +161,57 @@ void World::UpdateFromInput(float deltaSeconds)
 		positionToAdd = cameraRight * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
+	//up is (+z)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE) || theInput->IsKeyPressed(theInput->KEYBOARD_E))
 	{
 		positionToAdd = g_worldUp * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
+	//up is (-z)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL) || theInput->IsKeyPressed(theInput->KEYBOARD_Q))
 	{
 		positionToAdd = -g_worldUp * deltaSeconds * PLAYER_MOVEMENT_SPEED;
 	}
 
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_LEFT_SHIFT))
+	//sprint move speed (twice as fast)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_SHIFT))
 	{
-		positionToAdd = positionToAdd * 2;
+		positionToAdd *= 2.f;
 	}
 
-	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_U))
+	//reset chunks
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_U) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		DeactivateAllChunks();
 	}
 
-	if (theInput->WasKeyJustPressed(theInput->MOUSE_LEFT_CLICK))
+	//dig block
+	if (theInput->WasKeyJustPressed(theInput->MOUSE_LEFT_CLICK) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		DigBlock();
+		theGame->m_inputDelayTimer->Reset();
 	}
 
-	if (theInput->WasKeyJustPressed(theInput->MOUSE_RIGHT_CLICK))
+	//place block
+	if (theInput->WasKeyJustPressed(theInput->MOUSE_RIGHT_CLICK) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		PlaceBlock();
+		theGame->m_inputDelayTimer->Reset();
 	}
 
-	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_PAGEUP))
+	//exit player position and freelook
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_PAGEUP) && theGame->m_inputDelayTimer->HasElapsed())
 	{
-		LockCamera();
+		ToggleCameraViewLocked();
+		theGame->m_inputDelayTimer->Reset();
 	}
-	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_PAGEDOWN))
-	{
-		UnlockCamera();
-	}
+
+	//set player position to current freelook position 
+	//if (theInput->WasKeyJustPressed(theInput->KEYBOARD_PAGEDOWN) && theGame->m_inputDelayTimer->HasElapsed())
+	//{
+	//	//UnlockCamera();
+	//	theGame->m_inputDelayTimer->Reset();
+	//}
 
 	if(InputSystem::GetInstance()->WasKeyJustPressed(InputSystem::GetInstance()->KEYBOARD_ESCAPE))
 	{
@@ -696,7 +710,7 @@ void World::ProcessLightingForBlock(BlockLocator blockLocator)
 	block->SetLightingInDirtyListFlag(false);
 
 	uint8 minLightingValue = blockDef->m_minimumLightingValue;
-	uint8 currentLightingValue = block->GetIndoorLightingValue();;
+	uint8 currentLightingValue = block->GetIndoorLightingValue();
 	uint8 newLightingValue = currentLightingValue;
 
 	uint8 brightestNeighborLightingValue = 0;
@@ -705,82 +719,82 @@ void World::ProcessLightingForBlock(BlockLocator blockLocator)
 	if (northNeighbor.IsValid())
 	{
 		//if the block is opaque we don't consider it's lighting level
-		if (!northBlock->IsFullOpaque())
-		{
+		//if (!northBlock->IsFullOpaque())
+		//{
 			uint8 neighborLightingValue = northBlock->GetIndoorLightingValue();
 
 			if(neighborLightingValue > brightestNeighborLightingValue)
 				brightestNeighborLightingValue = neighborLightingValue;
-		}
+		//}
 	}
 
 	//process south neighbor ----------------------------------------------
 	if (southNeighbor.IsValid())
 	{
 		//if the block is opaque we don't consider it's lighting level
-		if (!southBlock->IsFullOpaque())
-		{
+		/*if (!southBlock->IsFullOpaque())
+		{*/
 			uint8 neighborLightingValue = southBlock->GetIndoorLightingValue();
 
 			if(neighborLightingValue > brightestNeighborLightingValue)
 				brightestNeighborLightingValue = neighborLightingValue;
-		}
+		//}
 	}
 
 	//process east neighbor ----------------------------------------------
 	if (eastNeighbor.IsValid())
 	{
 		//if the block is opaque we don't consider it's lighting level
-		if (!eastBlock->IsFullOpaque())
-		{
+		/*if (!eastBlock->IsFullOpaque())
+		{*/
 			uint8 neighborLightingValue = eastBlock->GetIndoorLightingValue();
 
 			if(neighborLightingValue > brightestNeighborLightingValue)
 				brightestNeighborLightingValue = neighborLightingValue;
-		}
+		//}
 	}
 
 	//process west neighbor ----------------------------------------------
 	if (westNeighbor.IsValid())
 	{
 		//if the block is opaque we don't consider it's lighting level
-		if (!westBlock->IsFullOpaque())
-		{
+		/*if (!westBlock->IsFullOpaque())
+		{*/
 			uint8 neighborLightingValue = westBlock->GetIndoorLightingValue();
 
 			if(neighborLightingValue > brightestNeighborLightingValue)
 				brightestNeighborLightingValue = neighborLightingValue;
-		}
+		//}
 	}
 
 	//process above neighbor ----------------------------------------------
 	if (aboveNeighbor.IsValid())
 	{
 		//if the block is opaque we don't consider it's lighting level
-		if (!aboveBlock->IsFullOpaque())
-		{
+		/*if (!aboveBlock->IsFullOpaque())
+		{*/
 			uint8 neighborLightingValue = aboveBlock->GetIndoorLightingValue();
 
 			if(neighborLightingValue > brightestNeighborLightingValue)
 				brightestNeighborLightingValue = neighborLightingValue;
-		}
+		//}
 	}
 
 	// process below neighbor ----------------------------------------------
 	if (belowNeighbor.IsValid())
 	{
 		//if the block is opaque we don't consider it's lighting level
-		if (!belowBlock->IsFullOpaque())
-		{
+		/*if (!belowBlock->IsFullOpaque())
+		{*/
 			uint8 neighborLightingValue = belowBlock->GetIndoorLightingValue();
 
 			if(neighborLightingValue > brightestNeighborLightingValue)
 				brightestNeighborLightingValue = neighborLightingValue;
-		}
+		//}
 	}
 
 	//now that we have checked all the neighbors, change the value to 1 less than the highest neighbor ----------------------------------------------
-	if ((brightestNeighborLightingValue - 1) > minLightingValue)
+	if ((brightestNeighborLightingValue - 1) > minLightingValue && (brightestNeighborLightingValue - 1) >= 0)
 		newLightingValue = brightestNeighborLightingValue - 1;
 	else
 		newLightingValue = minLightingValue;
@@ -789,6 +803,7 @@ void World::ProcessLightingForBlock(BlockLocator blockLocator)
 	if (newLightingValue != currentLightingValue)
 	{
 		block->SetIndoorLightingValue(newLightingValue);
+		blockLocator.m_chunk->m_isMeshDirty = true;
 
 		//foreach neighbor, if they AREN'T opaque, add them to the dirty list
 
@@ -1035,6 +1050,7 @@ void World::DigBlock()
 	{
 		Block* impactBlock = impactLocator.GetBlock();
 		SetBlockToType(impactBlock, AIR_BLOCK_ID);
+		AddBlockLocatorToDirtyLightingQueue(impactLocator);
 		impactLocator.m_chunk->m_isMeshDirty = true;
 		impactLocator.m_chunk->m_doesRequireSave = true;
 		
@@ -1088,10 +1104,10 @@ void World::PlaceBlock()
 	{
 		Block* targetedBlock = targetedBlockLocator.GetBlock();
 		SetBlockToType(targetedBlock, GLOWSTONE_BLOCK_ID);
+		AddBlockLocatorToDirtyLightingQueue(targetedBlockLocator);
+
 		targetedBlockLocator.m_chunk->m_isMeshDirty = true;
 		targetedBlockLocator.m_chunk->m_doesRequireSave = true;
-
-		AddBlockLocatorToDirtyLightingQueue(targetedBlockLocator);
 
 		//check to see if we need to set the neighboring chunks to dirty
 		std::vector<Chunk*> outNeighboringChunks;
@@ -1109,18 +1125,6 @@ void World::PlaceBlock()
 void World::ToggleCameraViewLocked()
 {
 	m_isCameraViewLocked = !m_isCameraViewLocked;
-}
-
-//  =========================================================================================
-void World::LockCamera()
-{
-	m_isCameraViewLocked = true;
-}
-
-//  =========================================================================================
-void World::UnlockCamera()
-{
-	m_isCameraViewLocked = false;
 }
 
 //  =========================================================================================
