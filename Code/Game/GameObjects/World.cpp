@@ -1254,7 +1254,12 @@ void World::DigBlock()
 	BlockLocator impactLocator = m_raycastResult.m_impactBlockLocator;
 	if (impactLocator.IsValid())
 	{
-		//AddSkyFlagToBelowBlocks(targetedBlockLocator);
+		BlockLocator aboveBlockLocator = impactLocator.GetBlockLocatorAbove();
+		if (aboveBlockLocator.GetBlock()->IsSky())
+		{
+			AddSkyFlagToBelowBlocks(impactLocator);
+		}
+		
 		SetBlockToType(impactLocator.GetBlock(), AIR_BLOCK_ID);
 		AddBlockLocatorToDirtyLightingQueue(impactLocator);
 		impactLocator.m_chunk->m_isMeshDirty = true;
@@ -1308,7 +1313,12 @@ void World::PlaceBlock()
 
 	if (targetedBlockLocator.IsValid())
 	{
-		RemoveSkyFlagFromBelowBlocks(targetedBlockLocator);
+		BlockLocator aboveBlockLocator = targetedBlockLocator.GetBlockLocatorAbove();
+		if (aboveBlockLocator.GetBlock()->IsSky())
+		{
+			RemoveSkyFlagFromBelowBlocks(targetedBlockLocator);
+		}
+
 		SetBlockToType(targetedBlockLocator.GetBlock(), m_selectableBlockTypes[m_selectedBlockIndex]);
 		AddBlockLocatorToDirtyLightingQueue(targetedBlockLocator);
 		targetedBlockLocator.m_chunk->m_isMeshDirty = true;
@@ -1342,33 +1352,50 @@ void World::CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vect
 //  =========================================================================================
 void World::RemoveSkyFlagFromBelowBlocks(BlockLocator& blockLocator)
 {
-	Block* targetedBlock = blockLocator.GetBlock();
-
-	//if we replaced a sky block we need to mark everything below it as "NOT SKY"
-	if (targetedBlock->IsSky()) 
+	//if we replaced dug a block out and we are sky, we need to go down until we hit a non opaque block
+	BlockLocator belowBlockLocator = blockLocator.GetBlockLocatorBelow();
+	bool isSky = true;
+	while (isSky)
 	{
-		BlockLocator belowBlockLocator = blockLocator.GetBlockLocatorBelow();
-
-		bool isSky = true;
-		while (isSky)
+		Block* belowBlock = belowBlockLocator.GetBlock();
+		if (!belowBlock->IsSky() || !belowBlock->IsValid())
 		{
-			Block* belowBlock = belowBlockLocator.GetBlock();
-			if (!belowBlock->IsSky() || !belowBlock->IsValid())
-			{
-				isSky = false;
-			}
-			else
-			{
-				belowBlock->SetSkyFlag(false);
-				belowBlockLocator.StepDown();
-			}
+			isSky = false;
 		}
-	}
+		else
+		{
+			AddBlockLocatorToDirtyLightingQueue(belowBlockLocator);
+			belowBlock->SetSkyFlag(false);
+			belowBlockLocator.StepDown();
+		}
+	}	
 }
 
 //  =========================================================================================
-void World::AddSkyFlagToBelowBlocks(BlockLocator & blockLocator)
+void World::AddSkyFlagToBelowBlocks(BlockLocator& blockLocator)
 {
+	Block* targetedBlock = blockLocator.GetBlock();
+	targetedBlock->SetSkyFlag(true);
+
+	//if we replaced dug a block out and we are sky, we need to go down until we hit a non opaque block
+	BlockLocator belowBlockLocator = blockLocator.GetBlockLocatorBelow();
+
+	bool isSky = true;
+	while (isSky)
+	{
+		Block* belowBlock = belowBlockLocator.GetBlock();
+		if (belowBlock->IsFullOpaque() || !belowBlock->IsValid())
+		{
+			isSky = false;
+		}
+		else
+		{
+			AddBlockLocatorToDirtyLightingQueue(belowBlockLocator);
+			belowBlock->SetSkyFlag(true);
+			belowBlockLocator.StepDown();
+		}
+	}
+	
 }
 
 //  =========================================================================================
