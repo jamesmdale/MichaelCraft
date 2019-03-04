@@ -1,6 +1,6 @@
 #include "Game\Helpers\GameRendererHelpers.hpp"
-#include "Engine\Renderer\Mesh.hpp"
-#include "Engine\Renderer\MeshBuilder.hpp"
+//#include "Engine\Renderer\Mesh.hpp"
+//#include "Engine\Renderer\MeshBuilder.hpp"
 #include "Engine\Math\Vector3.hpp"
 #include "Game\GameCommon.hpp"
 
@@ -89,6 +89,69 @@ Mesh* CreateDebugStar(const Vector3& center, const Rgba& color, float scale)
 	
 
 	return builder.CreateMesh<VertexPCU>();
+}
+
+//  =========================================================================================
+void CreateDebugStar(MeshBuilder& builder, const Vector3& center, const Rgba& color, float scale)
+{
+	float halfScale = scale * 0.5f;
+
+	builder.Begin(LINES_DRAW_PRIMITIVE, false);
+
+	//east to west
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) + (g_east * scale));
+
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) + (g_west * scale));
+
+	//north to south
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) + (g_north * scale));
+
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) + (g_south * scale));
+
+	//up to down
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) + (g_worldUp * scale));
+
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) - (g_worldUp * scale));
+
+	//diagonals
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) + (Vector3::ONE * halfScale));
+
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) - (Vector3::ONE * halfScale));
+
+	//diagonals
+
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) + (Vector3(1.f, -1.f, -1.f) * halfScale));
+
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) - (Vector3(1.f, -1.f, -1.f) * halfScale));
+
+	//diagonals
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) + (Vector3(-1.f, 1.f, -1.f) * halfScale));
+
+	builder.SetColor(color);
+	builder.SetUV(0, 0);
+	builder.PushVertex(Vector3(center) - (Vector3(-1.f, 1.f, -1.f) * halfScale));
 }
 
 //  =========================================================================================

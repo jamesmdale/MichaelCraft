@@ -16,8 +16,6 @@
 #include "Engine\Renderer\RenderScene.hpp"
 #include "Engine\Renderer\RenderScene2D.hpp"
 #include "Engine\Core\StringUtils.hpp"
-#include "Engine\Renderer\MeshBuilder.hpp"
-#include "Engine\Renderer\Mesh.hpp"
 #include "Engine\Math\IntVector2.hpp"
 #include "Engine\Math\MathUtils.hpp"
 #include "Engine\Renderer\RendererTypes.hpp"
@@ -40,6 +38,9 @@ World::~World()
 
 	delete(m_gameCamera);
 	m_gameCamera = nullptr;
+
+	delete(m_debugSkyMesh);
+	m_debugSkyMesh = nullptr;
 }
 
 //  =========================================================================================
@@ -179,7 +180,7 @@ void World::UpdateFromInput(float deltaSeconds)
 	//sprint move speed (twice as fast)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_SHIFT))
 	{
-		positionToAdd *= 2.f;
+		positionToAdd *= 3.f;
 	}
 
 	//reset chunks
@@ -199,6 +200,27 @@ void World::UpdateFromInput(float deltaSeconds)
 	if (theInput->WasKeyJustPressed(theInput->MOUSE_RIGHT_CLICK) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		PlaceBlock();
+		theGame->m_inputDelayTimer->Reset();
+	}
+
+	//enable debug for sky blocks
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_1) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		GenerateDebugSkyMesh();
+		theGame->m_inputDelayTimer->Reset();
+	}
+
+	//enable debug for sky blocks
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_2) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		m_isDebugDirtyLighting ? m_isDebugDirtyLighting = false : m_isDebugDirtyLighting = true;
+		theGame->m_inputDelayTimer->Reset();
+	}
+
+	//enable debug for sky blocks
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_L) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		m_shouldStepDirtyLightingDebug = true;
 		theGame->m_inputDelayTimer->Reset();
 	}
 
@@ -259,12 +281,33 @@ void World::UpdatePlayerViewPosition()
 void World::UpdateDirtyLighting()
 {
 	//process until no blocks are dirty
-	while (m_blocksWithDirtyLighting.size() > 0)
+	if (!m_isDebugDirtyLighting)
 	{
-		BlockLocator blockToProcess = m_blocksWithDirtyLighting.front();
-		m_blocksWithDirtyLighting.pop_front();
+		m_dirtyDebugLightingPoints.clear();
+		while (m_blocksWithDirtyLighting.size() > 0)
+		{
+			BlockLocator blockToProcess = m_blocksWithDirtyLighting.front();
+			m_blocksWithDirtyLighting.pop_front();
 
-		ProcessLightingForBlock(blockToProcess);
+			ProcessLightingForBlock(blockToProcess);
+		}
+	}
+	else if(m_isDebugDirtyLighting && m_shouldStepDirtyLightingDebug)
+	{
+		m_dirtyDebugLightingPoints.clear();
+		std::deque<BlockLocator> blocksToProcessThisFrame;
+		blocksToProcessThisFrame.swap(m_blocksWithDirtyLighting);
+		int blocksDirtyBefore = (int)blocksToProcessThisFrame.size();
+
+		while (blocksToProcessThisFrame.size() > 0)
+		{
+			BlockLocator blockToProcess = blocksToProcessThisFrame.front();
+			blocksToProcessThisFrame.pop_front();
+
+			ProcessLightingForBlock(blockToProcess);
+		}
+
+		m_shouldStepDirtyLightingDebug = false;
 	}
 }
 
@@ -369,6 +412,27 @@ void World::RenderDebug()
 
 	delete(raycastMesh);
 	raycastMesh = nullptr;
+
+	if (m_debugSkyMesh != nullptr)
+	{
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(m_debugSkyMesh);
+	}
+
+	if (m_isDebugDirtyLighting)
+	{
+		MeshBuilder debugLightBuilder;
+		for (int debugLightPoint = 0; debugLightPoint < (int)m_dirtyDebugLightingPoints.size(); ++debugLightPoint)
+		{
+			CreateDebugStar(debugLightBuilder, m_dirtyDebugLightingPoints[debugLightPoint], Rgba::YELLOW, 0.25f);
+		}
+
+		Mesh* debugLightRenderMesh = debugLightBuilder.CreateMesh<VertexPCU>();
+		theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
+		theRenderer->DrawMesh(debugLightRenderMesh);
+		delete(debugLightRenderMesh);
+		debugLightRenderMesh = nullptr;
+	}
 
 	/* NEIGHBORING BLOCK LOCATOR DEBUG =========================================================================================
 
@@ -1030,6 +1094,9 @@ void World::AddBlockLocatorToDirtyLightingQueue(BlockLocator blockLocator)
 
 	block->SetLightingInDirtyListFlag(true);
 
+	if(m_isDebugDirtyLighting)
+		m_dirtyDebugLightingPoints.emplace_back(blockLocator.m_chunk->GetBlockWorldCenterForBlockIndex(blockLocator.m_blockIndex));
+
 	m_blocksWithDirtyLighting.emplace_back(blockLocator);
 }
 
@@ -1394,8 +1461,7 @@ void World::AddSkyFlagToBelowBlocks(BlockLocator& blockLocator)
 			belowBlock->SetSkyFlag(true);
 			belowBlockLocator.StepDown();
 		}
-	}
-	
+	}	
 }
 
 //  =========================================================================================
@@ -1440,6 +1506,67 @@ Mesh* World::CreateUITextMesh()
 	}
 
 	return textMesh;
+}
+
+//  =========================================================================================
+void World::GenerateDebugSkyMesh()
+{
+	Vector3 position = m_gameCamera->m_position;
+	Chunk* chunk = GetActiveChunkFromPlayerPosition(position);
+
+	if(chunk == nullptr)
+		return;
+
+	MeshBuilder debugSkyBuilder;
+
+	for (int columnIndex = 0; columnIndex < BLOCKS_PER_LAYER; ++columnIndex)
+	{
+		bool isBlockSky = true;
+		//get highest block in column
+		IntVector3 blockCoords = chunk->GetBlockCoordsForBlockIndex(columnIndex);
+		blockCoords.z = BLOCKS_HIGH_Z - 1; //change index to the highest in the column
+
+		int blockIndex = chunk->GetBlockIndexForBlockCoords(blockCoords);
+		BlockLocator currentBlockLocator = BlockLocator(chunk, blockIndex);
+
+		while (isBlockSky)
+		{
+			//get the block locator below
+			Block* blockToProcess = currentBlockLocator.GetBlock();
+
+			//if block is visible we are at the 'ground' (first non air/sky block) at the current index
+			if (!blockToProcess->IsSky())
+			{
+				isBlockSky = false;
+			}
+			else
+			{			
+				//set block locator to block locator below
+				Vector3 worldCenterOfBlock = chunk->GetBlockWorldCenterForBlockIndex(currentBlockLocator.m_blockIndex);
+
+				CreateDebugStar(debugSkyBuilder, worldCenterOfBlock, Rgba::PINK, 0.25f);
+				currentBlockLocator.StepDown();
+			}
+		}
+	}
+
+	m_debugSkyMesh = debugSkyBuilder.CreateMesh<VertexPCU>();
+}
+
+//  =========================================================================================
+Chunk* World::GetActiveChunkFromPlayerPosition(const Vector3& playerPosition)
+{
+	std::map<IntVector2, Chunk*>::iterator activeChunkIterator = m_activeChunks.begin();
+
+	for (activeChunkIterator; activeChunkIterator != m_activeChunks.end(); ++activeChunkIterator)
+	{
+		Chunk* chunk = activeChunkIterator->second;
+		if(chunk->m_worldBounds.IsPointInside(playerPosition))
+			return chunk;
+	}
+
+	//point not found within active chunk list
+	return nullptr;
 }
 
 //  =========================================================================================

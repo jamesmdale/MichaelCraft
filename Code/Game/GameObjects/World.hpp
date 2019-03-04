@@ -63,6 +63,10 @@ public:
 	Mesh* CreateTexturedUIMesh();
 	Mesh* CreateUITextMesh();
 
+	//debug
+	void GenerateDebugSkyMesh();
+	Chunk* GetActiveChunkFromPlayerPosition(const Vector3& playerPosition);
+
 public:
 	std::map<IntVector2, Chunk*> m_activeChunks;
 	std::vector<IntVector2> m_chunksOnDisk;
@@ -82,8 +86,13 @@ public:
 	int m_selectedBlockIndex = 0;
 	std::vector<uint8> m_selectableBlockTypes;
 
+	Mesh* m_debugSkyMesh = nullptr;
+
 private:
 	bool m_isCameraViewLocked = false;
+	bool m_isDebugDirtyLighting = false;
+	bool m_shouldStepDirtyLightingDebug = false;
+	std::vector<Vector3> m_dirtyDebugLightingPoints;
 };
 
 bool CompareDistanceFromZeroLessThan(const IntVector2& first, const IntVector2& second);

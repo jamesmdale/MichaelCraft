@@ -12,7 +12,7 @@ extern bool g_isDebug;
 extern bool g_isQuitting;
 
 //gameplay globals  ----------------------------------------------
-constexpr float PLAYER_MOVEMENT_SPEED = 10.f;
+constexpr float PLAYER_MOVEMENT_SPEED = 5.f;
 constexpr float RAYCAST_MAX_DISTANCE = 8.f;
 constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
 constexpr float PLAYER_INPUT_DELAY_IN_SECONDS = 0.25f;
