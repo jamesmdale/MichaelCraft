@@ -212,7 +212,16 @@ void World::UpdateFromInput(float deltaSeconds)
 	//toggle debug for sky blocks
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_1) && theGame->m_inputDelayTimer->HasElapsed())
 	{
-		m_debugSkyMesh == nullptr ? GenerateDebugSkyMesh() : m_debugSkyMesh = nullptr;
+		if (m_debugSkyMesh == nullptr)
+		{
+			GenerateDebugSkyMesh();
+		}
+		else
+		{
+			delete(m_debugSkyMesh);
+			m_debugSkyMesh = nullptr;
+		}
+			
 		theGame->m_inputDelayTimer->Reset();
 	}
 
@@ -817,8 +826,6 @@ void World::InitializeChunkLighting(Chunk* chunk)
 			else
 			{			
 				blockToProcess->SetOutdoorLightingValue(MAX_OUTDOOR_LIGHTING_VALUE);
-				AddBlockLocatorToDirtyLightingQueue(currentBlockLocator);
-
 				//mark cardinal neighbors that AREN'T SKY dirty
 
 				//north block
@@ -1101,6 +1108,9 @@ void World::ProcessLightingForBlock(BlockLocator blockLocator)
 //  =========================================================================================
 void World::AddBlockLocatorToDirtyLightingQueue(BlockLocator blockLocator)
 {
+	if(!blockLocator.IsValid())
+		return;
+
 	Block* block = blockLocator.GetBlock();
 
 	//if the block is fully opaque OR it's already in the list, there is no need to add it to the dirty list
@@ -1111,6 +1121,15 @@ void World::AddBlockLocatorToDirtyLightingQueue(BlockLocator blockLocator)
 
 	if(m_isDebugDirtyLighting)
 		m_dirtyDebugLightingPoints.emplace_back(blockLocator.m_chunk->GetBlockWorldCenterForBlockIndex(blockLocator.m_blockIndex));
+
+	std::vector<Chunk*> outNeighboringChunks;
+	if (blockLocator.IsBlockIndexOnEdge(outNeighboringChunks))
+	{
+		for (int chunkIndex = 0; chunkIndex < (int)outNeighboringChunks.size(); ++chunkIndex)
+		{
+			outNeighboringChunks[chunkIndex]->m_isMeshDirty = true;
+		}
+	}
 
 	m_blocksWithDirtyLighting.emplace_back(blockLocator);
 }
