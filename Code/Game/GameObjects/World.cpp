@@ -183,6 +183,12 @@ void World::UpdateFromInput(float deltaSeconds)
 		positionToAdd *= 3.f;
 	}
 
+	//walk move speed
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_C))
+	{
+		positionToAdd *= 0.15f;
+	}
+
 	//reset chunks
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_U) && theGame->m_inputDelayTimer->HasElapsed())
 	{
@@ -203,14 +209,23 @@ void World::UpdateFromInput(float deltaSeconds)
 		theGame->m_inputDelayTimer->Reset();
 	}
 
-	//enable debug for sky blocks
+	//toggle debug for sky blocks
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_1) && theGame->m_inputDelayTimer->HasElapsed())
 	{
-		GenerateDebugSkyMesh();
+		m_debugSkyMesh == nullptr ? GenerateDebugSkyMesh() : m_debugSkyMesh = nullptr;
 		theGame->m_inputDelayTimer->Reset();
 	}
 
-	//enable debug for sky blocks
+	//refresh debug sky mesh
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_K) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		if(m_debugSkyMesh != nullptr)
+			GenerateDebugSkyMesh();
+
+		theGame->m_inputDelayTimer->Reset();
+	}
+
+	//enable debug for dirty lighting
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_2) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		m_isDebugDirtyLighting ? m_isDebugDirtyLighting = false : m_isDebugDirtyLighting = true;
@@ -766,7 +781,7 @@ void World::InitializeChunkLighting(Chunk* chunk)
 			Block* blockToProcess = currentBlockLocator.GetBlock();
 
 			//if block is visible we are at the 'ground' (first non air/sky block) at the current index
-			if (blockToProcess->IsFullOpaque())
+			if (blockToProcess->IsFullOpaque() || !blockToProcess->IsValid())
 			{
 				isBlockSky = false;
 			}
@@ -1459,6 +1474,7 @@ void World::AddSkyFlagToBelowBlocks(BlockLocator& blockLocator)
 		{
 			AddBlockLocatorToDirtyLightingQueue(belowBlockLocator);
 			belowBlock->SetSkyFlag(true);
+			//belowBlock->SetOutdoorLightingValue(MAX_OUTDOOR_LIGHTING_VALUE);
 			belowBlockLocator.StepDown();
 		}
 	}	
@@ -1495,9 +1511,21 @@ Mesh* World::CreateUITextMesh()
 	Mesh* textMesh = nullptr;
 	Window* theWindow = Window::GetInstance();
 
-	// fps counter ----------------------------------------------		
+	// block type counter ----------------------------------------------		
 	AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.9f, 0.8f), Vector2(0.99f, 0.89f));
 	builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("CurrentBlockType:"), Rgba::WHITE);
+
+	if (m_debugSkyMesh != nullptr)
+	{
+		AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.9f), Vector2(0.5f, 0.99f));
+		builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("SKY_DEBUG_ENABLED: 'K' to Refresh & '1' to disable"), Rgba::YELLOW);
+	}
+
+	if (m_isDebugDirtyLighting)
+	{
+		AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01, 0.8f), Vector2(0.5f, 0.89f));
+		builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("DEBUG_DIRTY_LIGHTING ENABLED: 'L' to Step & '2' to disable"), Rgba::YELLOW);
+	}
 
 	// create mesh ----------------------------------------------
 	if (builder.m_vertices.size() > 0)
