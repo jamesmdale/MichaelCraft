@@ -1254,8 +1254,8 @@ void World::DigBlock()
 	BlockLocator impactLocator = m_raycastResult.m_impactBlockLocator;
 	if (impactLocator.IsValid())
 	{
-		//AddSkyFlagToBelowBlocks(targetedBlockLocator);
-		SetBlockToType(impactLocator.GetBlock(), AIR_BLOCK_ID);
+		Block* impactBlock = impactLocator.GetBlock();
+		SetBlockToType(impactBlock, AIR_BLOCK_ID);
 		AddBlockLocatorToDirtyLightingQueue(impactLocator);
 		impactLocator.m_chunk->m_isMeshDirty = true;
 		impactLocator.m_chunk->m_doesRequireSave = true;

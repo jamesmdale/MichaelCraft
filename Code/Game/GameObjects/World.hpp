@@ -48,13 +48,16 @@ public:
 	//Raycasting
 	RaycastResult Raycast(const Vector3& start, const Vector3& forward, float maxDistance);
 
-	//player actions
+	//Player Actions
 	void InitializeSelectableBlockList();
 	void DigBlock();
 	void PlaceBlock();
 	void ToggleCameraViewLocked();
 	bool IsCameraViewLocked(){return m_isCameraViewLocked;}
 	void CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vector3& cameraForward);
+
+	void RemoveSkyFlagFromBelowBlocks(BlockLocator& blockLocator);
+	void AddSkyFlagToBelowBlocks(BlockLocator& blockLocator);
 
 	//UI
 	Mesh* CreateTexturedUIMesh();

@@ -26,6 +26,7 @@ constexpr uint BITS_TALL_Z = 8;
 constexpr uint BLOCKS_WIDE_X =  1 << BITS_WIDE_X;
 constexpr uint BLOCKS_WIDE_Y = 1 << BITS_WIDE_Y;
 constexpr uint BLOCKS_HIGH_Z = 1 << BITS_TALL_Z;
+constexpr uint BLOCKS_PER_LAYER = BLOCKS_WIDE_X * BLOCKS_WIDE_Y;
 constexpr uint BLOCKS_PER_CHUNK = BLOCKS_WIDE_X * BLOCKS_WIDE_Y * BLOCKS_HIGH_Z;
 
 constexpr uint16 CHUNK_X_MASK = BLOCKS_WIDE_X - 1;
