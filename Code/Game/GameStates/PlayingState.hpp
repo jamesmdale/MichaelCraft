@@ -30,12 +30,5 @@ public:
 public:
 
 	World* m_world = nullptr;
-	//Mesh* m_axisMesh = nullptr;
-
-	//Camera* m_uiCamera = nullptr;
-
-	//GameCamera* m_gameCamera = nullptr;
-
-	//Player* m_player = nullptr;
 };
 

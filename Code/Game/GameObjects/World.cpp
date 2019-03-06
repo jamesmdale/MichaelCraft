@@ -19,6 +19,9 @@
 #include "Engine\Math\IntVector2.hpp"
 #include "Engine\Math\MathUtils.hpp"
 #include "Engine\Renderer\RendererTypes.hpp"
+#include "Engine\Renderer\Material.hpp"
+#include "Engine\Renderer\Shader.hpp"
+#include "Engine\Renderer\ShaderProgram.hpp"
 #include <map>
 #include <string>
 #include <algorithm>
@@ -65,14 +68,12 @@ void World::Initialize()
 
 	InitializeSelectableBlockList();
 
-	//int test1 = CountNumWordsInString(nullptr);
-
-	//char str[] = { 'h', 'i'};
-
-	//int test2 = CountNumWordsInString(str);
-	//int value = CountNumWordsInString(" hello");
-	//int value1 = CountNumWordsInString("a");
-	//int value2 = CountNumWordsInString("A BIG DOG");
+	m_globalIndoorLightColor = Rgba(1.0f, 0.9f, 0.8f, 1.0f);
+	m_globalOutdoorLightColor = Rgba(0.8f, 0.9f, 1.0f, 1.0f);
+	m_skyColor = Rgba::LIGHT_BLUE;
+	
+	m_fogNearFarRange.x = (CHUNK_DISTANCE_RENDER * 16.f) * 0.75;  //fog near
+	m_fogNearFarRange.y = (CHUNK_DISTANCE_ACTIVATION * 16.f) * 0.75; //fog far
 }
 
 //  =========================================================================================
@@ -209,6 +210,8 @@ void World::UpdateFromInput(float deltaSeconds)
 		theGame->m_inputDelayTimer->Reset();
 	}
 
+	// debug keys ----------------------------------------------
+
 	//toggle debug for sky blocks
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_1) && theGame->m_inputDelayTimer->HasElapsed())
 	{
@@ -238,6 +241,13 @@ void World::UpdateFromInput(float deltaSeconds)
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_2) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		m_isDebugDirtyLighting ? m_isDebugDirtyLighting = false : m_isDebugDirtyLighting = true;
+		theGame->m_inputDelayTimer->Reset();
+	}
+
+	//enable debug for dirty lighting
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_3) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		m_isDebugRGB ? m_isDebugRGB = false : m_isDebugRGB = true;
 		theGame->m_inputDelayTimer->Reset();
 	}
 
@@ -376,8 +386,34 @@ void World::RenderUI()
 //  =========================================================================================
 void World::RenderChunks()
 {
-	std::map<IntVector2, Chunk*>::iterator chunkIterator;
+	Renderer* theRenderer = Renderer::GetInstance();
+	
+	//bind material
+	if (m_isDebugRGB)
+	{
+		theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
+	}
+	else
+	{
+		Material* overworldOpaqueMaterial = theRenderer->CreateOrGetMaterial("OverworldOpaque");
+		theRenderer->BindMaterial(overworldOpaqueMaterial);
+		int shaderProgramHandle = overworldOpaqueMaterial->m_shader->m_program->GetHandle();
 
+		//set material properties
+		bool bindSuccess = theRenderer->SetVector3Uniform(shaderProgramHandle, "CAMERA_WORLD_POSITION", m_gameCamera->m_position);
+		bindSuccess = theRenderer->SetVector3Uniform(shaderProgramHandle, "GLOBAL_INDOOR_LIGHT_COLOR", Rgba::ConvertToVector3(m_globalIndoorLightColor));
+		bindSuccess = theRenderer->SetVector3Uniform(shaderProgramHandle, "GLOBAL_OUTDOOR_LIGHT_COLOR", Rgba::ConvertToVector3(m_globalOutdoorLightColor));
+		bindSuccess = theRenderer->SetVector3Uniform(shaderProgramHandle, "SKY_COLOR", Rgba::ConvertToVector3(m_skyColor));
+		bindSuccess = theRenderer->SetVector2Uniform(shaderProgramHandle, "NEAR_FAR_FOG_DISTANCE", m_fogNearFarRange);
+
+		ASSERT_OR_DIE(bindSuccess, "BINDING FOR OVERWORLD SHADER BROKEN!!!");
+	}
+
+	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
+	theRenderer->m_defaultShader->SetFrontFace(WIND_COUNTER_CLOCKWISE);
+
+	//draw each chunk
+	std::map<IntVector2, Chunk*>::iterator chunkIterator;
 	for (chunkIterator = m_activeChunks.begin(); chunkIterator != m_activeChunks.end(); ++chunkIterator)
 	{
 		Chunk* chunk = chunkIterator->second;
@@ -1355,16 +1391,16 @@ void World::DigBlock()
 	BlockLocator impactLocator = m_raycastResult.m_impactBlockLocator;
 	if (impactLocator.IsValid())
 	{
-		BlockLocator aboveBlockLocator = impactLocator.GetBlockLocatorAbove();
-		if (aboveBlockLocator.GetBlock()->IsSky())
-		{
-			AddSkyFlagToBelowBlocks(impactLocator);
-		}
-		
 		SetBlockToType(impactLocator.GetBlock(), AIR_BLOCK_ID);
 		AddBlockLocatorToDirtyLightingQueue(impactLocator);
 		impactLocator.m_chunk->m_isMeshDirty = true;
 		impactLocator.m_chunk->m_doesRequireSave = true;
+
+		BlockLocator aboveBlockLocator = impactLocator.GetBlockLocatorAbove();
+		if (aboveBlockLocator.GetBlock()->IsSky())
+		{
+			AddSkyFlagToBelowBlocks(impactLocator);
+		}		
 		
 		//check to see if we need to set the neighboring chunks to dirty
 		std::vector<Chunk*> outNeighboringChunks;

@@ -48,6 +48,8 @@ constexpr float CHUNK_DEACTIVATION_RADIUS = (float)BLOCKS_WIDE_X * (float)CHUNK_
 constexpr uint8 CHUNK_SAVE_VERSION = 1;
 
 //block data ----------------------------------------------
+constexpr float ONE_SIXTEENTH = 1.f/16.f;
+constexpr float ONE_FIFTEENTH = 1.f/15.f;
 constexpr uint8 IS_BLOCK_SOLID_MASK = 0b0000'0001;
 constexpr uint8 IS_BLOCK_FULL_OPAQUE_MASK = 0b0000'0010;
 constexpr uint8 IS_BLOCK_VISIBLE_MASK = 0b0000'0100;

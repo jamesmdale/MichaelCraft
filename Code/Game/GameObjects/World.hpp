@@ -88,7 +88,13 @@ public:
 
 	Mesh* m_debugSkyMesh = nullptr;
 
+	Rgba m_globalIndoorLightColor;
+	Rgba m_globalOutdoorLightColor;
+	Rgba m_skyColor;
+	Vector2 m_fogNearFarRange;
+
 private:
+	bool m_isDebugRGB = false;
 	bool m_isCameraViewLocked = false;
 	bool m_isDebugDirtyLighting = false;
 	bool m_shouldStepDirtyLightingDebug = false;

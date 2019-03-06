@@ -7,6 +7,9 @@
 #include "Engine\Renderer\Mesh.hpp"
 #include "Engine\Math\SmoothNoise.hpp"
 #include "Engine\Math\MathUtils.hpp"
+#include "Engine\Renderer\Material.hpp"
+#include "Engine\Renderer\Shader.hpp"
+#include "Engine\Renderer\ShaderProgram.hpp"
 
 
 const Vector3 blockCenterOffset = Vector3(0.5f, 0.5f, 0.5f);
@@ -57,11 +60,6 @@ void Chunk::Update()
 void Chunk::Render()
 {
 	Renderer* theRenderer = Renderer::GetInstance();
-
-	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
-
-	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
-	theRenderer->m_defaultShader->SetFrontFace(WIND_COUNTER_CLOCKWISE);
 	theRenderer->DrawMesh(m_gpuMesh);
 }
 
@@ -142,16 +140,19 @@ Rgba Chunk::GetVertexColorFromBlockLightingValue(Block* block)
 	uint8 indoorLightingValue = block->GetIndoorLightingValue();
 	uint8 outdoorLightingValue = block->GetOutDoorLightingValue();
 	
-	highestLightingValue = indoorLightingValue;
+	/*highestLightingValue = indoorLightingValue;
 
 	if (indoorLightingValue < outdoorLightingValue)
 	{
 		highestLightingValue = outdoorLightingValue;
 	}
 
-	float percentageExposure = RangeMapFloat((float)highestLightingValue, 0.f, 15.f, MIN_LIGHT_EXPOSURE_PERCENTAGE, MAX_LIGHT_EXPOSURE_PERCENTAGE);
+	float percentageExposure = RangeMapFloat((float)highestLightingValue, 0.f, 15.f, MIN_LIGHT_EXPOSURE_PERCENTAGE, MAX_LIGHT_EXPOSURE_PERCENTAGE);*/
 
-	vertexColor.ScaleRGBByPercentage(percentageExposure);
+	vertexColor.SetRedAsFloat(ONE_SIXTEENTH * (float)(1 + indoorLightingValue));
+	vertexColor.SetGreenAsFloat(ONE_FIFTEENTH * (float)(outdoorLightingValue));
+
+	//vertexColor.ScaleRGBByPercentage(percentageExposure);
 	return vertexColor;
 }
 
