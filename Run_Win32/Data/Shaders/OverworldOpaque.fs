@@ -24,9 +24,7 @@ void main()
    vec3 outdoorLightColor = GLOBAL_OUTDOOR_LIGHT_COLOR * outdoorLightValue;
 
    vec3 highestLightColor = max(indoorLightColor, outdoorLightColor);
-   highestLightColor.r = max(indoorLightColor.r, outdoorLightColor.r);
-   highestLightColor.g = max(indoorLightColor.g, outdoorLightColor.g);
-   highestLightColor.b = max(indoorLightColor.b, outdoorLightColor.b);
+  
    vec4 modifiedDiffuse = diffuse * vec4(highestLightColor, passColor.a);
 
    //fog

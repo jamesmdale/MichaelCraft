@@ -70,10 +70,10 @@ void World::Initialize()
 
 	m_globalIndoorLightColor = Rgba(1.0f, 0.9f, 0.8f, 1.0f);
 	m_globalOutdoorLightColor = Rgba(0.8f, 0.9f, 1.0f, 1.0f);
-	m_skyColor = Rgba::LIGHT_BLUE;
-	
-	m_fogNearFarRange.x = (CHUNK_DISTANCE_RENDER * 16.f) * 0.75;  //fog near
-	m_fogNearFarRange.y = (CHUNK_DISTANCE_ACTIVATION * 16.f) * 0.75; //fog far
+	m_skyColor = g_lightBlue;	
+  
+	m_fogNearFarRange.y = (CHUNK_DISTANCE_RENDER * 16.f) - 48.f; //fog far
+	m_fogNearFarRange.x = m_fogNearFarRange.y * 0.35f; //fog near
 }
 
 //  =========================================================================================
@@ -101,7 +101,7 @@ void World::Render()
 	//always do this first at the beginning of the frame's render
 	theRenderer->SetCamera(m_engineCamera);	
 	theRenderer->ClearDepth(1.f);
-	theRenderer->ClearColor(Rgba::BLACK);
+	theRenderer->ClearColor(m_skyColor);
 
 	//hammer over camera view matrix
 	m_gameCamera->CreateFliippedViewMatrix(m_engineCamera->m_viewMatrix);
@@ -110,6 +110,8 @@ void World::Render()
 	RenderChunks();
 	RenderDebug();
 	RenderUI();
+
+	//theRenderer->ClearColor(Rgba(0.5f, 0.5f, 1.f, 1.f));
 }
 
 //  =========================================================================================

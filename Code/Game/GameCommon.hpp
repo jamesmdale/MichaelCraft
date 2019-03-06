@@ -12,7 +12,7 @@ extern bool g_isDebug;
 extern bool g_isQuitting;
 
 //gameplay globals  ----------------------------------------------
-constexpr float PLAYER_MOVEMENT_SPEED = 5.f;
+constexpr float PLAYER_MOVEMENT_SPEED = 3.f;
 constexpr float RAYCAST_MAX_DISTANCE = 8.f;
 constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
 constexpr float PLAYER_INPUT_DELAY_IN_SECONDS = 0.25f;
@@ -33,9 +33,9 @@ constexpr uint16 CHUNK_X_MASK = BLOCKS_WIDE_X - 1;
 constexpr uint16 CHUNK_Y_MASK = (BLOCKS_WIDE_Y - 1) << BITS_WIDE_X;
 constexpr uint16 CHUNK_Z_MASK = (BLOCKS_HIGH_Z - 1) << (BITS_WIDE_X + BITS_WIDE_Y);
 
-constexpr int CHUNK_DISTANCE_RENDER = 2;
-constexpr int CHUNK_DISTANCE_ACTIVATION = 4;
-constexpr int CHUNK_DISTANCE_DEACTIVATION = 5;
+constexpr int CHUNK_DISTANCE_RENDER = 8;
+constexpr int CHUNK_DISTANCE_ACTIVATION = 12;
+constexpr int CHUNK_DISTANCE_DEACTIVATION = 16;
 
 constexpr float BLOCKS_WIDE_X_DIVISOR =  1.f / (float)BLOCKS_WIDE_X;
 constexpr float BLOCKS_WIDE_Y_DIVISOR =  1.f / (float)BLOCKS_WIDE_Y;
@@ -70,6 +70,7 @@ constexpr float MAX_LIGHT_EXPOSURE_PERCENTAGE = 1.f;
 
 extern Rgba g_minLightColor;
 extern Rgba g_maxLightColor;
+extern Rgba g_lightBlue;
 
 //convenience directions ----------------------------------------------
 extern Vector3 g_worldUp;

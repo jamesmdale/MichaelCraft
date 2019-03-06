@@ -8,6 +8,7 @@ bool g_isQuitting = false;
 //lighting values
 Rgba g_minLightColor = Rgba(0.15f, 0.15f, 0.15f, 1.f);
 Rgba g_maxLightColor = Rgba(1.f, 1.f, 1.f, 1.f);
+Rgba g_lightBlue = Rgba(126, 174, 252, 255);
 
 //convenience directions
 Vector3 g_worldUp = Vector3(0.f, 0.f, 1.f);
