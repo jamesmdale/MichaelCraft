@@ -387,7 +387,7 @@ void World::UpdateGlobalLightingColors()
 
 	UpdateLightingFromTimeOfDay();
 	PerlinLightningStrike();
-	//IndoorFlicker();
+	IndoorLightingFlicker();
 }
 
 //  =========================================================================================
@@ -1635,7 +1635,7 @@ void World::PerlinLightningStrike()
 }
 
 //  =========================================================================================
-void World::IndoorFlicker()
+void World::IndoorLightingFlicker()
 {
 	float glowPerlin = Compute1dPerlinNoise(m_currentTimeOfDay * (float)(m_days + 1), 1.f, 9);
 	float glowStrength = RangeMapFloat(glowPerlin, -1.f, 1.f, 0.8f, 1.f);

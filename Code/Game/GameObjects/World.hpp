@@ -64,7 +64,7 @@ public:
 	void GetTimeOfDay(float inSeconds, int& outHours, int& outMinutes, int& outSeconds, std::string& outAmPm);
 	
 	void PerlinLightningStrike();
-	void IndoorFlicker();
+	void IndoorLightingFlicker();
 
 	//UI
 	Mesh* CreateTexturedUIMesh();
