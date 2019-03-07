@@ -79,13 +79,16 @@ void World::Initialize()
 //  =========================================================================================
 void World::Update(float deltaSeconds)
 {
+	//input & time
 	UpdateFromInput(deltaSeconds);
+	UpdateTime(deltaSeconds);
+
+	//player
 	UpdatePlayerViewPosition();
 
+	//chunks
 	ActivateChunks();
-
 	UpdateDirtyLighting();
-
 	GenerateDirtyChunks();
 	DeactivateChunks();
 
@@ -356,6 +359,20 @@ void World::UpdateChunks()
 	{
 		chunkIterator->second->Update();
 	}
+}
+
+//  =========================================================================================
+void World::UpdateTime(float deltaSeconds)
+{
+	m_currentTimeOfDay += deltaSeconds * m_worldTimeScale;
+
+	//case for rollover
+	if (m_currentTimeOfDay > TIME_PER_DAY_IN_SECONDS)
+	{
+		m_days++;
+		m_currentTimeOfDay = fmodf(m_currentTimeOfDay, TIME_PER_DAY_IN_SECONDS);
+	}
+	
 }
 
 //  =========================================================================================
@@ -1538,6 +1555,26 @@ void World::AddSkyFlagToBelowBlocks(BlockLocator& blockLocator)
 }
 
 //  =========================================================================================
+void World::GetTimeOfDay(float inSeconds, int& outHours, int& outMinutes, int& outSeconds, std::string& outAmPm)
+{
+	int seconds = (int)inSeconds;
+
+	seconds = seconds % (24 * 3600);
+	outSeconds = seconds / 3600;
+
+	seconds %= 3600;
+	outMinutes = seconds / 60;
+
+	seconds %= 60;
+	outHours = seconds;
+
+	if(inSeconds >= (TIME_PER_DAY_IN_SECONDS * 0.5))
+		outAmPm = "PM";
+	else
+		outAmPm = "AM";
+}
+
+//  =========================================================================================
 Mesh* World::CreateTexturedUIMesh()
 {
 	MeshBuilder builder = MeshBuilder();
@@ -1571,16 +1608,27 @@ Mesh* World::CreateUITextMesh()
 	// block type counter ----------------------------------------------		
 	AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.9f, 0.8f), Vector2(0.99f, 0.89f));
 	builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("CurrentBlockType:"), Rgba::WHITE);
+	
+	//time
+	int seconds = 0;
+	int minutes = 0;
+	int hours = 0;
+	std::string amPm = "";
+	GetTimeOfDay(m_currentTimeOfDay, seconds, minutes, hours, amPm);
+	AABB2 timeBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.95f), Vector2(0.25f, 0.99f));
+	builder.CreateText2DFromPoint(timeBlock.mins, 10.f, 1.f, Stringf("Day: %i - CurrentTime: %i:%01i %s", m_days, hours, minutes, amPm.c_str()), Rgba::YELLOW);
 
+	//debug type - sky mesh
 	if (m_debugSkyMesh != nullptr)
 	{
-		AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.9f), Vector2(0.5f, 0.99f));
+		AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.8f), Vector2(0.5f, 0.89f));
 		builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("SKY_DEBUG_ENABLED: 'K' to Refresh & '1' to disable"), Rgba::YELLOW);
 	}
 
+	//debug type - dirty lighting stepping
 	if (m_isDebugDirtyLighting)
 	{
-		AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01, 0.8f), Vector2(0.5f, 0.89f));
+		AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01, 0.7f), Vector2(0.5f, 0.79f));
 		builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("DEBUG_DIRTY_LIGHTING ENABLED: 'L' to Step & '2' to disable"), Rgba::YELLOW);
 	}
 

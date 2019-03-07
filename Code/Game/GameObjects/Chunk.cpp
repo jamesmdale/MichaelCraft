@@ -149,6 +149,8 @@ Rgba Chunk::GetVertexColorFromBlockLightingValue(Block* block)
 
 	float percentageExposure = RangeMapFloat((float)highestLightingValue, 0.f, 15.f, MIN_LIGHT_EXPOSURE_PERCENTAGE, MAX_LIGHT_EXPOSURE_PERCENTAGE);*/
 
+	
+	//ClampFloat(ONE_SIXTEENTH * (float)(2 + indoorLightingValue), 0.f, 1.f)
 	vertexColor.SetRedAsFloat(ONE_SIXTEENTH * (float)(1 + indoorLightingValue));
 	vertexColor.SetGreenAsFloat(ONE_FIFTEENTH * (float)(outdoorLightingValue));
 

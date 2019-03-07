@@ -16,9 +16,9 @@ constexpr float PLAYER_MOVEMENT_SPEED = 3.f;
 constexpr float RAYCAST_MAX_DISTANCE = 8.f;
 constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
 constexpr float PLAYER_INPUT_DELAY_IN_SECONDS = 0.25f;
+constexpr float TIME_PER_DAY_IN_SECONDS = 60.f * 60.f * 24.f;;
 
 // chunk data ----------------------------------------------
-
 constexpr uint BITS_WIDE_X = 4;
 constexpr uint BITS_WIDE_Y = 4;
 constexpr uint BITS_TALL_Z = 8;

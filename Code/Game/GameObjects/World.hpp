@@ -23,6 +23,7 @@ public:
 	void UpdatePlayerViewPosition();
 	void UpdateDirtyLighting();
 	void UpdateChunks();
+	void UpdateTime(float deltaSeconds);
 
 	void RenderUI();
 	void RenderChunks();
@@ -58,6 +59,7 @@ public:
 
 	void RemoveSkyFlagFromBelowBlocks(BlockLocator& blockLocator);
 	void AddSkyFlagToBelowBlocks(BlockLocator& blockLocator);
+	void GetTimeOfDay(float inSeconds, int& outHours, int& outMinutes, int& outSeconds, std::string& outAmPm);
 
 	//UI
 	Mesh* CreateTexturedUIMesh();
@@ -92,6 +94,11 @@ public:
 	Rgba m_globalOutdoorLightColor;
 	Rgba m_skyColor;
 	Vector2 m_fogNearFarRange;
+
+	float m_currentTimeOfDay = TIME_PER_DAY_IN_SECONDS * 0.5f;
+	uint m_days = 0;
+
+	float m_worldTimeScale = 500.f;
 
 private:
 	bool m_isDebugRGB = false;
