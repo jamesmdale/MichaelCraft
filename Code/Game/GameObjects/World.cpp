@@ -219,6 +219,22 @@ void World::UpdateFromInput(float deltaSeconds)
 		theGame->m_inputDelayTimer->Reset();
 	}
 
+	//world time pause
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_P) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		m_isWorldTimePaused ? m_isWorldTimePaused = false : m_isWorldTimePaused = true;
+	}
+
+	//accelerate time
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_T))
+	{
+		m_worldTimeScale = 10000.f;
+	}
+	if (theInput->WasKeyJustReleased(theInput->KEYBOARD_T))
+	{
+		m_worldTimeScale = 200.f;
+	}
+
 	// debug keys ----------------------------------------------
 
 	//toggle debug for sky blocks
@@ -258,13 +274,18 @@ void World::UpdateFromInput(float deltaSeconds)
 	{
 		m_isDebugRGB ? m_isDebugRGB = false : m_isDebugRGB = true;
 		theGame->m_inputDelayTimer->Reset();
-	}
+	}	
 
 	//enable debug for sky blocks
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_L) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		m_shouldStepDirtyLightingDebug = true;
 		theGame->m_inputDelayTimer->Reset();
+	}
+
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_4) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		m_lightingEffectsDisabled ? m_lightingEffectsDisabled = false : m_lightingEffectsDisabled = true;
 	}
 
 	//mouse wheel scrolling for changing blocks
@@ -368,15 +389,17 @@ void World::UpdateChunks()
 //  =========================================================================================
 void World::UpdateTime(float deltaSeconds)
 {
-	m_currentTimeOfDay += deltaSeconds * m_worldTimeScale;
-
-	//case for rollover
-	if (m_currentTimeOfDay > TIME_PER_DAY_IN_SECONDS)
+	if (!m_isWorldTimePaused)
 	{
-		m_days++;
-		m_currentTimeOfDay = fmodf(m_currentTimeOfDay, TIME_PER_DAY_IN_SECONDS);
+		m_currentTimeOfDay += deltaSeconds * m_worldTimeScale;
+
+		//case for rollover
+		if (m_currentTimeOfDay > TIME_PER_DAY_IN_SECONDS)
+		{
+			m_days++;
+			m_currentTimeOfDay = fmodf(m_currentTimeOfDay, TIME_PER_DAY_IN_SECONDS);
+		}	
 	}
-	
 }
 
 //  =========================================================================================
@@ -386,8 +409,12 @@ void World::UpdateGlobalLightingColors()
 	m_globalIndoorLightColor = g_defaultIndoorLightColor;
 
 	UpdateLightingFromTimeOfDay();
-	PerlinLightningStrike();
-	IndoorLightingFlicker();
+
+	if (!m_lightingEffectsDisabled)
+	{
+		PerlinLightningStrike();
+		IndoorLightingFlicker();
+	}
 }
 
 //  =========================================================================================
@@ -1625,7 +1652,7 @@ void World::GetTimeOfDay(float inSeconds, int& outHours, int& outMinutes, int& o
 //  =========================================================================================
 void World::PerlinLightningStrike()
 {
-	float lightningPerlin = Compute1dPerlinNoise(m_currentTimeOfDay * (float)(m_days + 1), 1.f, 9);
+	float lightningPerlin = Compute1dPerlinNoise(m_currentTimeOfDay * (float)(m_days + 1), 20.f, 9);
 
 	if(lightningPerlin < 0.9f)
 		return;
@@ -1637,7 +1664,7 @@ void World::PerlinLightningStrike()
 //  =========================================================================================
 void World::IndoorLightingFlicker()
 {
-	float glowPerlin = Compute1dPerlinNoise(m_currentTimeOfDay * (float)(m_days + 1), 1.f, 9);
+	float glowPerlin = Compute1dPerlinNoise(m_currentTimeOfDay * (float)(m_days + 1), 500.f, 3);
 	float glowStrength = RangeMapFloat(glowPerlin, -1.f, 1.f, 0.8f, 1.f);
 
 	m_globalIndoorLightColor.ScaleRGBByPercentage(glowStrength);

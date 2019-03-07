@@ -106,10 +106,12 @@ public:
 	float m_worldTimeScale = 500.f;
 
 private:
+	bool m_lightingEffectsDisabled = false;
 	bool m_isDebugRGB = false;
 	bool m_isCameraViewLocked = false;
 	bool m_isDebugDirtyLighting = false;
 	bool m_shouldStepDirtyLightingDebug = false;
+	bool m_isWorldTimePaused = false;
 	std::vector<Vector3> m_dirtyDebugLightingPoints;
 };
 
