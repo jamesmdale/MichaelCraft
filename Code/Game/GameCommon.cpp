@@ -10,7 +10,9 @@ Rgba g_minLightColor = Rgba(0.15f, 0.15f, 0.15f, 1.f);
 Rgba g_maxLightColor = Rgba(1.f, 1.f, 1.f, 1.f);
 Rgba g_lightBlue = Rgba(126, 174, 252, 255);
 Rgba g_darkBlue = Rgba(20, 40, 40, 255);
+Rgba g_white = Rgba(1.f, 1.f, 1.f, 1.f);
 
+Rgba g_defaultIndoorLightColor = Rgba(1.0f, 0.9f, 0.8f, 1.f);
 Rgba g_defaultOutdoorLightColor = Rgba(0.8f, 0.9f, 1.0f, 1.0f);
 Rgba g_minOutdoorLightColor = Rgba(0.05f, 0.05f, 0.075f, 1.0f);
 Rgba g_dayLightColor = g_lightBlue;

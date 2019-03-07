@@ -22,6 +22,8 @@
 #include "Engine\Renderer\Material.hpp"
 #include "Engine\Renderer\Shader.hpp"
 #include "Engine\Renderer\ShaderProgram.hpp"
+#include "Engine\Math\RawNoise.hpp"
+#include "Engine\Math\SmoothNoise.hpp"
 #include <map>
 #include <string>
 #include <algorithm>
@@ -68,8 +70,8 @@ void World::Initialize()
 
 	InitializeSelectableBlockList();
 
-	m_globalIndoorLightColor = g_defaultOutdoorLightColor;
-	m_globalOutdoorLightColor = Rgba(0.8f, 0.9f, 1.0f, 1.0f);
+	m_globalIndoorLightColor = g_defaultIndoorLightColor;
+	m_globalOutdoorLightColor = g_defaultOutdoorLightColor;
 	m_skyColor = g_lightBlue;	
   
 	m_fogNearFarRange.y = (CHUNK_DISTANCE_RENDER * 16.f) - 48.f; //fog far
@@ -83,7 +85,7 @@ void World::Update(float deltaSeconds)
 	UpdateFromInput(deltaSeconds);
 	UpdateTime(deltaSeconds);
 
-	UpdateColorsFromTimeOfDay();
+	UpdateGlobalLightingColors();
 
 	//player
 	UpdatePlayerViewPosition();
@@ -378,9 +380,19 @@ void World::UpdateTime(float deltaSeconds)
 }
 
 //  =========================================================================================
-void World::UpdateColorsFromTimeOfDay()
+void World::UpdateGlobalLightingColors()
 {
+	m_globalOutdoorLightColor = g_defaultOutdoorLightColor;
+	m_globalIndoorLightColor = g_defaultIndoorLightColor;
 
+	UpdateLightingFromTimeOfDay();
+	PerlinLightningStrike();
+	//IndoorFlicker();
+}
+
+//  =========================================================================================
+void World::UpdateLightingFromTimeOfDay()
+{
 	float percentageInDay = m_currentTimeOfDay / TIME_PER_DAY_IN_SECONDS;
 
 	//night time
@@ -404,7 +416,7 @@ void World::UpdateColorsFromTimeOfDay()
 		float fraction = (percentageInDay - NOON_TIME_IN_DAY) / (SIX_PM_TIME_IN_DAY - NOON_TIME_IN_DAY);
 		m_skyColor = Interpolate(g_dayLightColor, g_nightLightColor, fraction);
 		m_globalOutdoorLightColor = Interpolate(g_defaultOutdoorLightColor, g_minOutdoorLightColor, fraction);
-	}		
+	}
 }
 
 //  =========================================================================================
@@ -1608,6 +1620,27 @@ void World::GetTimeOfDay(float inSeconds, int& outHours, int& outMinutes, int& o
 		outAmPm = "PM";
 	else
 		outAmPm = "AM";
+}
+
+//  =========================================================================================
+void World::PerlinLightningStrike()
+{
+	float lightningPerlin = Compute1dPerlinNoise(m_currentTimeOfDay * (float)(m_days + 1), 1.f, 9);
+
+	if(lightningPerlin < 0.9f)
+		return;
+
+	float lightningStrength = RangeMapFloat(lightningPerlin, 0.9f, 1.f, 0.f, 1.f);	
+	m_globalOutdoorLightColor = Interpolate(m_globalOutdoorLightColor, g_white, lightningStrength);
+}
+
+//  =========================================================================================
+void World::IndoorFlicker()
+{
+	float glowPerlin = Compute1dPerlinNoise(m_currentTimeOfDay * (float)(m_days + 1), 1.f, 9);
+	float glowStrength = RangeMapFloat(glowPerlin, -1.f, 1.f, 0.8f, 1.f);
+
+	m_globalIndoorLightColor.ScaleRGBByPercentage(glowStrength);
 }
 
 //  =========================================================================================

@@ -24,7 +24,8 @@ public:
 	void UpdateDirtyLighting();
 	void UpdateChunks();
 	void UpdateTime(float deltaSeconds);
-	void UpdateColorsFromTimeOfDay();
+	void UpdateGlobalLightingColors();
+	void UpdateLightingFromTimeOfDay();
 
 	void RenderUI();
 	void RenderChunks();
@@ -61,6 +62,9 @@ public:
 	void RemoveSkyFlagFromBelowBlocks(BlockLocator& blockLocator);
 	void AddSkyFlagToBelowBlocks(BlockLocator& blockLocator);
 	void GetTimeOfDay(float inSeconds, int& outHours, int& outMinutes, int& outSeconds, std::string& outAmPm);
+	
+	void PerlinLightningStrike();
+	void IndoorFlicker();
 
 	//UI
 	Mesh* CreateTexturedUIMesh();

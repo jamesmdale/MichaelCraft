@@ -78,7 +78,9 @@ extern Rgba g_minLightColor;
 extern Rgba g_maxLightColor;
 extern Rgba g_lightBlue;
 extern Rgba g_darkBlue;
+extern Rgba g_white;
 
+extern Rgba g_defaultIndoorLightColor;
 extern Rgba g_defaultOutdoorLightColor;
 extern Rgba g_minOutdoorLightColor;
 extern Rgba g_dayLightColor;
