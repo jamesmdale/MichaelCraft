@@ -33,5 +33,6 @@ void main()
    fogNormalized = clamp(fogNormalized, 0.0, 1.0);
 
    vec3 outColorRGB = mix(modifiedDiffuse.rgb, SKY_COLOR, fogNormalized); 
+   //outColorRGB = mix( SKY_COLOR, NEAR_FAR_FOG_DISTANCE.x * GLOBAL_OUTDOOR_LIGHT_COLOR * GLOBAL_INDOOR_LIGHT_COLOR * CAMERA_WORLD_POSITION, 0.f );
    outColor = vec4(outColorRGB, 1.0); 
 }

@@ -16,7 +16,13 @@ constexpr float PLAYER_MOVEMENT_SPEED = 3.f;
 constexpr float RAYCAST_MAX_DISTANCE = 8.f;
 constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
 constexpr float PLAYER_INPUT_DELAY_IN_SECONDS = 0.25f;
-constexpr float TIME_PER_DAY_IN_SECONDS = 60.f * 60.f * 24.f;;
+constexpr float TIME_PER_DAY_IN_SECONDS = 60.f * 60.f * 24.f;
+
+
+constexpr float NOON_TIME_IN_DAY = 0.5f;
+constexpr float SIX_AM_TIME_IN_DAY = 0.25f;
+constexpr float SIX_PM_TIME_IN_DAY = 0.75;
+constexpr float MIDNIGHT_TIME_IN_DAY = 1.f;
 
 // chunk data ----------------------------------------------
 constexpr uint BITS_WIDE_X = 4;
@@ -71,6 +77,12 @@ constexpr float MAX_LIGHT_EXPOSURE_PERCENTAGE = 1.f;
 extern Rgba g_minLightColor;
 extern Rgba g_maxLightColor;
 extern Rgba g_lightBlue;
+extern Rgba g_darkBlue;
+
+extern Rgba g_defaultOutdoorLightColor;
+extern Rgba g_minOutdoorLightColor;
+extern Rgba g_dayLightColor;
+extern Rgba g_nightLightColor;
 
 //convenience directions ----------------------------------------------
 extern Vector3 g_worldUp;

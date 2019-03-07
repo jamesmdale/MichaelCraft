@@ -24,6 +24,7 @@ public:
 	void UpdateDirtyLighting();
 	void UpdateChunks();
 	void UpdateTime(float deltaSeconds);
+	void UpdateColorsFromTimeOfDay();
 
 	void RenderUI();
 	void RenderChunks();

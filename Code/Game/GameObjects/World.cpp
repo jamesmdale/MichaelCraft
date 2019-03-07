@@ -68,7 +68,7 @@ void World::Initialize()
 
 	InitializeSelectableBlockList();
 
-	m_globalIndoorLightColor = Rgba(1.0f, 0.9f, 0.8f, 1.0f);
+	m_globalIndoorLightColor = g_defaultOutdoorLightColor;
 	m_globalOutdoorLightColor = Rgba(0.8f, 0.9f, 1.0f, 1.0f);
 	m_skyColor = g_lightBlue;	
   
@@ -82,6 +82,8 @@ void World::Update(float deltaSeconds)
 	//input & time
 	UpdateFromInput(deltaSeconds);
 	UpdateTime(deltaSeconds);
+
+	UpdateColorsFromTimeOfDay();
 
 	//player
 	UpdatePlayerViewPosition();
@@ -376,6 +378,36 @@ void World::UpdateTime(float deltaSeconds)
 }
 
 //  =========================================================================================
+void World::UpdateColorsFromTimeOfDay()
+{
+
+	float percentageInDay = m_currentTimeOfDay / TIME_PER_DAY_IN_SECONDS;
+
+	//night time
+	if (percentageInDay < SIX_AM_TIME_IN_DAY || percentageInDay > SIX_PM_TIME_IN_DAY)
+	{
+		m_skyColor = g_nightLightColor;
+		m_globalOutdoorLightColor = g_minOutdoorLightColor;
+	}
+
+	//morning
+	else if (percentageInDay > SIX_AM_TIME_IN_DAY && percentageInDay <= NOON_TIME_IN_DAY)
+	{
+		float fraction = (percentageInDay - SIX_AM_TIME_IN_DAY) / (NOON_TIME_IN_DAY - SIX_AM_TIME_IN_DAY);
+		m_skyColor = Interpolate(g_nightLightColor, g_dayLightColor, fraction);
+		m_globalOutdoorLightColor = Interpolate(g_minOutdoorLightColor, g_defaultOutdoorLightColor, fraction);
+	}
+
+	//evening
+	else if (percentageInDay > NOON_TIME_IN_DAY && percentageInDay <= SIX_PM_TIME_IN_DAY)
+	{
+		float fraction = (percentageInDay - NOON_TIME_IN_DAY) / (SIX_PM_TIME_IN_DAY - NOON_TIME_IN_DAY);
+		m_skyColor = Interpolate(g_dayLightColor, g_nightLightColor, fraction);
+		m_globalOutdoorLightColor = Interpolate(g_defaultOutdoorLightColor, g_minOutdoorLightColor, fraction);
+	}		
+}
+
+//  =========================================================================================
 void World::RenderUI()
 {
 	Renderer* theRenderer = Renderer::GetInstance();
@@ -419,13 +451,17 @@ void World::RenderChunks()
 		int shaderProgramHandle = overworldOpaqueMaterial->m_shader->m_program->GetHandle();
 
 		//set material properties
-		bool bindSuccess = theRenderer->SetVector3Uniform(shaderProgramHandle, "CAMERA_WORLD_POSITION", m_gameCamera->m_position);
-		bindSuccess = theRenderer->SetVector3Uniform(shaderProgramHandle, "GLOBAL_INDOOR_LIGHT_COLOR", Rgba::ConvertToVector3(m_globalIndoorLightColor));
-		bindSuccess = theRenderer->SetVector3Uniform(shaderProgramHandle, "GLOBAL_OUTDOOR_LIGHT_COLOR", Rgba::ConvertToVector3(m_globalOutdoorLightColor));
-		bindSuccess = theRenderer->SetVector3Uniform(shaderProgramHandle, "SKY_COLOR", Rgba::ConvertToVector3(m_skyColor));
-		bindSuccess = theRenderer->SetVector2Uniform(shaderProgramHandle, "NEAR_FAR_FOG_DISTANCE", m_fogNearFarRange);
+		bool bindSuccess1 = theRenderer->SetVector3Uniform(shaderProgramHandle, "CAMERA_WORLD_POSITION", m_gameCamera->m_position);
+		bool bindSuccess2 = theRenderer->SetVector3Uniform(shaderProgramHandle, "GLOBAL_INDOOR_LIGHT_COLOR", Rgba::ConvertToVector3(m_globalIndoorLightColor));
+		bool bindSuccess3 = theRenderer->SetVector3Uniform(shaderProgramHandle, "GLOBAL_OUTDOOR_LIGHT_COLOR", Rgba::ConvertToVector3(m_globalOutdoorLightColor));
+		bool bindSuccess4 = theRenderer->SetVector3Uniform(shaderProgramHandle, "SKY_COLOR", Rgba::ConvertToVector3(m_skyColor));
+		bool bindSuccess5 = theRenderer->SetVector2Uniform(shaderProgramHandle, "NEAR_FAR_FOG_DISTANCE", m_fogNearFarRange);
 
-		ASSERT_OR_DIE(bindSuccess, "BINDING FOR OVERWORLD SHADER BROKEN!!!");
+		//ASSERT_OR_DIE(bindSuccess1, "BINDING FOR OVERWORLD SHADER BROKEN!!!");
+		//ASSERT_OR_DIE(bindSuccess2, "BINDING FOR OVERWORLD SHADER BROKEN!!!");
+		//ASSERT_OR_DIE(bindSuccess3, "BINDING FOR OVERWORLD SHADER BROKEN!!!");
+		//ASSERT_OR_DIE(bindSuccess4, "BINDING FOR OVERWORLD SHADER BROKEN!!!");
+		//ASSERT_OR_DIE(bindSuccess5, "BINDING FOR OVERWORLD SHADER BROKEN!!!");
 	}
 
 	theRenderer->SetTexture(*GetTerrainSprites()->GetSpriteSheetTexture());
