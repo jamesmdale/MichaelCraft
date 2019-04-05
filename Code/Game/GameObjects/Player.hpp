@@ -1,8 +1,9 @@
 #pragma once
-#include "Engine\Core\GameObject.hpp"
-#include "Game\GameObjects\GameCamera.hpp"
+#include "Game\GameObjects\Entity.hpp"
 
-class Player : GameObject
+class GameCamera;
+
+class Player : Entity
 {
 public:
 	Player();
@@ -13,8 +14,5 @@ public:
 
 	float UpdateFromInput(float deltaSeconds);
 
-	void SetCamera(Camera* camera);
-
-public:
-	GameCamera* m_camera = nullptr;
+	void SetCamera(GameCamera* camera);
 };

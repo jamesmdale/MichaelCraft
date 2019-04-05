@@ -386,6 +386,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameObjects\Entity.cpp" />
     <ClCompile Include="Helpers\ChunkFileLoader.cpp" />
     <ClCompile Include="GameObjects\BlockLocator.cpp" />
     <ClCompile Include="Definitions\BlockDefinition.cpp" />
@@ -408,6 +409,7 @@
     <ClCompile Include="GameObjects\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameObjects\Entity.hpp" />
     <ClInclude Include="Helpers\ChunkFileLoader.hpp" />
     <ClInclude Include="GameObjects\BlockLocator.hpp" />
     <ClInclude Include="Definitions\BlockDefinition.hpp" />
