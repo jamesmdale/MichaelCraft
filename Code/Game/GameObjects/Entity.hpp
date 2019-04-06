@@ -12,6 +12,7 @@ public:
 
 	virtual void Update(float deltaSeconds);
 	virtual float UpdateFromInput(float deltaSeconds);
+	virtual void UpdatePhysics(float deltaSeconds);
 	virtual void Render();
 	
 	void SetCamera(GameCamera* camera);

@@ -25,6 +25,12 @@ float Entity::UpdateFromInput(float deltaSeconds)
 }
 
 //  =========================================================================================
+void Entity::UpdatePhysics(float deltaSeconds)
+{
+	UNUSED(deltaSeconds);
+}
+
+//  =========================================================================================
 void Entity::Render()
 {
 	//does nothing. Intended for derivation

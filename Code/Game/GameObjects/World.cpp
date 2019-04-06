@@ -59,10 +59,11 @@ void World::Initialize()
 	m_uiCamera = Game::GetInstance()->m_uiCamera;
 
 	m_gameCamera = new GameCamera();
-	m_gameCamera->Translate(Vector3(0.f, 0.f, 180.f));
+	m_gameCamera->m_position = Vector3(0.f, 0.f, 120.f);
 
 	//initialize entities
 	m_player = new Player();
+	m_player->m_position = Vector3(0.f, 0.f, 100.f);
 
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
@@ -91,15 +92,18 @@ void World::Update(float deltaSeconds)
 
 	UpdateGlobalLightingColors();
 
-	//camera and player
-	UpdateEntities(deltaSeconds);
-	UpdatePlayerViewPosition();
-
 	//chunks
 	ActivateChunks();
 	UpdateDirtyLighting();
 	GenerateDirtyChunks();
 	DeactivateChunks();
+
+	//camera and player
+	UpdateEntities(deltaSeconds);
+	UpdatePlayerViewPosition();
+
+	//update physics
+	UpdateEntityPhysics(deltaSeconds);
 
 	//player raycast
 	m_raycastResult = Raycast(m_cameraViewPosition, m_cameraViewForwardNormalized, RAYCAST_MAX_DISTANCE);
@@ -456,6 +460,14 @@ void World::UpdateLightingFromTimeOfDay()
 		m_skyColor = Interpolate(g_dayLightColor, g_nightLightColor, fraction);
 		m_globalOutdoorLightColor = Interpolate(g_defaultOutdoorLightColor, g_minOutdoorLightColor, fraction);
 	}
+}
+
+//  =========================================================================================
+void World::UpdateEntityPhysics(float deltaSeconds)
+{
+	m_player->UpdatePhysics(deltaSeconds);
+
+	//other entities go here
 }
 
 //  =========================================================================================

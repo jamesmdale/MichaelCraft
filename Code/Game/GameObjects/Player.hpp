@@ -3,13 +3,14 @@
 
 class Mesh;
 
-class Player : Entity
+class Player : public Entity
 {
 public:
 	Player();
 	~Player();
 
 	virtual void Update(float deltaSeconds) override;
+	virtual void UpdatePhysics(float deltaSeconds) override;
 	virtual void Render() override;
     void PreRender();
 

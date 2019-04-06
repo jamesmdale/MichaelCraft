@@ -7,6 +7,9 @@ bool g_isQuitting = false;
 
 // physics globals ----------------------------------------------
 Vector3 g_gravity = Vector3(0.f, 0.f, -9.8f);
+Vector3 g_groundFrictionX = Vector3(1.f, 0.f, 0.f);
+Vector3 g_groundFrictionY = Vector3(0.f, 1.f, 0.f);
+Vector3 g_airFriction = Vector3(0.f, 0.f, 1.f);
 
 // player globals ----------------------------------------------
 float g_playerWidth = 0.6f;

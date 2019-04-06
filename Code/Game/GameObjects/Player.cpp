@@ -1,6 +1,8 @@
 #include "Game\GameObjects\Player.hpp"
 #include "Game\GameCommon.hpp"
 #include "Game\Helpers\GameRendererHelpers.hpp"
+#include "Game\GameObjects\BlockLocator.hpp"
+#include "Game\GameObjects\Block.hpp"
 #include "Engine\Renderer\Mesh.hpp"
 #include "Engine\Input\InputSystem.hpp"
 #include "Engine\Core\EngineCommon.hpp"
@@ -31,6 +33,21 @@ void Player::Update(float deltaSeconds)
 
 	//last step is updating my physics/visual bounds to the new position
 	UpdateBoundsToCurrentPosition();
+}
+
+//  =========================================================================================
+void Player::UpdatePhysics(float deltaSeconds)
+{
+	//apply all forces into velocity
+	m_velocity += g_gravity * deltaSeconds;
+
+	//move the player
+	m_position += m_velocity;
+	UpdateBoundsToCurrentPosition();
+
+	//std::vector<BlockLocator*> neighborhood;
+	//std::vector<BlockLocator*> neighborhood;
+	//GetBlockNeighborhood();
 }
 
 //  =========================================================================================

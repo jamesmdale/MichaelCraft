@@ -28,6 +28,7 @@ public:
 	void UpdateTime(float deltaSeconds);
 	void UpdateGlobalLightingColors();
 	void UpdateLightingFromTimeOfDay();
+	void UpdateEntityPhysics(float deltaSeconds);
 
 	void RenderUI();
 	void RenderEntities();
