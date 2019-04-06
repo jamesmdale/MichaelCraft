@@ -5,6 +5,16 @@
 bool g_isDebug = false;
 bool g_isQuitting = false;
 
+// physics globals ----------------------------------------------
+Vector3 g_gravity = Vector3(0.f, 0.f, -9.8f);
+
+// player globals ----------------------------------------------
+float g_playerWidth = 0.6f;
+float g_playerHeight = 1.8f;
+float g_playerEyesOffset = 1.65f;
+float g_playerWalkSpeed = 5.f;
+float g_playerRunSpeed = 7.5f;
+
 //lighting values
 Rgba g_minLightColor = Rgba(0.15f, 0.15f, 0.15f, 1.f);
 Rgba g_maxLightColor = Rgba(1.f, 1.f, 1.f, 1.f);

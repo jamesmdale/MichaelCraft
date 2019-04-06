@@ -1,4 +1,5 @@
 #include "Game\GameObjects\GameCamera.hpp"
+#include "Game\GameObjects\Entity.hpp"
 #include "Game\GameCommon.hpp"
 
 
@@ -27,4 +28,11 @@ void GameCamera::CreateFliippedViewMatrix(Matrix44& outMatrix)
 void GameCamera::Translate(Vector3 translation)
 {
 	m_position += translation;
+}
+
+//  =========================================================================================
+void GameCamera::AttachToEntity(Entity* entity)
+{
+	m_attachedEntity = entity;
+	entity->SetCamera(this);
 }

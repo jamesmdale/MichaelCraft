@@ -8,6 +8,7 @@
 #include <deque>
 
 typedef IntVector2 ChunkCoords;
+class Player;
 
 class World
 {
@@ -23,11 +24,13 @@ public:
 	void UpdatePlayerViewPosition();
 	void UpdateDirtyLighting();
 	void UpdateChunks();
+	void UpdateEntities(float deltaSeconds);
 	void UpdateTime(float deltaSeconds);
 	void UpdateGlobalLightingColors();
 	void UpdateLightingFromTimeOfDay();
 
 	void RenderUI();
+	void RenderEntities();
 	void RenderChunks();
 	void RenderDebug();
 
@@ -75,24 +78,32 @@ public:
 	Chunk* GetActiveChunkFromPlayerPosition(const Vector3& playerPosition);
 
 public:
+
+	// entities / camera ----------------------------------------------
+	Player* m_player = nullptr;
+	//std::vector<Entity*> m_entities;
+
+	Camera* m_uiCamera = nullptr;
+	Camera* m_engineCamera = nullptr;
+	GameCamera* m_gameCamera = nullptr;
+
+	Vector3 m_cameraViewPosition;
+	Vector3 m_cameraViewForwardNormalized;
+
+	// chunk / block data ----------------------------------------------
 	std::map<IntVector2, Chunk*> m_activeChunks;
 	std::vector<IntVector2> m_chunksOnDisk;
 	std::vector<IntVector2> m_neighborHoodBuildOrder;
 
 	std::deque<BlockLocator> m_blocksWithDirtyLighting;
 
-	Camera* m_uiCamera = nullptr;
-	Camera* m_engineCamera = nullptr;
-	GameCamera* m_gameCamera = nullptr;
-
-	Vector3 m_playerViewPosition;
-	Vector3 m_playerViewForwardNormalized;
-
 	RaycastResult m_raycastResult;
 
 	int m_selectedBlockIndex = 0;
 	std::vector<uint8> m_selectableBlockTypes;
 
+
+	// lighting / sky ----------------------------------------------
 	Mesh* m_debugSkyMesh = nullptr;
 
 	Rgba m_globalIndoorLightColor;
@@ -100,12 +111,15 @@ public:
 	Rgba m_skyColor;
 	Vector2 m_fogNearFarRange;
 
+	// world time ----------------------------------------------
 	float m_currentTimeOfDay = TIME_PER_DAY_IN_SECONDS * 0.5f;
 	uint m_days = 0;
 
 	float m_worldTimeScale = 500.f;
 
 private:
+
+	// flags ----------------------------------------------
 	bool m_lightingEffectsDisabled = false;
 	bool m_isDebugRGB = false;
 	bool m_isCameraViewLocked = false;

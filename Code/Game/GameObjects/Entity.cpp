@@ -9,22 +9,35 @@ Entity::Entity()
 //  =========================================================================================
 Entity::~Entity()
 {
+	m_attachedCamera = nullptr;
 }
 
 //  =========================================================================================
 void Entity::Update(float deltaSeconds)
 {
-
+	//does nothing. Intended for derivation
 }
 
 //  =========================================================================================
 float Entity::UpdateFromInput(float deltaSeconds)
 {
-	return 0.0f;
+	return deltaSeconds;
+}
+
+//  =========================================================================================
+void Entity::Render()
+{
+	//does nothing. Intended for derivation
 }
 
 //  =========================================================================================
 void Entity::SetCamera(GameCamera* camera)
 {
 	m_attachedCamera = camera;
+}
+
+//  =========================================================================================
+void Entity::DetachCamera()
+{
+	m_attachedCamera = nullptr;
 }

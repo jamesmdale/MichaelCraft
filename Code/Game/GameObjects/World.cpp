@@ -9,6 +9,7 @@
 #include "Game\Definitions\BlockDefinition.hpp"
 #include "Game\GameObjects\Block.hpp"
 #include "Game\GameObjects\BlockLocator.hpp"
+#include "Game\GameObjects\Player.hpp"
 #include "Engine\Window\Window.hpp"
 #include "Engine\Debug\DebugRender.hpp"
 #include "Engine\Core\LightObject.hpp"
@@ -60,6 +61,9 @@ void World::Initialize()
 	m_gameCamera = new GameCamera();
 	m_gameCamera->Translate(Vector3(0.f, 0.f, 180.f));
 
+	//initialize entities
+	m_player = new Player();
+
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
 
@@ -87,7 +91,8 @@ void World::Update(float deltaSeconds)
 
 	UpdateGlobalLightingColors();
 
-	//player
+	//camera and player
+	UpdateEntities(deltaSeconds);
 	UpdatePlayerViewPosition();
 
 	//chunks
@@ -97,7 +102,7 @@ void World::Update(float deltaSeconds)
 	DeactivateChunks();
 
 	//player raycast
-	m_raycastResult = Raycast(m_playerViewPosition, m_playerViewForwardNormalized, RAYCAST_MAX_DISTANCE);
+	m_raycastResult = Raycast(m_cameraViewPosition, m_cameraViewForwardNormalized, RAYCAST_MAX_DISTANCE);
 }
 
 //  =========================================================================================
@@ -115,6 +120,7 @@ void World::Render()
 
 	//render
 	RenderChunks();
+	RenderEntities();
 	RenderDebug();
 	RenderUI();
 
@@ -154,37 +160,37 @@ void World::UpdateFromInput(float deltaSeconds)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
 	{
 		//calculate movement for camera and use same movement for ship and light
-		positionToAdd = cameraCardinalForward * deltaSeconds * PLAYER_MOVEMENT_SPEED;
+		positionToAdd = cameraCardinalForward * deltaSeconds * CAMERA_FLY_SPEED;
 	}
 
 	//backward (-x)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
 	{
-		positionToAdd = -cameraCardinalForward * deltaSeconds * PLAYER_MOVEMENT_SPEED;
+		positionToAdd = -cameraCardinalForward * deltaSeconds * CAMERA_FLY_SPEED;
 	}
 
 	//left is north (y)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_A))
 	{
-		positionToAdd = -cameraRight * deltaSeconds * PLAYER_MOVEMENT_SPEED;
+		positionToAdd = -cameraRight * deltaSeconds * CAMERA_FLY_SPEED;
 	}
 
 	//right is south (-y)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_D))
 	{
-		positionToAdd = cameraRight * deltaSeconds * PLAYER_MOVEMENT_SPEED;
+		positionToAdd = cameraRight * deltaSeconds * CAMERA_FLY_SPEED;
 	}
 
 	//up is (+z)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE) || theInput->IsKeyPressed(theInput->KEYBOARD_E))
 	{
-		positionToAdd = g_worldUp * deltaSeconds * PLAYER_MOVEMENT_SPEED;
+		positionToAdd = g_worldUp * deltaSeconds * CAMERA_FLY_SPEED;
 	}
 
 	//up is (-z)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL) || theInput->IsKeyPressed(theInput->KEYBOARD_Q))
 	{
-		positionToAdd = -g_worldUp * deltaSeconds * PLAYER_MOVEMENT_SPEED;
+		positionToAdd = -g_worldUp * deltaSeconds * CAMERA_FLY_SPEED;
 	}
 
 	//sprint move speed (twice as fast)
@@ -387,6 +393,12 @@ void World::UpdateChunks()
 }
 
 //  =========================================================================================
+void World::UpdateEntities(float deltaSeconds)
+{
+	m_player->Update(deltaSeconds);
+}
+
+//  =========================================================================================
 void World::UpdateTime(float deltaSeconds)
 {
 	if (!m_isWorldTimePaused)
@@ -471,6 +483,14 @@ void World::RenderUI()
 		theRenderer->DrawMesh(textMesh);
 		delete(textMesh);
 	}
+}
+
+//  =========================================================================================
+void World::RenderEntities()
+{
+	m_player->Render();
+
+	//render other entities
 }
 
 //  =========================================================================================
@@ -1576,8 +1596,8 @@ void World::ToggleCameraViewLocked()
 //  =========================================================================================
 void World::CopyCameraDataToPlayerView(const Vector3& cameraPosition, const Vector3& cameraForward)
 {
-	m_playerViewPosition = cameraPosition;
-	m_playerViewForwardNormalized = cameraForward;
+	m_cameraViewPosition = cameraPosition;
+	m_cameraViewForwardNormalized = cameraForward;
 }
 
 //  =========================================================================================

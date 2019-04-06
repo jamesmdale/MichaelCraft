@@ -11,13 +11,22 @@
 extern bool g_isDebug;
 extern bool g_isQuitting;
 
+//physics globals ----------------------------------------------
+extern Vector3 g_gravity;
+
+//player globals ----------------------------------------------
+extern float g_playerWidth;
+extern float g_playerHeight;
+extern float g_playerEyesOffset;
+extern float g_playerWalkSpeed;
+extern float g_playerRunSpeed;
+
 //gameplay globals  ----------------------------------------------
-constexpr float PLAYER_MOVEMENT_SPEED = 3.f;
+constexpr float CAMERA_FLY_SPEED = 3.f;
 constexpr float RAYCAST_MAX_DISTANCE = 8.f;
 constexpr float RAYCAST_STEP_AMOUNT = 0.015f;
 constexpr float PLAYER_INPUT_DELAY_IN_SECONDS = 0.25f;
 constexpr float TIME_PER_DAY_IN_SECONDS = 60.f * 60.f * 24.f;
-
 
 constexpr float NOON_TIME_IN_DAY = 0.5f;
 constexpr float SIX_AM_TIME_IN_DAY = 0.25f;
