@@ -3,6 +3,7 @@
 #include "Game\Helpers\GameRendererHelpers.hpp"
 #include "Game\GameObjects\BlockLocator.hpp"
 #include "Game\GameObjects\Block.hpp"
+#include "Game\GameObjects\World.hpp"
 #include "Engine\Renderer\Mesh.hpp"
 #include "Engine\Input\InputSystem.hpp"
 #include "Engine\Core\EngineCommon.hpp"
@@ -39,15 +40,19 @@ void Player::Update(float deltaSeconds)
 void Player::UpdatePhysics(float deltaSeconds)
 {
 	//apply all forces into velocity
-	m_velocity += g_gravity * deltaSeconds;
+	m_velocity += (g_gravity * deltaSeconds);
 
 	//move the player
 	m_position += m_velocity;
 	UpdateBoundsToCurrentPosition();
 
-	//std::vector<BlockLocator*> neighborhood;
-	//std::vector<BlockLocator*> neighborhood;
-	//GetBlockNeighborhood();
+	std::vector<BlockLocator&> neighborhood;
+	GetBlockNeighborhood(neighborhood);
+
+	for (int blockIndex = 0; blockIndex < (int)neighborhood.size(); ++blockIndex)
+	{
+		PushOutOfBlock(neighborhood[blockIndex]);
+	}
 }
 
 //  =========================================================================================
@@ -133,4 +138,22 @@ void Player::UpdateBoundsToCurrentPosition()
 
 	Vector3 bottomCenterPivot = GetBottomCenterPivot();
 	m_physicsSphere.m_position = Vector3(bottomCenterPivot.x, bottomCenterPivot.y, bottomCenterPivot.z + m_physicsSphere.m_radius);
+}
+
+//  =========================================================================================
+void Player::GetBlockNeighborhood(std::vector<BlockLocator&> outBlockLocators)
+{
+	if (m_world == nullptr)
+		return;
+
+	BlockLocator& currentBlockPosition = m_world->GetChunkByPositionFromChunkList(m_physicsSphere.m_position);
+
+	currentBlockPosition.GetBlockLocatorAbove();
+
+}
+
+//  =========================================================================================
+void Player::PushOutOfBlock(BlockLocator& locator)
+{
+
 }

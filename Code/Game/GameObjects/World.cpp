@@ -1085,6 +1085,36 @@ void World::LoadSavedChunkReferences()
 }
 
 //  =========================================================================================
+BlockLocator& World::GetChunkByPositionFromChunkList(const Vector3& worldPosition)
+{
+	BlockLocator locator;
+
+	// get chunk information we need for  ----------------------------------------------
+	IntVector2 chunkCoordsOfWorldPosition = IntVector2((int)floorf(worldPosition.x * BLOCKS_WIDE_X_DIVISOR), (int)floorf(worldPosition.y * BLOCKS_WIDE_Y_DIVISOR));
+
+	std::map<IntVector2, Chunk*>::iterator activeChunkIterator = m_activeChunks.find(chunkCoordsOfWorldPosition);
+
+	if (activeChunkIterator == m_activeChunks.end())
+	{
+		return locator;
+	}
+
+	Chunk* currentChunk = activeChunkIterator->second;
+
+	uint outBlockIndex;
+	bool success = currentChunk->GetBlockIndexForWorldPositionWithinBounds(outBlockIndex, worldPosition);
+
+	//we are out of bounds of the chunk bounds
+	if (!success)
+	{
+		return locator;
+	}
+
+	locator = BlockLocator(currentChunk, outBlockIndex);
+	return locator;
+}
+
+//  =========================================================================================
 void World::ProcessLightingForBlock(BlockLocator blockLocator)
 {
 	Block* block = blockLocator.GetBlock();

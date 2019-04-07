@@ -354,3 +354,83 @@ BlockLocator BlockLocator::GetBlockLocatorBelow()
 
 	return BlockLocator(nullptr, -1);
 }
+
+BlockLocator BlockLocator::GetBlockLocatorToAboveNorth()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToAboveWest()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToAboveSouth()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToAboveEast()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToBelowNorth()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToBelowWest()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToBelowSouth()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToBelowEast()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToAboveNorthEast()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToAboveNorthWest()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToAboveSouthEast()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToAboveSouthWest()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToBelowNorthEast()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToBelowNorthWest()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToBelowSouthEast()
+{
+	return BlockLocator();
+}
+
+BlockLocator BlockLocator::GetBlockLocatorToBelowSouthWest()
+{
+	return BlockLocator();
+}

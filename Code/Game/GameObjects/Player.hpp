@@ -1,7 +1,9 @@
 #pragma once
 #include "Game\GameObjects\Entity.hpp"
+#include <vector>
 
 class Mesh;
+class BlockLocator;
 
 class Player : public Entity
 {
@@ -23,6 +25,10 @@ public:
 	Vector3 GetBottomCenterPivot();
 	void UpdateBoundsToCurrentPosition();
 
+	void GetBlockNeighborhood(std::vector<BlockLocator&> outBlockLocators);
+	void PushOutOfBlock(BlockLocator& locator);
+
+	//inline functions
 	inline AABB3 GetVisualBounds() { return m_visualBounds; }
 
 protected:

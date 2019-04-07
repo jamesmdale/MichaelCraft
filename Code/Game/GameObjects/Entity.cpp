@@ -10,6 +10,7 @@ Entity::Entity()
 Entity::~Entity()
 {
 	m_attachedCamera = nullptr;
+	m_world = nullptr;
 }
 
 //  =========================================================================================

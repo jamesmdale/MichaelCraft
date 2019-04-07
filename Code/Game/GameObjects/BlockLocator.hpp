@@ -26,6 +26,25 @@ public:
 	BlockLocator GetBlockLocatorToEast();
 	BlockLocator GetBlockLocatorAbove();
 	BlockLocator GetBlockLocatorBelow();
+
+	BlockLocator GetBlockLocatorToAboveNorth();
+	BlockLocator GetBlockLocatorToAboveWest();
+	BlockLocator GetBlockLocatorToAboveSouth();
+	BlockLocator GetBlockLocatorToAboveEast();
+	BlockLocator GetBlockLocatorToBelowNorth();
+	BlockLocator GetBlockLocatorToBelowWest();
+	BlockLocator GetBlockLocatorToBelowSouth();
+	BlockLocator GetBlockLocatorToBelowEast();
+
+	BlockLocator GetBlockLocatorToAboveNorthEast();
+	BlockLocator GetBlockLocatorToAboveNorthWest();
+	BlockLocator GetBlockLocatorToAboveSouthEast();
+	BlockLocator GetBlockLocatorToAboveSouthWest();
+	BlockLocator GetBlockLocatorToBelowNorthEast();
+	BlockLocator GetBlockLocatorToBelowNorthWest();
+	BlockLocator GetBlockLocatorToBelowSouthEast();
+	BlockLocator GetBlockLocatorToBelowSouthWest();
+
 	bool IsValid();
 
 	bool IsBlockIndexOnEdge(std::vector<Chunk*>& outConnectingChunks);

@@ -3,6 +3,7 @@
 #include "Engine\Math\Sphere.hpp"
 
 class GameCamera;
+class World;
 
 class Entity
 {
@@ -36,6 +37,9 @@ public:
 	float m_rollDegreesX = 0.0f; //roll
 	float m_pitchDegreesY = 0.0f; //pitch
 	float m_yawDegreesZ = 0.0f; //yaw
+
+	//world reference
+	World* m_world = nullptr;
 
 protected:
 
