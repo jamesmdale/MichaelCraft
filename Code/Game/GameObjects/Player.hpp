@@ -27,7 +27,7 @@ public:
 	void UpdateBoundsToCurrentPosition();
 
 	void GetBlockNeighborhood(std::vector<BlockLocator>& outBlockLocators);
-	void PushOutOfBlock(BlockLocator locator);
+	bool PushOutOfBlock(BlockLocator locator);
 
 	//inline functions
 	inline AABB3 GetVisualBounds() { return m_visualBounds; }

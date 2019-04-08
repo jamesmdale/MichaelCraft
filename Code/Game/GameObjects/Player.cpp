@@ -51,9 +51,12 @@ void Player::UpdatePhysics(float deltaSeconds)
 	std::vector<BlockLocator> neighborhood;
 	GetBlockNeighborhood(neighborhood);
 
-	for (int blockIndex = 0; blockIndex < (int)neighborhood.size(); ++blockIndex)
+	int pushCount = 0;
+	for (int blockIndex = 0; blockIndex < (int)neighborhood.size() && pushCount < 3; ++blockIndex)
 	{
-		PushOutOfBlock(neighborhood[blockIndex]);
+		bool didPush = PushOutOfBlock(neighborhood[blockIndex]);
+		if (didPush)
+			pushCount = 0;
 	}
 
 	//UpdateBoundsToCurrentPosition();
@@ -160,56 +163,128 @@ void Player::GetBlockNeighborhood(std::vector<BlockLocator>& outBlockLocators)
 	if (m_world == nullptr)
 		return;
 
-	BlockLocator& currentBlock = m_world->GetChunkByPositionFromChunkList(m_physicsSphere.m_position);
+	BlockLocator currentBlock = m_world->GetChunkByPositionFromChunkList(m_physicsSphere.m_position);
 
 	if (!currentBlock.IsValid())
 		return;
 
 	//top priority
-	outBlockLocators.push_back(currentBlock.GetBlockLocatorBelow());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorAbove());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToNorth());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToSouth());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToWest());
+	BlockLocator checkedBlock = currentBlock.GetBlockLocatorBelow();
+	if(checkedBlock.IsValid())
+		outBlockLocators.push_back(checkedBlock);
 
-	////second priority
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToNorthEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToNorthWest());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToSouthEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToSouthWest());
+	checkedBlock = currentBlock.GetBlockLocatorAbove();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
 
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToBelowNorth());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToBelowSouth());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToBelowEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToBelowWest());
+	checkedBlock = currentBlock.GetBlockLocatorToNorth();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
 
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToAboveNorth());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToAboveSouth());	
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToAboveEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToAboveWest());
+	checkedBlock = currentBlock.GetBlockLocatorToSouth();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
 
-	////third priority
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToBelowSouthEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToBelowSouthWest());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToBelowNorthEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToBelowNorthWest());
+	checkedBlock = currentBlock.GetBlockLocatorToEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
 
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToAboveNorthEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToAboveNorthWest());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToAboveSouthEast());
-	//outBlockLocators.push_back(currentBlock.GetBlockLocatorToAboveSouthWest());
+	checkedBlock = currentBlock.GetBlockLocatorToWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	//second priority
+	checkedBlock = currentBlock.GetBlockLocatorToNorthEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToNorthWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToSouthEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToSouthWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToBelowNorth();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToBelowSouth();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToBelowEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToBelowWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToAboveNorth();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToAboveSouth();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToAboveEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToAboveWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	//third priority
+	checkedBlock = currentBlock.GetBlockLocatorToBelowSouthEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToBelowSouthWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToBelowNorthEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToBelowNorthWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToAboveNorthEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToAboveNorthWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToAboveSouthEast();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
+
+	checkedBlock = currentBlock.GetBlockLocatorToAboveSouthWest();
+	if (checkedBlock.IsValid())
+	outBlockLocators.push_back(checkedBlock);
 }
 
 //  =========================================================================================
-void Player::PushOutOfBlock(BlockLocator locator)
+bool Player::PushOutOfBlock(BlockLocator locator)
 {
 	if (!locator.IsValid())
-		return;
+		return false;
 
 	Block* block = locator.GetBlock();
 	if (!locator.GetBlock()->IsSolid())
-		return;
+		return false;
 
 	Vector3 worldCenter = locator.m_chunk->GetBlockWorldCenterForBlockIndex(locator.m_blockIndex);
 	AABB3 blockBounds = AABB3(worldCenter, 0.5f, 0.5f, 0.5f);
@@ -223,7 +298,7 @@ void Player::PushOutOfBlock(BlockLocator locator)
 
 	//we aren't overlapping
 	if (separation >= 0.f || IsNearZero(separation))
-		return;
+		return false;
 	
 	//we need to push out
 	Vector3 pushDirectionNormalized = (m_physicsSphere.m_position - closestPointOnBounds).GetNormalized();		
@@ -234,4 +309,6 @@ void Player::PushOutOfBlock(BlockLocator locator)
 	//kill velocity in the direction we are pushing
 	Vector3 projection = GetProjectedVector(m_velocity, (-1.f * pushDirectionNormalized));
 	m_velocity -= projection;
+
+	return true;
 }
