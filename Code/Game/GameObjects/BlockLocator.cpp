@@ -1,6 +1,7 @@
 #include "Game\GameObjects\BlockLocator.hpp"
 #include "Game\GameObjects\Chunk.hpp"
 #include "Game\GameObjects\Block.hpp"
+#include "Game\GameCommon.hpp"
 
 
 //  =========================================================================================
@@ -130,6 +131,9 @@ Block* BlockLocator::GetBlock()
 //  =========================================================================================
 void BlockLocator::StepNorth()
 {
+	if (!IsValid())
+		return;
+
 	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
 	if (yIndex != CHUNK_Y_MASK)
 	{
@@ -153,6 +157,9 @@ void BlockLocator::StepNorth()
 //  =========================================================================================
 void BlockLocator::StepWest()
 {
+	if (!IsValid())
+		return ;
+
 	int xIndex = m_blockIndex & (CHUNK_X_MASK);
 	if (xIndex != 0)
 	{
@@ -178,6 +185,9 @@ void BlockLocator::StepWest()
 //  =========================================================================================
 void BlockLocator::StepSouth()
 {
+	if (!IsValid())
+		return ;
+
 	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
 	if (yIndex != 0)
 	{
@@ -200,6 +210,9 @@ void BlockLocator::StepSouth()
 //  =========================================================================================
 void BlockLocator::StepEast()
 {
+	if (!IsValid())
+		return;
+
 	int xIndex = m_blockIndex & (CHUNK_X_MASK);
 	if (xIndex != CHUNK_X_MASK)
 	{
@@ -225,6 +238,9 @@ void BlockLocator::StepEast()
 //  =========================================================================================
 void BlockLocator::StepUp()
 {
+	if (!IsValid())
+		return;
+
 	int zIndex = m_blockIndex & (CHUNK_Z_MASK);
 	if (zIndex != CHUNK_Z_MASK)
 	{
@@ -239,6 +255,9 @@ void BlockLocator::StepUp()
 //  =========================================================================================
 void BlockLocator::StepDown()
 {
+	if (!IsValid())
+		return;
+
 	int zIndex = m_blockIndex & (CHUNK_Z_MASK);
 	if (zIndex != 0)
 	{
@@ -253,6 +272,9 @@ void BlockLocator::StepDown()
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToNorth()
 {
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
 	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
 	if (yIndex != CHUNK_Y_MASK)
 	{
@@ -273,6 +295,9 @@ BlockLocator BlockLocator::GetBlockLocatorToNorth()
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToSouth()
 {
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
 	int yIndex = m_blockIndex & (CHUNK_Y_MASK);
 	if (yIndex != 0)
 	{
@@ -293,6 +318,9 @@ BlockLocator BlockLocator::GetBlockLocatorToSouth()
 //  ========================================================================================= 
 BlockLocator BlockLocator::GetBlockLocatorToWest()
 {
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
 	int xIndex = m_blockIndex & (CHUNK_X_MASK);
 	if (xIndex != 0)
 	{
@@ -314,6 +342,9 @@ BlockLocator BlockLocator::GetBlockLocatorToWest()
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToEast()
 {
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
 	int xIndex = m_blockIndex & (CHUNK_X_MASK);
 	if (xIndex != CHUNK_X_MASK)
 	{
@@ -334,6 +365,9 @@ BlockLocator BlockLocator::GetBlockLocatorToEast()
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorAbove()
 {
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
 	int zIndex = m_blockIndex & (CHUNK_Z_MASK);
 	if (zIndex != CHUNK_Z_MASK)
 	{
@@ -346,6 +380,9 @@ BlockLocator BlockLocator::GetBlockLocatorAbove()
 //  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorBelow()
 {
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
 	int zIndex = m_blockIndex & (CHUNK_Z_MASK);
 	if (zIndex != 0)
 	{
@@ -355,82 +392,182 @@ BlockLocator BlockLocator::GetBlockLocatorBelow()
 	return BlockLocator(nullptr, -1);
 }
 
+//  =========================================================================================
+BlockLocator BlockLocator::GetBlockLocatorToNorthEast()
+{
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorToNorth().GetBlockLocatorToEast();
+}
+
+//  =========================================================================================
+BlockLocator BlockLocator::GetBlockLocatorToSouthEast()
+{
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorToSouth().GetBlockLocatorToEast();
+}
+
+//  =========================================================================================
+BlockLocator BlockLocator::GetBlockLocatorToNorthWest()
+{
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorToNorth().GetBlockLocatorToWest();
+}
+
+//  =========================================================================================
+BlockLocator BlockLocator::GetBlockLocatorToSouthWest()
+{
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorToSouth().GetBlockLocatorToWest();
+}
+
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToAboveNorth()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorAbove().GetBlockLocatorToNorth();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToAboveWest()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorAbove().GetBlockLocatorToWest();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToAboveSouth()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorAbove().GetBlockLocatorToSouth();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToAboveEast()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorAbove().GetBlockLocatorToEast();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToBelowNorth()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorBelow().GetBlockLocatorToNorth();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToBelowWest()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorBelow().GetBlockLocatorToWest();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToBelowSouth()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorBelow().GetBlockLocatorToSouth();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToBelowEast()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorBelow().GetBlockLocatorToEast();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToAboveNorthEast()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorAbove().GetBlockLocatorToNorth().GetBlockLocatorToEast();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToAboveNorthWest()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorAbove().GetBlockLocatorToNorth().GetBlockLocatorToWest();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToAboveSouthEast()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorAbove().GetBlockLocatorToSouth().GetBlockLocatorToEast();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToAboveSouthWest()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorAbove().GetBlockLocatorToSouth().GetBlockLocatorToWest();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToBelowNorthEast()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorBelow().GetBlockLocatorToNorth().GetBlockLocatorToEast();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToBelowNorthWest()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorBelow().GetBlockLocatorToNorth().GetBlockLocatorToWest();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToBelowSouthEast()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorBelow().GetBlockLocatorToSouth().GetBlockLocatorToEast();
 }
 
+//  =========================================================================================
 BlockLocator BlockLocator::GetBlockLocatorToBelowSouthWest()
 {
-	return BlockLocator();
+	if (!IsValid())
+		return g_invalidBlockLocator;
+
+	return GetBlockLocatorBelow().GetBlockLocatorToSouth().GetBlockLocatorToWest();
 }

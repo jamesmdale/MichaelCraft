@@ -1,9 +1,11 @@
 #include "Game\GameObjects\Entity.hpp"
 #include "Game\GameObjects\GameCamera.hpp"
+#include "Game\GameObjects\World.hpp"
 
 //  =========================================================================================
-Entity::Entity()
+Entity::Entity(World* world)
 {
+	m_world = world;
 }
 
 //  =========================================================================================

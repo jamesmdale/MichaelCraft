@@ -59,11 +59,11 @@ void World::Initialize()
 	m_uiCamera = Game::GetInstance()->m_uiCamera;
 
 	m_gameCamera = new GameCamera();
-	m_gameCamera->m_position = Vector3(0.f, 0.f, 120.f);
+	m_gameCamera->m_position = Vector3(0.1f, 0.1f, 110.f);
 
 	//initialize entities
-	m_player = new Player();
-	m_player->m_position = Vector3(0.f, 0.f, 100.f);
+	m_player = new Player(this);
+	m_player->m_position = Vector3(0.f, 0.f, 115.f);
 
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
@@ -323,7 +323,14 @@ void World::UpdateFromInput(float deltaSeconds)
 		theGame->m_inputDelayTimer->Reset();
 	}
 
-	if(InputSystem::GetInstance()->WasKeyJustPressed(InputSystem::GetInstance()->KEYBOARD_ESCAPE))
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_R))
+	{
+		m_player->m_position = Vector3(0.f, 0.f, 100.f);
+		m_player->m_velocity = Vector3::ZERO;
+		m_player->UpdateBoundsToCurrentPosition();
+	}
+
+	if(theInput->WasKeyJustPressed(theInput->KEYBOARD_ESCAPE))
 	{
 		DeactivateAllChunks();
 		g_isQuitting = true;
@@ -1775,6 +1782,16 @@ Mesh* World::CreateUITextMesh()
 	GetTimeOfDay(m_currentTimeOfDay, seconds, minutes, hours, amPm);
 	AABB2 timeBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.95f), Vector2(0.25f, 0.99f));
 	builder.CreateText2DFromPoint(timeBlock.mins, 10.f, 1.f, Stringf("Day: %i - CurrentTime: %i:%01i %s", m_days, hours, minutes, amPm.c_str()), Rgba::YELLOW);
+
+	//camera position
+	AABB2 posBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.875f), Vector2(0.25f, 0.925f));
+	builder.CreateText2DFromPoint(posBlock.mins, 10.f, 1.f, Stringf("CameraPos: %i, %i, %i", (int)m_cameraViewPosition.x, (int)m_cameraViewPosition.y, (int)m_cameraViewPosition.z), Rgba::YELLOW);
+
+	AABB2 playerPosBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.8f), Vector2(0.25f, 0.85f));
+	builder.CreateText2DFromPoint(playerPosBlock.mins, 10.f, 1.f, Stringf("PlayerSpherePos: %i, %i, %i", (int)m_player->m_physicsSphere.m_position.x, (int)m_player->m_physicsSphere.m_position.y, (int)m_player->m_physicsSphere.m_position.z), Rgba::YELLOW);
+
+	playerPosBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.725f), Vector2(0.25f, 0.775f));
+	builder.CreateText2DFromPoint(playerPosBlock.mins, 10.f, 1.f, Stringf("PlayerPos: %i, %i, %i", (int)m_player->m_position.x, (int)m_player->m_position.y, (int)m_player->m_position.z), Rgba::YELLOW);
 
 	//debug type - sky mesh
 	if (m_debugSkyMesh != nullptr)

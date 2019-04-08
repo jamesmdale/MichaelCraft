@@ -26,6 +26,11 @@ public:
 	BlockLocator GetBlockLocatorToEast();
 	BlockLocator GetBlockLocatorAbove();
 	BlockLocator GetBlockLocatorBelow();
+	
+	BlockLocator GetBlockLocatorToNorthEast();
+	BlockLocator GetBlockLocatorToSouthEast();
+	BlockLocator GetBlockLocatorToNorthWest();
+	BlockLocator GetBlockLocatorToSouthWest();
 
 	BlockLocator GetBlockLocatorToAboveNorth();
 	BlockLocator GetBlockLocatorToAboveWest();

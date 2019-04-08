@@ -8,7 +8,7 @@ class World;
 class Entity
 {
 public:
-	Entity();
+	Entity(World* world);
 	virtual ~Entity();
 
 	virtual void Update(float deltaSeconds);
@@ -41,7 +41,7 @@ public:
 	//world reference
 	World* m_world = nullptr;
 
-protected:
+public:
 
 	Sphere m_physicsSphere;
 	bool m_doesReceiveUserInput = false;

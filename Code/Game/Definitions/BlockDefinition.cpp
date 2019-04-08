@@ -93,10 +93,10 @@ void BlockDefinition::ConstructBitsFromBools()
 		m_defaultBits |= IS_BLOCK_FULL_OPAQUE_MASK;
 
 	if(m_isVisible)
-		m_defaultBits |= IS_BLOCK_SOLID_MASK;
+		m_defaultBits |= IS_BLOCK_VISIBLE_MASK;
 
 	if(m_isSolid)
-		m_defaultBits |= IS_BLOCK_VISIBLE_MASK;
+		m_defaultBits |= IS_BLOCK_SOLID_MASK;
 
 	if(m_doesEmitLight)
 		m_defaultBits |= DOES_BLOCK_EMIT_LIGHT;

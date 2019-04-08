@@ -16,6 +16,7 @@ SHIFT			- faster move speed
 '4'				- disable lighting effects (flickering, lightning, etc)
 'K'				- reload sky mesh for chunk (only if in debug sky mesh mode)
 'L'				- step lighting change (only if in debug dirty lighting mode)
+'R'				- Reset player to predefined position and reset velocity
 'MOUSE WHEEL'	- change active block type (placing)
 'PAGE UP'		- toggle targetting block raycast position lock
 'ESCAPE'		- quit (saves current world state)

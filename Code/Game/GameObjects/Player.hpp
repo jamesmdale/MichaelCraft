@@ -1,5 +1,6 @@
 #pragma once
 #include "Game\GameObjects\Entity.hpp"
+#include "Game\GameObjects\BlockLocator.hpp"
 #include <vector>
 
 class Mesh;
@@ -8,7 +9,7 @@ class BlockLocator;
 class Player : public Entity
 {
 public:
-	Player();
+	Player(World* world);
 	~Player();
 
 	virtual void Update(float deltaSeconds) override;
@@ -25,8 +26,8 @@ public:
 	Vector3 GetBottomCenterPivot();
 	void UpdateBoundsToCurrentPosition();
 
-	void GetBlockNeighborhood(std::vector<BlockLocator&> outBlockLocators);
-	void PushOutOfBlock(BlockLocator& locator);
+	void GetBlockNeighborhood(std::vector<BlockLocator>& outBlockLocators);
+	void PushOutOfBlock(BlockLocator locator);
 
 	//inline functions
 	inline AABB3 GetVisualBounds() { return m_visualBounds; }
