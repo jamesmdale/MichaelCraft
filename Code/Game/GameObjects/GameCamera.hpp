@@ -20,6 +20,8 @@ public:
 	GameCamera();
 	~GameCamera();
 
+	void UpdateFromInput(float deltaSeconds);
+
 	void CreateFliippedViewMatrix(Matrix44& outMatrix);
 	void Translate(Vector3 translation);
 	void AttachToEntity(Entity* entity);

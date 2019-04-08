@@ -26,11 +26,14 @@ public:
 	Vector3 GetBottomCenterPivot();
 	void UpdateBoundsToCurrentPosition();
 
+	//physics helpers
+	void ApplyFriction(float deltaSeconds);
 	void GetBlockNeighborhood(std::vector<BlockLocator>& outBlockLocators);
 	bool PushOutOfBlock(BlockLocator locator);
 
 	//inline functions
 	inline AABB3 GetVisualBounds() { return m_visualBounds; }
+	inline float GetSpeed() { return m_velocity.GetLength(); }
 
 protected:
 	AABB3 m_visualBounds;

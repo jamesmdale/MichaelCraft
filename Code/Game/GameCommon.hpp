@@ -14,6 +14,8 @@ extern bool g_isQuitting;
 
 //physics globals ----------------------------------------------
 extern Vector3 g_gravity;
+extern float g_groundFrictionAmount;
+extern float g_airFrictionAmount;
 
 //player globals ----------------------------------------------
 extern float g_playerWidth;

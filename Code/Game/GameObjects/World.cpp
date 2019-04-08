@@ -87,6 +87,8 @@ void World::Initialize()
 void World::Update(float deltaSeconds)
 {
 	//input & time
+	m_player->UpdateFromInput(deltaSeconds);
+	m_gameCamera->UpdateFromInput(deltaSeconds);
 	UpdateFromInput(deltaSeconds);
 	UpdateTime(deltaSeconds);
 
@@ -139,75 +141,6 @@ void World::UpdateFromInput(float deltaSeconds)
 
 	Vector2 mouseDelta = Vector2::ZERO;
 	mouseDelta = InputSystem::GetInstance()->GetMouse()->GetMouseDelta();
-
-	//calculate rotation for camera and use same rotation for player
-	//m_camera->m_transform->AddRotation(Vector3(mouseDelta.y, mouseDelta.x, 0.f) * deltaSeconds * 10.f);
-
-	m_gameCamera->m_yawDegreesZ += -mouseDelta.x * 0.05f;
-	m_gameCamera->m_pitchDegreesY += mouseDelta.y * 0.05f;
-
-	m_gameCamera->m_yawDegreesZ = Modulus(m_gameCamera->m_yawDegreesZ, 360.f);
-	m_gameCamera->m_pitchDegreesY = ClampFloat(m_gameCamera->m_pitchDegreesY, -90.f, 90.f);
-
-	/*Vector3 rotation = Vector3(clampedX, clampedY, 0.f);
-	m_camera->m_transform->SetLocalRotation(Vector3(rotation));*/
-
-	Vector3 cameraCardinalForward = Vector3(CosDegrees(m_gameCamera->m_yawDegreesZ), SinDegrees(m_gameCamera->m_yawDegreesZ), 0);
-	cameraCardinalForward.Normalize();
-	Vector3 cameraRight = Vector3(SinDegrees(m_gameCamera->m_yawDegreesZ), -CosDegrees(m_gameCamera->m_yawDegreesZ), 0);
-
-	Vector3 positionToAdd = Vector3::ZERO;
-	Vector3 positionAtStartOfFrame = positionToAdd;
-
-	//update movement
-	//forward (x)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
-	{
-		//calculate movement for camera and use same movement for ship and light
-		positionToAdd = cameraCardinalForward * deltaSeconds * CAMERA_FLY_SPEED;
-	}
-
-	//backward (-x)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
-	{
-		positionToAdd = -cameraCardinalForward * deltaSeconds * CAMERA_FLY_SPEED;
-	}
-
-	//left is north (y)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_A))
-	{
-		positionToAdd = -cameraRight * deltaSeconds * CAMERA_FLY_SPEED;
-	}
-
-	//right is south (-y)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_D))
-	{
-		positionToAdd = cameraRight * deltaSeconds * CAMERA_FLY_SPEED;
-	}
-
-	//up is (+z)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_SPACE) || theInput->IsKeyPressed(theInput->KEYBOARD_E))
-	{
-		positionToAdd = g_worldUp * deltaSeconds * CAMERA_FLY_SPEED;
-	}
-
-	//up is (-z)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_CONTROL) || theInput->IsKeyPressed(theInput->KEYBOARD_Q))
-	{
-		positionToAdd = -g_worldUp * deltaSeconds * CAMERA_FLY_SPEED;
-	}
-
-	//sprint move speed (twice as fast)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_SHIFT))
-	{
-		positionToAdd *= 3.f;
-	}
-
-	//walk move speed
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_C))
-	{
-		positionToAdd *= 0.15f;
-	}
 
 	//reset chunks
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_U) && theGame->m_inputDelayTimer->HasElapsed())
@@ -325,7 +258,7 @@ void World::UpdateFromInput(float deltaSeconds)
 
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_R))
 	{
-		m_player->m_position = Vector3(0.f, 0.f, 100.f);
+		m_player->m_position = m_player->m_position + Vector3(0.f, 0.f, 15.f);
 		m_player->m_velocity = Vector3::ZERO;
 		m_player->UpdateBoundsToCurrentPosition();
 	}
@@ -342,7 +275,6 @@ void World::UpdateFromInput(float deltaSeconds)
 	// return 
 	//return deltaSeconds; //new deltaSeconds
 
-	m_gameCamera->Translate(positionToAdd);
 }
 
 //  =========================================================================================
@@ -1787,11 +1719,13 @@ Mesh* World::CreateUITextMesh()
 	AABB2 posBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.875f), Vector2(0.25f, 0.925f));
 	builder.CreateText2DFromPoint(posBlock.mins, 10.f, 1.f, Stringf("CameraPos: %i, %i, %i", (int)m_cameraViewPosition.x, (int)m_cameraViewPosition.y, (int)m_cameraViewPosition.z), Rgba::YELLOW);
 
+	//player
 	AABB2 playerPosBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.8f), Vector2(0.25f, 0.85f));
-	builder.CreateText2DFromPoint(playerPosBlock.mins, 10.f, 1.f, Stringf("PlayerSpherePos: %i, %i, %i", (int)m_player->m_physicsSphere.m_position.x, (int)m_player->m_physicsSphere.m_position.y, (int)m_player->m_physicsSphere.m_position.z), Rgba::YELLOW);
-
-	playerPosBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.725f), Vector2(0.25f, 0.775f));
 	builder.CreateText2DFromPoint(playerPosBlock.mins, 10.f, 1.f, Stringf("PlayerPos: %i, %i, %i", (int)m_player->m_position.x, (int)m_player->m_position.y, (int)m_player->m_position.z), Rgba::YELLOW);
+
+	//player collision 
+	AABB2 playerSpeedBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.725f), Vector2(0.25f, 0.775f));
+	builder.CreateText2DFromPoint(playerPosBlock.mins, 10.f, 1.f, Stringf("PlayerSpeed: %f", m_player->GetSpeed()), Rgba::YELLOW);
 
 	//debug type - sky mesh
 	if (m_debugSkyMesh != nullptr)

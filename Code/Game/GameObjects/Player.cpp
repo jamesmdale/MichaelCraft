@@ -24,6 +24,8 @@ Player::Player(World* world) : Entity(world)
 		GenerateDebugVisualsMesh();
 	if (m_physicsMesh == nullptr)
 		GenerateDebugPhysicsMesh();
+
+	m_doesReceiveUserInput = true;
 }
 
 //  =========================================================================================
@@ -42,7 +44,10 @@ void Player::Update(float deltaSeconds)
 void Player::UpdatePhysics(float deltaSeconds)
 {
 	//apply all forces into velocity
-	m_velocity += (g_gravity * deltaSeconds * 0.001f);
+	m_velocity += (g_gravity * deltaSeconds * 0.1f);
+
+	//apply friction
+	ApplyFriction(deltaSeconds);
 
 	//move the player
 	m_position += m_velocity;
@@ -115,10 +120,29 @@ float Player::UpdateFromInput(float deltaSeconds)
 
 	InputSystem* theInput = InputSystem::GetInstance();
 
-	Vector2 mouseDelta = Vector2::ZERO;
-	mouseDelta = InputSystem::GetInstance()->GetMouse()->GetMouseDelta();
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_UP_ARROW))
+	{
+		//calculate movement for camera and use same movement for ship and light
+		m_velocity += g_worldForward * deltaSeconds * g_playerWalkSpeed;
+	}
 
-	theInput = nullptr;
+	//backward (-x)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_DOWN_ARROW))
+	{
+		m_velocity += -g_worldForward * deltaSeconds * g_playerWalkSpeed;
+	}
+
+	//left is north (y)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_LEFT_ARROW))
+	{
+		m_velocity += -g_worldRight * deltaSeconds * g_playerWalkSpeed;
+	}
+
+	//right is south (-y)
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_RIGHT_ARROW))
+	{
+		m_velocity += g_worldRight * deltaSeconds * g_playerWalkSpeed;
+	}
 
 	return deltaSeconds;
 }
@@ -155,6 +179,32 @@ void Player::UpdateBoundsToCurrentPosition()
 
 	Vector3 bottomCenterPivot = GetBottomCenterPivot();
 	m_physicsSphere.m_position = Vector3(bottomCenterPivot.x, bottomCenterPivot.y, bottomCenterPivot.z + m_physicsSphere.m_radius);
+}
+
+//  =========================================================================================
+void Player::ApplyFriction(float deltaSeconds)
+{
+	//get a position just slightly below the current position
+	Vector3 bottomCenterPivot = GetBottomCenterPivot();
+	bottomCenterPivot -= Vector3(0.f, 0.f, 0.01f);
+
+	//get the block for that value
+	BlockLocator currentBlock = m_world->GetChunkByPositionFromChunkList(bottomCenterPivot);
+
+	Vector3 velocityNormalized = m_velocity.GetNormalized();
+
+	if (currentBlock.GetBlock()->IsSolid()) 
+	{
+		//we are on ground. Apply ground friction
+		Vector3 frictionForce = Vector3(m_velocity.x * g_groundFrictionAmount, m_velocity.y * g_groundFrictionAmount, 0.f);
+		m_velocity += (-1.f * frictionForce * deltaSeconds);
+	}
+	else
+	{
+		//we are on ground. Apply ground friction
+		Vector3 frictionForce = Vector3(m_velocity.x * g_airFrictionAmount, m_velocity.y * g_airFrictionAmount, m_velocity.z * g_airFrictionAmount);
+		m_velocity += (-1.f * frictionForce * deltaSeconds);
+	}
 }
 
 //  =========================================================================================
