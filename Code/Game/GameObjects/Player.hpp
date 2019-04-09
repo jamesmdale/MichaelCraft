@@ -31,7 +31,7 @@ public:
 	void SetThirdPersonCamera();
 
 	//physics helpers
-	void ApplyFriction(float deltaSeconds);
+	void ApplyFrictionToVelocity(float deltaSeconds);
 	void GetBlockNeighborhood(std::vector<BlockLocator>& outBlockLocators);
 	bool PushOutOfBlock(BlockLocator locator);
 

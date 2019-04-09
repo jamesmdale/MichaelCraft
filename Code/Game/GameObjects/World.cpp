@@ -103,14 +103,17 @@ void World::Update(float deltaSeconds)
 	DeactivateChunks();
 
 	//camera and player
-	UpdateEntities(deltaSeconds);
-	UpdatePlayerViewPosition();
+	/*if (m_activeChunks.size() > 3)
+	{*/
+		UpdateEntities(deltaSeconds);
+		UpdatePlayerViewPosition();
 
-	//update physics
-	UpdateEntityPhysics(deltaSeconds);
+		//update physics
+		UpdateEntityPhysics(deltaSeconds);
 
-	//player raycast
-	m_raycastResult = Raycast(m_cameraViewPosition, m_cameraViewForwardNormalized, RAYCAST_MAX_DISTANCE);
+		//player raycast
+		m_raycastResult = Raycast(m_cameraViewPosition, m_cameraViewForwardNormalized, RAYCAST_MAX_DISTANCE);
+	//}		
 }
 
 //  =========================================================================================

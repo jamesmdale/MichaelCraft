@@ -47,6 +47,7 @@ void Player::Update(float deltaSeconds)
 //  =========================================================================================
 void Player::UpdatePhysics(float deltaSeconds)
 {
+	//no clip logic skips corrective physics and speed limits (doesn't even use velocity)
 	if (m_currentPhysicsMode == NO_CLIP_PHYSICS_MODE)
 	{
 		m_velocity += m_frameMoveIntention * g_playerWalkSpeed * deltaSeconds;
@@ -61,9 +62,9 @@ void Player::UpdatePhysics(float deltaSeconds)
 	//apply neutonian physics
 	float speedBeforeChange = m_velocity.GetLengthXY();
 	Vector3 moveIntentionXY = Vector3(m_frameMoveIntention.x, m_frameMoveIntention.y, 0.f) * g_playerWalkSpeed * deltaSeconds;
-	Vector3 moveIntentionZ = Vector3(0.f, 0.f, m_frameMoveIntention.z) * g_jumpStrength * deltaSeconds;
+	Vector3 moveIntentionZ = Vector3(0.f, 0.f, m_frameMoveIntention.z);
 
-	m_velocity += moveIntentionXY + moveIntentionZ;
+	m_velocity += (moveIntentionXY + moveIntentionZ);
 
 	//apply all forces into velocity
 	Vector3 gravity = g_gravity;
@@ -73,14 +74,15 @@ void Player::UpdatePhysics(float deltaSeconds)
 	m_velocity += (gravity * deltaSeconds * 0.1f);
 
 	//apply friction
-	ApplyFriction(deltaSeconds);
+	ApplyFrictionToVelocity(deltaSeconds);
 
 	float speedAfterChange = m_velocity.GetLengthXY();
 
+	//apply speed limits
 	if (speedAfterChange > speedBeforeChange)
 	{
 		float speedLimit = g_playerWalkSpeed;
-		if (m_currentPhysicsMode != WALKING_PHYSICS_MODE)
+		if (m_currentPhysicsMode == FLYING_PHYSICS_MODE)
 			speedLimit = g_playerFlySpeed;
 
 		float maxSpeedLimit = GetMaxFloat(speedBeforeChange, speedLimit);
@@ -170,8 +172,7 @@ void Player::PreRender()
 		case DETACHED_CAMERA_MODE:
 			break;
 		case NUM_CAMERA_MODES:
-			break;
-		
+			break;		
 	}
 }
 
@@ -230,7 +231,7 @@ float Player::UpdateFromInput(float deltaSeconds)
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_SPACE) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		if(m_isOnGround)
-			m_frameMoveIntention += g_worldUp;
+			m_frameMoveIntention.z = g_jumpStrength;
 
 		theGame->m_inputDelayTimer->Reset();
 	}
@@ -304,7 +305,7 @@ void Player::SetThirdPersonCamera()
 }
 
 //  =========================================================================================
-void Player::ApplyFriction(float deltaSeconds)
+void Player::ApplyFrictionToVelocity(float deltaSeconds)
 {
 	Vector3 velocityNormalized = m_velocity.GetNormalized();
 	if (m_isOnGround) 
@@ -315,8 +316,9 @@ void Player::ApplyFriction(float deltaSeconds)
 	}
 	else
 	{
-		//we are on ground. Apply ground friction
-		Vector3 frictionForce = Vector3(m_velocity.x * g_airFrictionAmount, m_velocity.y * g_airFrictionAmount, m_velocity.z * g_airFrictionAmount);
+		//we are in air. Apply air friction
+		float airFrictionZ = (m_currentPhysicsMode == FLYING_PHYSICS_MODE) ? g_airFrictionAmount : 0.f;
+		Vector3 frictionForce = Vector3(m_velocity.x * g_airFrictionAmount, m_velocity.y * g_airFrictionAmount, m_velocity.z * airFrictionZ);
 		m_velocity += (-1.f * frictionForce * deltaSeconds);
 	}
 }

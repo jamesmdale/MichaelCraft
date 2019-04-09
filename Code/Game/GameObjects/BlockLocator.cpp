@@ -26,6 +26,7 @@ BlockLocator::~BlockLocator()
 //  =========================================================================================
 bool BlockLocator::IsValid()
 {
+	//uint8 m_type = GetBlock()->m_type;
 	if (m_chunk == nullptr || m_blockIndex == -1)
 	{
 		return false;

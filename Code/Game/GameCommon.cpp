@@ -16,7 +16,7 @@ float g_playerHeight = 1.8f;
 float g_playerEyesOffset = 1.65f;
 float g_playerWalkSpeed = 0.3f;
 float g_playerFlySpeed = 0.3f;
-float g_jumpStrength = 10.f;
+float g_jumpStrength = 0.1f;
 //float g_playerRunSpeed = 7.5f;
 
 //lighting values ----------------------------------------------
