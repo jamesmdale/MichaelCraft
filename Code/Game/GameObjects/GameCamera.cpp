@@ -2,6 +2,8 @@
 #include "Game\GameObjects\Entity.hpp"
 #include "Game\GameCommon.hpp"
 #include "Game\Game.hpp"
+#include "Game\GameStates\GameState.hpp"
+#include "Game\GameStates\PlayingState.hpp"
 #include "Engine\Input\InputSystem.hpp"
 
 
@@ -113,7 +115,7 @@ void GameCamera::CreateFliippedViewMatrix(Matrix44& outMatrix)
 }
 
 //  =========================================================================================
-void GameCamera::Translate(Vector3 translation)
+void GameCamera::Translate(const Vector3& translation)
 {
 	m_position += translation;
 }
@@ -126,12 +128,61 @@ void GameCamera::AttachToEntity(Entity* entity)
 }
 
 //  =========================================================================================
+void GameCamera::SetRotations(float rollX, float pitchY, float yawZ)
+{
+	m_rollDegreesX = rollX;
+	m_pitchDegreesY = pitchY;
+	m_yawDegreesZ = yawZ;
+}
+
+//  =========================================================================================
+void GameCamera::SetTranslation(const Vector3& position)
+{
+	m_position = position;
+}
+
+//  =========================================================================================
 void GameCamera::CycleCameraModes()
 {
 	m_currentCameraMode = (CameraModes)((int)m_currentCameraMode + 1);
 
 	if (m_currentCameraMode == NUM_CAMERA_MODES)
 		m_currentCameraMode = (CameraModes)0;
+
+	switch (m_currentCameraMode)
+	{
+	case FIRST_PERSON_CAMERA_MODE:
+		PlayingState* gameState = (PlayingState*)GameState::GetCurrentGameState();
+		if (gameState->m_type != PLAYING_GAME_STATE)
+			break;
+		gameState->m_world->m_player->SetCamera(this);
+		m_attachedEntity = gameState->m_world->m_player;
+		break;
+	case THIRD_PERSON_CAMERA_MODE:
+		PlayingState * gameState = (PlayingState*)GameState::GetCurrentGameState();
+		if (gameState->m_type != PLAYING_GAME_STATE)
+			break;
+		gameState->m_world->m_player->SetCamera(this);
+		m_attachedEntity = gameState->m_world->m_player;
+		break;
+	case FIXED_ANGLE_CAMERA_MODE:
+		PlayingState * gameState = (PlayingState*)GameState::GetCurrentGameState();
+		if (gameState->m_type != PLAYING_GAME_STATE)
+			break;
+		gameState->m_world->m_player->SetCamera(this);
+		m_attachedEntity = gameState->m_world->m_player;
+		break;
+	/*case STATIONARY_CAMERA_MODE:
+		m_attachedEntity->m_attachedCamera = nullptr;
+		m_attachedEntity = nullptr;
+		break;*/
+	case DETACHED_CAMERA_MODE:
+		m_attachedEntity->m_attachedCamera = nullptr;
+		m_attachedEntity = nullptr;
+		break;
+	case NUM_CAMERA_MODES:
+		break;
+	}
 }
 
 //  =========================================================================================
@@ -149,8 +200,8 @@ std::string GameCamera::GetCameraModeAsText()
 	case FIXED_ANGLE_CAMERA_MODE:
 		cameraModeAsText = "Fixed Angle";
 		break;
-	case STATIONARY_CAMERA_MODE:
-		cameraModeAsText = "Stationary";
+		/*case STATIONARY_CAMERA_MODE:
+			cameraModeAsText = "Stationary";*/
 		break;
 	case DETACHED_CAMERA_MODE:
 		cameraModeAsText = "Detached";

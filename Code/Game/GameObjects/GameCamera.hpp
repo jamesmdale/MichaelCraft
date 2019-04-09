@@ -10,7 +10,7 @@ enum CameraModes
 	FIRST_PERSON_CAMERA_MODE,
 	THIRD_PERSON_CAMERA_MODE,
 	FIXED_ANGLE_CAMERA_MODE,
-	STATIONARY_CAMERA_MODE,
+	//STATIONARY_CAMERA_MODE,
 	DETACHED_CAMERA_MODE,
 	NUM_CAMERA_MODES
 };
@@ -24,8 +24,10 @@ public:
 	void UpdateFromInput(float deltaSeconds);
 
 	void CreateFliippedViewMatrix(Matrix44& outMatrix);
-	void Translate(Vector3 translation);
+	void Translate(const Vector3& translation);
 	void AttachToEntity(Entity* entity);
+	void SetRotations(float rollX, float pitchY, float yawZ);
+	void SetTranslation(const Vector3& position);
 
 	void CycleCameraModes();
 	std::string GetCameraModeAsText();

@@ -108,6 +108,11 @@ void Player::UpdatePhysics(float deltaSeconds)
 //  =========================================================================================
 void Player::Render()
 {
+	//if the camera is attached to us and is in first person, don't draw anything
+	if (m_attachedCamera != nullptr)
+		if (m_attachedCamera->m_currentCameraMode == FIRST_PERSON_CAMERA_MODE)
+			return;
+
 	Renderer* theRenderer = Renderer::GetInstance();
 	theRenderer->BindMaterial(theRenderer->CreateOrGetMaterial("default"));
 	theRenderer->SetTexture(*theRenderer->CreateOrGetTexture("default"));
@@ -146,7 +151,27 @@ void Player::Render()
 //  =========================================================================================
 void Player::PreRender()
 {
+	//move camera to it's position
+	if (m_attachedCamera = nullptr)
+		return;
 
+	switch (m_attachedCamera->m_currentCameraMode)
+	{		
+		case FIRST_PERSON_CAMERA_MODE:
+			m_attachedCamera->m_position
+			break;
+		case THIRD_PERSON_CAMERA_MODE:
+
+			break;
+		case FIXED_ANGLE_CAMERA_MODE:
+
+			break;
+		case DETACHED_CAMERA_MODE:
+			break;
+		case NUM_CAMERA_MODES:
+			break;
+		
+	}
 }
 
 //  =========================================================================================
