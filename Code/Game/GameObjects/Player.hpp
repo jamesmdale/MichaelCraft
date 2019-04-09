@@ -18,6 +18,7 @@ public:
     void PreRender();
 
 	float UpdateFromInput(float deltaSeconds);
+	void UpdateIsOnGround();
 
 	void SetCamera(GameCamera* camera);
 	void GenerateDebugVisualsMesh();
@@ -39,4 +40,6 @@ protected:
 	AABB3 m_visualBounds;
 	Mesh* m_visualsMesh = nullptr;
 	Mesh* m_physicsMesh = nullptr;
+
+	bool m_isOnGround = false;
 };

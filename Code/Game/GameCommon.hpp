@@ -23,6 +23,7 @@ extern float g_playerHeight;
 extern float g_playerEyesOffset;
 extern float g_playerWalkSpeed;
 extern float g_playerFlySpeed;
+extern float g_jumpStrength;
 
 //gameplay globals  ----------------------------------------------
 constexpr float CAMERA_FLY_SPEED = 3.f;

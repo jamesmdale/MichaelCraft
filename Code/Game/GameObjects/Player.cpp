@@ -1,9 +1,11 @@
 #include "Game\GameObjects\Player.hpp"
+#include "Game\Game.hpp"
 #include "Game\GameCommon.hpp"
 #include "Game\Helpers\GameRendererHelpers.hpp"
 #include "Game\GameObjects\Block.hpp"
 #include "Game\GameObjects\Chunk.hpp"
 #include "Game\GameObjects\World.hpp"
+#include "Engine\TIme\Stopwatch.hpp"
 #include "Engine\Renderer\Mesh.hpp"
 #include "Engine\Input\InputSystem.hpp"
 #include "Engine\Core\EngineCommon.hpp"
@@ -37,7 +39,7 @@ Player::~Player()
 //  =========================================================================================
 void Player::Update(float deltaSeconds)
 {
-	UNUSED(deltaSeconds);
+	UpdateIsOnGround();
 }
 
 //  =========================================================================================
@@ -56,8 +58,10 @@ void Player::UpdatePhysics(float deltaSeconds)
 		
 	//apply neutonian physics
 	float speedBeforeChange = m_velocity.GetLengthXY();
+	Vector3 moveIntentionXY = Vector3(m_frameMoveIntention.x, m_frameMoveIntention.y, 0.f) * g_playerWalkSpeed * deltaSeconds;
+	Vector3 moveIntentionZ = Vector3(0.f, 0.f, m_frameMoveIntention.z) * g_jumpStrength * deltaSeconds;
 
-	m_velocity += m_frameMoveIntention * g_playerWalkSpeed * deltaSeconds;
+	m_velocity += moveIntentionXY + moveIntentionZ;
 
 	//apply all forces into velocity
 	Vector3 gravity = g_gravity;
@@ -153,29 +157,42 @@ float Player::UpdateFromInput(float deltaSeconds)
 		return deltaSeconds;
 
 	InputSystem* theInput = InputSystem::GetInstance();
+	Game* theGame = Game::GetInstance();
+
+	//clear move intention before applying from input
+	m_frameMoveIntention = Vector3::ZERO;
 
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_UP_ARROW))
 	{
 		//calculate movement for camera and use same movement for ship and light
-		m_velocity += g_worldForward * deltaSeconds * g_playerWalkSpeed;
+		m_frameMoveIntention += g_worldForward;
 	}
 
 	//backward (-x)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_DOWN_ARROW))
 	{
-		m_velocity += -g_worldForward * deltaSeconds * g_playerWalkSpeed;
+		m_frameMoveIntention += -g_worldForward;
 	}
 
 	//left is north (y)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_LEFT_ARROW))
 	{
-		m_velocity += -g_worldRight * deltaSeconds * g_playerWalkSpeed;
+		m_frameMoveIntention += -g_worldRight;
 	}
 
 	//right is south (-y)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_RIGHT_ARROW))
 	{
-		m_velocity += g_worldRight * deltaSeconds * g_playerWalkSpeed;
+		m_frameMoveIntention += g_worldRight;
+	}
+
+	//right is south (-y)
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_SPACE) && theGame->m_inputDelayTimer->HasElapsed())
+	{
+		if(m_isOnGround)
+			m_frameMoveIntention += g_worldUp;
+
+		theGame->m_inputDelayTimer->Reset();
 	}
 
 	//change physics mode
@@ -186,6 +203,20 @@ float Player::UpdateFromInput(float deltaSeconds)
 
 	return deltaSeconds;
 }
+
+//  =========================================================================================
+void Player::UpdateIsOnGround()
+{
+	//get a position just slightly below the current position
+	Vector3 bottomCenterPivot = GetBottomCenterPivot();
+	bottomCenterPivot -= Vector3(0.f, 0.f, 0.01f);
+
+	//get the block for that value
+	BlockLocator currentBlock = m_world->GetChunkByPositionFromChunkList(bottomCenterPivot);
+
+	currentBlock.GetBlock()->IsSolid() ? m_isOnGround = true : m_isOnGround = false;
+}
+	
 
 //  =========================================================================================
 void Player::SetCamera(GameCamera* camera)
@@ -224,16 +255,8 @@ void Player::UpdateBoundsToCurrentPosition()
 //  =========================================================================================
 void Player::ApplyFriction(float deltaSeconds)
 {
-	//get a position just slightly below the current position
-	Vector3 bottomCenterPivot = GetBottomCenterPivot();
-	bottomCenterPivot -= Vector3(0.f, 0.f, 0.01f);
-
-	//get the block for that value
-	BlockLocator currentBlock = m_world->GetChunkByPositionFromChunkList(bottomCenterPivot);
-
 	Vector3 velocityNormalized = m_velocity.GetNormalized();
-
-	if (currentBlock.GetBlock()->IsSolid()) 
+	if (m_isOnGround) 
 	{
 		//we are on ground. Apply ground friction
 		Vector3 frictionForce = Vector3(m_velocity.x * g_groundFrictionAmount, m_velocity.y * g_groundFrictionAmount, 0.f);

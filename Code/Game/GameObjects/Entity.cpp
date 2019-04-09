@@ -27,6 +27,7 @@ float Entity::UpdateFromInput(float deltaSeconds)
 	return deltaSeconds;
 }
 
+
 //  =========================================================================================
 void Entity::UpdatePhysics(float deltaSeconds)
 {
