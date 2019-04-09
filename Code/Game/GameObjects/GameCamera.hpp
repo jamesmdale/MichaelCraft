@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine\Math\Vector3.hpp"
 #include "Engine\Math\Matrix44.hpp"
+#include <string>
 
 class Entity;
 
@@ -25,6 +26,9 @@ public:
 	void CreateFliippedViewMatrix(Matrix44& outMatrix);
 	void Translate(Vector3 translation);
 	void AttachToEntity(Entity* entity);
+
+	void CycleCameraModes();
+	std::string GetCameraModeAsText();
 
 public:
 	float m_rollDegreesX = 0.0f; //roll

@@ -5,6 +5,7 @@
 #include "Engine\Input\InputSystem.hpp"
 
 
+
 //  =========================================================================================
 GameCamera::GameCamera()
 {
@@ -122,4 +123,42 @@ void GameCamera::AttachToEntity(Entity* entity)
 {
 	m_attachedEntity = entity;
 	entity->SetCamera(this);
+}
+
+//  =========================================================================================
+void GameCamera::CycleCameraModes()
+{
+	m_currentCameraMode = (CameraModes)((int)m_currentCameraMode + 1);
+
+	if (m_currentCameraMode == NUM_CAMERA_MODES)
+		m_currentCameraMode = (CameraModes)0;
+}
+
+//  =========================================================================================
+std::string GameCamera::GetCameraModeAsText()
+{
+	std::string cameraModeAsText = "";
+	switch (m_currentCameraMode)
+	{
+	case FIRST_PERSON_CAMERA_MODE:
+		cameraModeAsText = "First Person";
+		break;
+	case THIRD_PERSON_CAMERA_MODE:
+		cameraModeAsText = "Third Person";
+		break;
+	case FIXED_ANGLE_CAMERA_MODE:
+		cameraModeAsText = "Fixed Angle";
+		break;
+	case STATIONARY_CAMERA_MODE:
+		cameraModeAsText = "Stationary";
+		break;
+	case DETACHED_CAMERA_MODE:
+		cameraModeAsText = "Detached";
+		break;
+	case NUM_CAMERA_MODES:
+		cameraModeAsText = "NOT SET";
+		break;
+	}
+
+	return cameraModeAsText;
 }

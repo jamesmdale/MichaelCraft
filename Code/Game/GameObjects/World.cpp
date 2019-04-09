@@ -263,6 +263,13 @@ void World::UpdateFromInput(float deltaSeconds)
 		m_player->UpdateBoundsToCurrentPosition();
 	}
 
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F2))
+	{
+		m_player->m_position = m_player->m_position + Vector3(0.f, 0.f, 15.f);
+		m_player->m_velocity = Vector3::ZERO;
+		m_player->UpdateBoundsToCurrentPosition();
+	}
+
 	if(theInput->WasKeyJustPressed(theInput->KEYBOARD_ESCAPE))
 	{
 		DeactivateAllChunks();
