@@ -45,12 +45,19 @@ void Player::UpdatePhysics(float deltaSeconds)
 {
 	if (m_currentPhysicsMode == NO_CLIP_PHYSICS_MODE)
 	{
+		m_velocity += m_frameMoveIntention * g_playerWalkSpeed * deltaSeconds;
 		Vector3 moveDirection = m_velocity.GetNormalized();
 		m_velocity = Vector3::ZERO;
 		m_position += moveDirection * g_playerWalkSpeed * deltaSeconds;
+		m_frameMoveIntention = Vector3::ZERO;
+		UpdateBoundsToCurrentPosition();
 		return;
 	}
 		
+	//apply neutonian physics
+	float speedBeforeChange = m_velocity.GetLengthXY();
+
+	m_velocity += m_frameMoveIntention * g_playerWalkSpeed * deltaSeconds;
 
 	//apply all forces into velocity
 	Vector3 gravity = g_gravity;
@@ -62,10 +69,23 @@ void Player::UpdatePhysics(float deltaSeconds)
 	//apply friction
 	ApplyFriction(deltaSeconds);
 
+	float speedAfterChange = m_velocity.GetLengthXY();
+
+	if (speedAfterChange > speedBeforeChange)
+	{
+		float speedLimit = g_playerWalkSpeed;
+		if (m_currentPhysicsMode != WALKING_PHYSICS_MODE)
+			speedLimit = g_playerFlySpeed;
+
+		float maxSpeedLimit = GetMaxFloat(speedBeforeChange, speedLimit);
+		m_velocity.ClipXYToLength(maxSpeedLimit);
+	}
+
 	//move the player
 	m_position += m_velocity;
 	UpdateBoundsToCurrentPosition();
 
+	//corrective physics
 	std::vector<BlockLocator> neighborhood;
 	GetBlockNeighborhood(neighborhood);
 
@@ -74,10 +94,11 @@ void Player::UpdatePhysics(float deltaSeconds)
 	{
 		bool didPush = PushOutOfBlock(neighborhood[blockIndex]);
 		if (didPush)
-			pushCount = 0;
+			pushCount += 1;
 	}
 
-	//UpdateBoundsToCurrentPosition();
+	//update frame move intention
+	m_frameMoveIntention = Vector3::ZERO;
 }
 
 //  =========================================================================================

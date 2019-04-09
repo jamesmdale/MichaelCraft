@@ -44,6 +44,7 @@ public:
 	
 	Vector3 m_position = Vector3::ZERO;	
 	Vector3 m_velocity = Vector3::ZERO;
+	Vector3 m_frameMoveIntention = Vector3::ZERO;
 
 	float m_rollDegreesX = 0.0f; //roll
 	float m_pitchDegreesY = 0.0f; //pitch
