@@ -11,7 +11,7 @@
 //  =========================================================================================
 GameCamera::GameCamera()
 {
-	m_currentCameraMode = DETACHED_CAMERA_MODE;
+	m_currentCameraMode = FIRST_PERSON_CAMERA_MODE;
 }
 
 //  =========================================================================================
@@ -39,9 +39,6 @@ void GameCamera::UpdateFromInput(float deltaSeconds)
 
 	m_yawDegreesZ = Modulus(m_yawDegreesZ, 360.f);
 	m_pitchDegreesY = ClampFloat(m_pitchDegreesY, -90.f, 90.f);
-
-	/*Vector3 rotation = Vector3(clampedX, clampedY, 0.f);
-	m_camera->m_transform->SetLocalRotation(Vector3(rotation));*/
 
 	Vector3 cameraCardinalForward = Vector3(CosDegrees(m_yawDegreesZ), SinDegrees(m_yawDegreesZ), 0);
 	cameraCardinalForward.Normalize();
@@ -125,6 +122,31 @@ void GameCamera::AttachToEntity(Entity* entity)
 {
 	m_attachedEntity = entity;
 	entity->SetCamera(this);
+
+	//enable disable inputs depending on the current mode
+	switch (m_currentCameraMode)
+	{
+		case FIRST_PERSON_CAMERA_MODE:
+			m_attachedEntity->EnableInput();
+			/*	break;
+			case THIRD_PERSON_CAMERA_MODE:
+				m_attachedEntity->EnableInput();
+				break;
+			case FIXED_ANGLE_CAMERA_MODE:
+				m_attachedEntity->EnableInput();
+				break;*/
+			/*case STATIONARY_CAMERA_MODE:
+				m_attachedEntity->m_attachedCamera = nullptr;
+				m_attachedEntity = nullptr;
+				break;*/
+			break;
+		case DETACHED_CAMERA_MODE:
+			m_attachedEntity->DisableInput();
+			break;
+		case NUM_CAMERA_MODES:
+			break;
+
+	}
 }
 
 //  =========================================================================================
@@ -149,36 +171,36 @@ void GameCamera::CycleCameraModes()
 	if (m_currentCameraMode == NUM_CAMERA_MODES)
 		m_currentCameraMode = (CameraModes)0;
 
+	PlayingState* gameState = (PlayingState*)GameState::GetCurrentGameState();
+	if (gameState->m_type != PLAYING_GAME_STATE)
+		return;
+
 	switch (m_currentCameraMode)
 	{
 	case FIRST_PERSON_CAMERA_MODE:
-		PlayingState* gameState = (PlayingState*)GameState::GetCurrentGameState();
-		if (gameState->m_type != PLAYING_GAME_STATE)
-			break;
 		gameState->m_world->m_player->SetCamera(this);
 		m_attachedEntity = gameState->m_world->m_player;
+		m_attachedEntity->EnableInput();
 		break;
-	case THIRD_PERSON_CAMERA_MODE:
-		PlayingState * gameState = (PlayingState*)GameState::GetCurrentGameState();
-		if (gameState->m_type != PLAYING_GAME_STATE)
+		/*case THIRD_PERSON_CAMERA_MODE:
+			gameState->m_world->m_player->SetCamera(this);
+			m_attachedEntity = gameState->m_world->m_player;
+			m_attachedEntity->EnableInput();
 			break;
-		gameState->m_world->m_player->SetCamera(this);
-		m_attachedEntity = gameState->m_world->m_player;
-		break;
-	case FIXED_ANGLE_CAMERA_MODE:
-		PlayingState * gameState = (PlayingState*)GameState::GetCurrentGameState();
-		if (gameState->m_type != PLAYING_GAME_STATE)
-			break;
-		gameState->m_world->m_player->SetCamera(this);
-		m_attachedEntity = gameState->m_world->m_player;
-		break;
+		case FIXED_ANGLE_CAMERA_MODE:
+			gameState->m_world->m_player->SetCamera(this);
+			m_attachedEntity = gameState->m_world->m_player;
+			m_attachedEntity->EnableInput();
+			break;*/
 	/*case STATIONARY_CAMERA_MODE:
 		m_attachedEntity->m_attachedCamera = nullptr;
 		m_attachedEntity = nullptr;
 		break;*/
+		break;
 	case DETACHED_CAMERA_MODE:
+		m_attachedEntity->DisableInput();
 		m_attachedEntity->m_attachedCamera = nullptr;
-		m_attachedEntity = nullptr;
+		m_attachedEntity = nullptr;	
 		break;
 	case NUM_CAMERA_MODES:
 		break;
@@ -194,15 +216,15 @@ std::string GameCamera::GetCameraModeAsText()
 	case FIRST_PERSON_CAMERA_MODE:
 		cameraModeAsText = "First Person";
 		break;
-	case THIRD_PERSON_CAMERA_MODE:
-		cameraModeAsText = "Third Person";
-		break;
-	case FIXED_ANGLE_CAMERA_MODE:
-		cameraModeAsText = "Fixed Angle";
-		break;
+	//case THIRD_PERSON_CAMERA_MODE:
+	//	cameraModeAsText = "Third Person";
+	//	break;
+	//case FIXED_ANGLE_CAMERA_MODE:
+	//	cameraModeAsText = "Fixed Angle";
+	//	break;
 		/*case STATIONARY_CAMERA_MODE:
-			cameraModeAsText = "Stationary";*/
-		break;
+			cameraModeAsText = "Stationary";
+		break;*/
 	case DETACHED_CAMERA_MODE:
 		cameraModeAsText = "Detached";
 		break;

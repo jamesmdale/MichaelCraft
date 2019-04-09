@@ -18,6 +18,7 @@ public:
 
 	void Initialize();
 	void Update(float deltaSeconds);
+	void PreRender();
 	void Render();
 	void UpdateFromInput(float deltaSeconds);
 

@@ -65,6 +65,8 @@ void World::Initialize()
 	m_player = new Player(this);
 	m_player->m_position = Vector3(0.f, 0.f, 115.f);
 
+	m_gameCamera->AttachToEntity(m_player);
+
 	//m_camera->m_skybox = new Skybox("Data/Images/galaxy2.png");
 	theRenderer->SetAmbientLightIntensity(0.15f);
 
@@ -109,6 +111,12 @@ void World::Update(float deltaSeconds)
 
 	//player raycast
 	m_raycastResult = Raycast(m_cameraViewPosition, m_cameraViewForwardNormalized, RAYCAST_MAX_DISTANCE);
+}
+
+//  =========================================================================================
+void World::PreRender()
+{
+	m_player->PreRender();
 }
 
 //  =========================================================================================
@@ -263,11 +271,16 @@ void World::UpdateFromInput(float deltaSeconds)
 		m_player->UpdateBoundsToCurrentPosition();
 	}
 
+	//change camera modes
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F2))
 	{
-		m_player->m_position = m_player->m_position + Vector3(0.f, 0.f, 15.f);
-		m_player->m_velocity = Vector3::ZERO;
-		m_player->UpdateBoundsToCurrentPosition();
+		m_gameCamera->CycleCameraModes();
+	}
+
+	//change physics mode
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F3))
+	{
+		m_player->CyclePhysicsModes();
 	}
 
 	if(theInput->WasKeyJustPressed(theInput->KEYBOARD_ESCAPE))

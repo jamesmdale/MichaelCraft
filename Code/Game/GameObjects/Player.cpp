@@ -22,6 +22,8 @@ Player::Player(World* world) : Entity(world)
 	//generate physics sphere bounds
 	m_physicsSphere = Sphere(Vector3::ZERO, widthRadius);
 
+	m_firstPersonCameraPositionOffsetFromPivot = Vector3(0.f, 0.f, g_playerEyesOffset);
+
 	if (m_visualsMesh == nullptr)
 		GenerateDebugVisualsMesh();
 	if (m_physicsMesh == nullptr)
@@ -152,20 +154,19 @@ void Player::Render()
 void Player::PreRender()
 {
 	//move camera to it's position
-	if (m_attachedCamera = nullptr)
+	if (m_attachedCamera == nullptr)
 		return;
 
 	switch (m_attachedCamera->m_currentCameraMode)
 	{		
 		case FIRST_PERSON_CAMERA_MODE:
-			m_attachedCamera->m_position
+			SetFirstPersonCamera();
 			break;
-		case THIRD_PERSON_CAMERA_MODE:
-
-			break;
-		case FIXED_ANGLE_CAMERA_MODE:
-
-			break;
+			/*case THIRD_PERSON_CAMERA_MODE:
+				SetThirdPersonCamera();
+				break;
+			case FIXED_ANGLE_CAMERA_MODE:
+				break;*/
 		case DETACHED_CAMERA_MODE:
 			break;
 		case NUM_CAMERA_MODES:
@@ -184,31 +185,45 @@ float Player::UpdateFromInput(float deltaSeconds)
 	InputSystem* theInput = InputSystem::GetInstance();
 	Game* theGame = Game::GetInstance();
 
+	//handle rotation
+	Vector2 mouseDelta = Vector2::ZERO;
+	mouseDelta = InputSystem::GetInstance()->GetMouse()->GetMouseDelta();
+
+	m_yawDegreesZ += -mouseDelta.x * 0.05f;
+	m_pitchDegreesY += mouseDelta.y * 0.05f;
+
+	m_yawDegreesZ = Modulus(m_yawDegreesZ, 360.f);
+	m_pitchDegreesY = ClampFloat(m_pitchDegreesY, -90.f, 90.f);
+
+	Vector3 playerForward = Vector3(CosDegrees(m_yawDegreesZ), SinDegrees(m_yawDegreesZ), 0);
+	playerForward.Normalize();
+	Vector3 playerRight = Vector3(SinDegrees(m_yawDegreesZ), -CosDegrees(m_yawDegreesZ), 0);
+
 	//clear move intention before applying from input
 	m_frameMoveIntention = Vector3::ZERO;
 
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_UP_ARROW))
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
 	{
 		//calculate movement for camera and use same movement for ship and light
-		m_frameMoveIntention += g_worldForward;
+		m_frameMoveIntention += playerForward;
 	}
 
 	//backward (-x)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_DOWN_ARROW))
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
 	{
-		m_frameMoveIntention += -g_worldForward;
+		m_frameMoveIntention += -playerForward;
 	}
 
 	//left is north (y)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_LEFT_ARROW))
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_A))
 	{
-		m_frameMoveIntention += -g_worldRight;
+		m_frameMoveIntention += -playerRight;
 	}
 
 	//right is south (-y)
-	if (theInput->IsKeyPressed(theInput->KEYBOARD_RIGHT_ARROW))
+	if (theInput->IsKeyPressed(theInput->KEYBOARD_D))
 	{
-		m_frameMoveIntention += g_worldRight;
+		m_frameMoveIntention += playerRight;
 	}
 
 	//right is south (-y)
@@ -218,12 +233,6 @@ float Player::UpdateFromInput(float deltaSeconds)
 			m_frameMoveIntention += g_worldUp;
 
 		theGame->m_inputDelayTimer->Reset();
-	}
-
-	//change physics mode
-	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F3))
-	{
-		CyclePhysicsModes();
 	}
 
 	return deltaSeconds;
@@ -240,8 +249,7 @@ void Player::UpdateIsOnGround()
 	BlockLocator currentBlock = m_world->GetChunkByPositionFromChunkList(bottomCenterPivot);
 
 	currentBlock.GetBlock()->IsSolid() ? m_isOnGround = true : m_isOnGround = false;
-}
-	
+}	
 
 //  =========================================================================================
 void Player::SetCamera(GameCamera* camera)
@@ -275,6 +283,24 @@ void Player::UpdateBoundsToCurrentPosition()
 
 	Vector3 bottomCenterPivot = GetBottomCenterPivot();
 	m_physicsSphere.m_position = Vector3(bottomCenterPivot.x, bottomCenterPivot.y, bottomCenterPivot.z + m_physicsSphere.m_radius);
+}
+
+//  =========================================================================================
+void Player::SetFirstPersonCamera()
+{
+	if (m_attachedCamera != nullptr)
+		if (m_attachedCamera->m_currentCameraMode == FIRST_PERSON_CAMERA_MODE)
+		{
+			Vector3 eyePos = GetBottomCenterPivot() + m_firstPersonCameraPositionOffsetFromPivot;
+			m_attachedCamera->SetTranslation(eyePos);
+			m_attachedCamera->SetRotations(m_rollDegreesX, m_pitchDegreesY, m_yawDegreesZ);
+		}		
+}
+
+//  =========================================================================================
+void Player::SetThirdPersonCamera()
+{
+	return; // Vector3();
 }
 
 //  =========================================================================================

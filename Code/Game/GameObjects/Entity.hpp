@@ -39,8 +39,8 @@ public:
 	inline void Translate(const Vector3& translation) { m_position += translation; }
 
 public:
-	Vector3 m_firstPersonCameraPositionOffsetFromCenter;
-	Vector3 m_thirdPersonCameraPositionOffsetFromCenter;
+	Vector3 m_firstPersonCameraPositionOffsetFromPivot;
+	Vector3 m_thirdPersonCameraPositionOffsetFromPivot;
 	
 	Vector3 m_position = Vector3::ZERO;	
 	Vector3 m_velocity = Vector3::ZERO;

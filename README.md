@@ -20,4 +20,10 @@ SHIFT			- faster move speed
 'MOUSE WHEEL'	- change active block type (placing)
 'PAGE UP'		- toggle targetting block raycast position lock
 'ESCAPE'		- quit (saves current world state)
+'F2'			- Cycle Camera Modes
+'F3'			- Cycle Player Physics Modes
+
+Player Possesed
+'SPACE'			- Jump
+
 

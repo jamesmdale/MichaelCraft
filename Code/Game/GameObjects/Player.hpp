@@ -27,6 +27,9 @@ public:
 	Vector3 GetBottomCenterPivot();
 	void UpdateBoundsToCurrentPosition();
 
+	void SetFirstPersonCamera();
+	void SetThirdPersonCamera();
+
 	//physics helpers
 	void ApplyFriction(float deltaSeconds);
 	void GetBlockNeighborhood(std::vector<BlockLocator>& outBlockLocators);
