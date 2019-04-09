@@ -50,3 +50,35 @@ void Entity::DetachCamera()
 {
 	m_attachedCamera = nullptr;
 }
+
+//  =========================================================================================
+void Entity::CyclePhysicsModes()
+{
+	m_currentPhysicsMode = (PhysicsMode)((int)m_currentPhysicsMode + 1);
+
+	if (m_currentPhysicsMode == NUM_PHYSICS_MODES)
+		m_currentPhysicsMode = (PhysicsMode)0;
+}
+
+//  =========================================================================================
+std::string Entity::GetPhysicsModeAsText()
+{
+	std::string physicsModeAsText = "";
+	switch (m_currentPhysicsMode)
+	{
+	case WALKING_PHYSICS_MODE:
+		physicsModeAsText = "Walking";
+		break;
+	case FLYING_PHYSICS_MODE:
+		physicsModeAsText = "Flying";
+		break;
+	case NO_CLIP_PHYSICS_MODE:
+		physicsModeAsText = "NoClip";
+		break;
+	case NUM_PHYSICS_MODES:
+		physicsModeAsText = "NOT SET";
+		break;
+	}
+
+	return physicsModeAsText;
+}

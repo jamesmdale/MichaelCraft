@@ -1,9 +1,18 @@
 #pragma once
 #include "Engine\Math\AABB3.hpp"
 #include "Engine\Math\Sphere.hpp"
+#include <string>
 
 class GameCamera;
 class World;
+
+enum PhysicsMode
+{
+	WALKING_PHYSICS_MODE,
+	FLYING_PHYSICS_MODE,
+	NO_CLIP_PHYSICS_MODE,
+	NUM_PHYSICS_MODES
+};
 
 class Entity
 {
@@ -19,12 +28,14 @@ public:
 	void SetCamera(GameCamera* camera);
 	void DetachCamera();
 
+	void CyclePhysicsModes();
+	std::string GetPhysicsModeAsText();
+
 	inline bool IsCameraAttached() { return m_attachedCamera != nullptr; }
 	inline void EnableInput() { m_doesReceiveUserInput = true; }
 	inline void DisableInput() { m_doesReceiveUserInput = false; }
 	inline bool DoesReceiveInput() { return m_doesReceiveUserInput; }
 	inline Sphere GetPhysicsBounds() { return m_physicsSphere; }
-
 	inline void Translate(const Vector3& translation) { m_position += translation; }
 
 public:
@@ -40,9 +51,9 @@ public:
 
 	//world reference
 	World* m_world = nullptr;
+	PhysicsMode m_currentPhysicsMode = WALKING_PHYSICS_MODE;
 
 public:
-
 	Sphere m_physicsSphere;
 	bool m_doesReceiveUserInput = false;
 	GameCamera* m_attachedCamera = nullptr;

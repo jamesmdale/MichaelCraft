@@ -105,6 +105,7 @@ public:
 	int m_selectedBlockIndex = 0;
 	std::vector<uint8> m_selectableBlockTypes;
 
+	float m_physicsFPS = 0.f;
 
 	// lighting / sky ----------------------------------------------
 	Mesh* m_debugSkyMesh = nullptr;

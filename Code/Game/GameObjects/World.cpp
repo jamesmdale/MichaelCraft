@@ -404,6 +404,7 @@ void World::UpdateLightingFromTimeOfDay()
 //  =========================================================================================
 void World::UpdateEntityPhysics(float deltaSeconds)
 {
+	m_physicsFPS = 1.f / deltaSeconds;
 	m_player->UpdatePhysics(deltaSeconds);
 
 	//other entities go here
@@ -1705,36 +1706,44 @@ Mesh* World::CreateUITextMesh()
 	// block type counter ----------------------------------------------		
 	AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.9f, 0.8f), Vector2(0.99f, 0.89f));
 	builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("CurrentBlockType:"), Rgba::WHITE);
+
+	// fps block counter ----------------------------------------------		
+	AABB2 fpsBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.9f, 0.75f), Vector2(0.99f, 0.8f));
+	builder.CreateText2DFromPoint(fpsBlock.mins, 15.f, 1.f, Stringf("FPS: %-4.2f", m_physicsFPS), Rgba::YELLOW);
 	
-	//time
+	//time ----------------------------------------------		
 	int seconds = 0;
 	int minutes = 0;
 	int hours = 0;
 	std::string amPm = "";
 	GetTimeOfDay(m_currentTimeOfDay, seconds, minutes, hours, amPm);
-	AABB2 timeBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.95f), Vector2(0.25f, 0.99f));
-	builder.CreateText2DFromPoint(timeBlock.mins, 10.f, 1.f, Stringf("Day: %i - CurrentTime: %i:%01i %s", m_days, hours, minutes, amPm.c_str()), Rgba::YELLOW);
+	AABB2 timeBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.975f), Vector2(0.25f, 0.99f));
+	builder.CreateText2DFromPoint(timeBlock.mins, 15.f, 1.f, Stringf("Day: %i - CurrentTime: %i:%01i %s", m_days, hours, minutes, amPm.c_str()), Rgba::YELLOW);
 
-	//camera position
-	AABB2 posBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.875f), Vector2(0.25f, 0.925f));
-	builder.CreateText2DFromPoint(posBlock.mins, 10.f, 1.f, Stringf("CameraPos: %i, %i, %i", (int)m_cameraViewPosition.x, (int)m_cameraViewPosition.y, (int)m_cameraViewPosition.z), Rgba::YELLOW);
+	//camera position ----------------------------------------------		
+	AABB2 posBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.95f), Vector2(0.25f, 0.975f));
+	builder.CreateText2DFromPoint(posBox.mins, 15.f, 1.f, Stringf("CameraPos: %i, %i, %i", (int)m_cameraViewPosition.x, (int)m_cameraViewPosition.y, (int)m_cameraViewPosition.z), Rgba::YELLOW);
 
-	//player
-	AABB2 playerPosBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.8f), Vector2(0.25f, 0.85f));
-	builder.CreateText2DFromPoint(playerPosBlock.mins, 10.f, 1.f, Stringf("PlayerPos: %i, %i, %i", (int)m_player->m_position.x, (int)m_player->m_position.y, (int)m_player->m_position.z), Rgba::YELLOW);
+	//player ----------------------------------------------		
+	AABB2 playerPosBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.925f), Vector2(0.25f, 0.95f));
+	builder.CreateText2DFromPoint(playerPosBox.mins, 15.f, 1.f, Stringf("PlayerPos: %i, %i, %i", (int)m_player->m_position.x, (int)m_player->m_position.y, (int)m_player->m_position.z), Rgba::YELLOW);
 
-	//player collision 
-	AABB2 playerSpeedBlock = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.725f), Vector2(0.25f, 0.775f));
-	builder.CreateText2DFromPoint(playerPosBlock.mins, 10.f, 1.f, Stringf("PlayerSpeed: %f", m_player->GetSpeed()), Rgba::YELLOW);
+	//player speed  ----------------------------------------------		
+	AABB2 playerSpeedBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.9f), Vector2(0.25f, 0.925f));
+	builder.CreateText2DFromPoint(playerSpeedBox.mins, 15.f, 1.f, Stringf("PlayerSpeed: %f", m_player->GetSpeed()), Rgba::YELLOW);
 
-	//debug type - sky mesh
+	//player physics mode  ----------------------------------------------		
+	AABB2 physicsModeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.875f), Vector2(0.25f, 0.9f));
+	builder.CreateText2DFromPoint(physicsModeBox.mins, 15.f, 1.f, Stringf("Current Mode: %s", m_player->GetPhysicsModeAsText().c_str()), Rgba::YELLOW);
+
+	//debug type - sky mesh ----------------------------------------------		
 	if (m_debugSkyMesh != nullptr)
 	{
 		AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01f, 0.8f), Vector2(0.5f, 0.89f));
 		builder.CreateText2DInAABB2( selectedBlockTypeBox.GetCenter(), selectedBlockTypeBox.GetDimensions(), 1.f, Stringf("SKY_DEBUG_ENABLED: 'K' to Refresh & '1' to disable"), Rgba::YELLOW);
 	}
 
-	//debug type - dirty lighting stepping
+	//debug type - dirty lighting stepping ----------------------------------------------		
 	if (m_isDebugDirtyLighting)
 	{
 		AABB2 selectedBlockTypeBox = AABB2(theWindow->GetClientWindow(), Vector2(0.01, 0.7f), Vector2(0.5f, 0.79f));

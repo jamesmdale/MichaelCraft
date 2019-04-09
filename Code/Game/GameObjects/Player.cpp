@@ -43,8 +43,21 @@ void Player::Update(float deltaSeconds)
 //  =========================================================================================
 void Player::UpdatePhysics(float deltaSeconds)
 {
+	if (m_currentPhysicsMode == NO_CLIP_PHYSICS_MODE)
+	{
+		Vector3 moveDirection = m_velocity.GetNormalized();
+		m_velocity = Vector3::ZERO;
+		m_position += moveDirection * g_playerWalkSpeed * deltaSeconds;
+		return;
+	}
+		
+
 	//apply all forces into velocity
-	m_velocity += (g_gravity * deltaSeconds * 0.1f);
+	Vector3 gravity = g_gravity;
+	if (m_currentPhysicsMode == FLYING_PHYSICS_MODE)
+		gravity = Vector3::ZERO;
+
+	m_velocity += (gravity * deltaSeconds * 0.1f);
 
 	//apply friction
 	ApplyFriction(deltaSeconds);
@@ -142,6 +155,12 @@ float Player::UpdateFromInput(float deltaSeconds)
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_RIGHT_ARROW))
 	{
 		m_velocity += g_worldRight * deltaSeconds * g_playerWalkSpeed;
+	}
+
+	//change physics mode
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F3))
+	{
+		CyclePhysicsModes();
 	}
 
 	return deltaSeconds;
