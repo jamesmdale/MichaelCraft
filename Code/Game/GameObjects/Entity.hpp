@@ -55,7 +55,7 @@ public:
 	PhysicsMode m_currentPhysicsMode = WALKING_PHYSICS_MODE;
 
 public:
-	Sphere m_physicsSphere;
+	Sphere m_physicsSphere = Sphere(Vector3::ZERO, 0.f);
 	bool m_doesReceiveUserInput = false;
 	GameCamera* m_attachedCamera = nullptr;
 };

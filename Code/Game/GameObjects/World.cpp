@@ -1048,7 +1048,7 @@ void World::LoadSavedChunkReferences()
 }
 
 //  =========================================================================================
-BlockLocator& World::GetChunkByPositionFromChunkList(const Vector3& worldPosition)
+BlockLocator World::GetChunkByPositionFromChunkList(const Vector3& worldPosition)
 {
 	BlockLocator locator;
 

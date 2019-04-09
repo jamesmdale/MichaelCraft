@@ -49,7 +49,7 @@ public:
 	void GenerateChunkBuildOrderCheatSheet();
 	void LoadSavedChunkReferences();
 
-	BlockLocator& GetChunkByPositionFromChunkList(const Vector3& worldPosition);
+	BlockLocator GetChunkByPositionFromChunkList(const Vector3& worldPosition);
 
 	//Lighting
 	void ProcessLightingForBlock(BlockLocator blockLocator);

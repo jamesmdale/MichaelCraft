@@ -40,7 +40,7 @@ public:
 	inline float GetSpeed() { return m_velocity.GetLength(); }
 
 protected:
-	AABB3 m_visualBounds;
+	AABB3 m_visualBounds = AABB3(Vector3::ZERO, Vector3::ZERO);
 	Mesh* m_visualsMesh = nullptr;
 	Mesh* m_physicsMesh = nullptr;
 
