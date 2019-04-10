@@ -23,6 +23,7 @@ Player::Player(World* world) : Entity(world)
 	m_physicsSphere = Sphere(Vector3::ZERO, widthRadius);
 
 	m_firstPersonCameraPositionOffsetFromPivot = Vector3(0.f, 0.f, g_playerEyesOffset);
+	m_thirdPersonDistanceOffset = 4.f; //4 meters
 
 	if (m_visualsMesh == nullptr)
 		GenerateDebugVisualsMesh();
@@ -61,10 +62,10 @@ void Player::UpdatePhysics(float deltaSeconds)
 		
 	//apply neutonian physics
 	float speedBeforeChange = m_velocity.GetLengthXY();
-	Vector3 moveIntentionXY = Vector3(m_frameMoveIntention.x, m_frameMoveIntention.y, 0.f) * g_playerWalkSpeed * deltaSeconds;
+	Vector3 accelerationXY = Vector3(m_frameMoveIntention.x, m_frameMoveIntention.y, 0.f) * g_playerWalkAcceleration;//* deltaSeconds;
 	Vector3 moveIntentionZ = Vector3(0.f, 0.f, m_frameMoveIntention.z);
 
-	m_velocity += (moveIntentionXY + moveIntentionZ);
+	m_velocity += (accelerationXY + moveIntentionZ);
 
 	//apply all forces into velocity
 	Vector3 gravity = g_gravity;
@@ -90,7 +91,7 @@ void Player::UpdatePhysics(float deltaSeconds)
 	}
 
 	//move the player
-	m_position += m_velocity;
+	m_position += m_velocity * deltaSeconds;
 	UpdateBoundsToCurrentPosition();
 
 	//corrective physics
@@ -197,39 +198,42 @@ float Player::UpdateFromInput(float deltaSeconds)
 	m_pitchDegreesY = ClampFloat(m_pitchDegreesY, -90.f, 90.f);
 
 	Vector3 playerForward = Vector3(CosDegrees(m_yawDegreesZ), SinDegrees(m_yawDegreesZ), 0);
-	playerForward.Normalize();
-	Vector3 playerRight = Vector3(SinDegrees(m_yawDegreesZ), -CosDegrees(m_yawDegreesZ), 0);
+	Vector3 playerRight = Vector3(SinDegrees(m_yawDegreesZ), -CosDegrees(m_yawDegreesZ), 0); //could make cheaper
 
 	//clear move intention before applying from input
 	m_frameMoveIntention = Vector3::ZERO;
 
+	//forward
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_W))
 	{
 		//calculate movement for camera and use same movement for ship and light
 		m_frameMoveIntention += playerForward;
 	}
 
-	//backward (-x)
+	//backward
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_S))
 	{
 		m_frameMoveIntention += -playerForward;
 	}
 
-	//left is north (y)
+	//left
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_A))
 	{
 		m_frameMoveIntention += -playerRight;
 	}
 
-	//right is south (-y)
+	//right
 	if (theInput->IsKeyPressed(theInput->KEYBOARD_D))
 	{
 		m_frameMoveIntention += playerRight;
 	}
 
-	//right is south (-y)
+	m_frameMoveIntention.Normalize();
+
+	//jump (World up)
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_SPACE) && theGame->m_inputDelayTimer->HasElapsed())
 	{
+		TODO("separate jump into bool isJumping. For cases like flying etc");
 		if(m_isOnGround)
 			m_frameMoveIntention.z = g_jumpStrength;
 

@@ -44,5 +44,6 @@ protected:
 	Mesh* m_visualsMesh = nullptr;
 	Mesh* m_physicsMesh = nullptr;
 
+	float m_thirdPersonDistanceOffset = 0.f;
 	bool m_isOnGround = false;
 };

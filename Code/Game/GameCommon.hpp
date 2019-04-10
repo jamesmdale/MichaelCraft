@@ -22,6 +22,7 @@ extern float g_playerWidth;
 extern float g_playerHeight;
 extern float g_playerEyesOffset;
 extern float g_playerWalkSpeed;
+extern float g_playerWalkAcceleration;
 extern float g_playerFlySpeed;
 extern float g_jumpStrength;
 
