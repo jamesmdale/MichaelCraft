@@ -129,9 +129,9 @@ void GameCamera::AttachToEntity(Entity* entity)
 		case FIRST_PERSON_CAMERA_MODE:
 			m_attachedEntity->EnableInput();
 			break;
-			/*case THIRD_PERSON_CAMERA_MODE:
+			case THIRD_PERSON_CAMERA_MODE:
 				m_attachedEntity->EnableInput();
-				break;*/
+				break;
 			/*case FIXED_ANGLE_CAMERA_MODE:
 				m_attachedEntity->EnableInput();
 				break;*/
@@ -166,14 +166,14 @@ void GameCamera::SetTranslation(const Vector3& position)
 //  =========================================================================================
 void GameCamera::CycleCameraModes()
 {
+	PlayingState* gameState = (PlayingState*)GameState::GetCurrentGameState();
+	if (gameState->m_type != PLAYING_GAME_STATE)
+		return;
+
 	m_currentCameraMode = (CameraModes)((int)m_currentCameraMode + 1);
 
 	if (m_currentCameraMode == NUM_CAMERA_MODES)
 		m_currentCameraMode = (CameraModes)0;
-
-	PlayingState* gameState = (PlayingState*)GameState::GetCurrentGameState();
-	if (gameState->m_type != PLAYING_GAME_STATE)
-		return;
 
 	switch (m_currentCameraMode)
 	{
@@ -182,11 +182,11 @@ void GameCamera::CycleCameraModes()
 		m_attachedEntity = gameState->m_world->m_player;
 		m_attachedEntity->EnableInput();
 		break;
-		/*case THIRD_PERSON_CAMERA_MODE:
-			gameState->m_world->m_player->SetCamera(this);
-			m_attachedEntity = gameState->m_world->m_player;
-			m_attachedEntity->EnableInput();
-			break;*/
+	case THIRD_PERSON_CAMERA_MODE:
+		gameState->m_world->m_player->SetCamera(this);
+		m_attachedEntity = gameState->m_world->m_player;
+		m_attachedEntity->EnableInput();
+		break;
 	/*case FIXED_ANGLE_CAMERA_MODE:
 		gameState->m_world->m_player->SetCamera(this);
 		m_attachedEntity = gameState->m_world->m_player;
@@ -216,9 +216,9 @@ std::string GameCamera::GetCameraModeAsText()
 	case FIRST_PERSON_CAMERA_MODE:
 		cameraModeAsText = "First Person";
 		break;
-	/*case THIRD_PERSON_CAMERA_MODE:
+	case THIRD_PERSON_CAMERA_MODE:
 		cameraModeAsText = "Third Person";
-		break;*/
+		break;
 	//case FIXED_ANGLE_CAMERA_MODE:
 	//	cameraModeAsText = "Fixed Angle";
 	//	break;

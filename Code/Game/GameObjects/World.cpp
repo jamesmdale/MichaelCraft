@@ -105,20 +105,19 @@ void World::Update(float deltaSeconds)
 	//camera and player
 	/*if (m_activeChunks.size() > 3)
 	{*/
-		UpdateEntities(deltaSeconds);
+	UpdateEntities(deltaSeconds);
 
-		//update physics
-		UpdateEntityPhysics(deltaSeconds);
+	//update physics
+	UpdateEntityPhysics(deltaSeconds);
 
-		//player raycast
-		if (m_gameCamera->m_currentCameraMode != DETACHED_CAMERA_MODE)
-		{
-			UpdateCameraViewPosition();
-		
-		}
+	//player raycast
+	if (m_gameCamera->m_currentCameraMode != DETACHED_CAMERA_MODE)
+	{
+		UpdateCameraViewPosition();		
+	}
 
-		Vector3 playerEyePosition = m_player->m_firstPersonCameraPositionOffsetFromPivot + m_player->GetBottomCenterPivot();
-		m_raycastResult = Raycast(playerEyePosition, m_player->GetForward(), RAYCAST_MAX_DISTANCE);
+	Vector3 playerEyePosition = m_player->m_firstPersonCameraPositionOffsetFromPivot + m_player->GetBottomCenterPivot();
+	m_raycastResult = Raycast(playerEyePosition, m_player->GetForward(), RAYCAST_MAX_DISTANCE);
 			
 	//}		
 }
@@ -282,15 +281,17 @@ void World::UpdateFromInput(float deltaSeconds)
 	}
 
 	//change camera modes
-	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F2))
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F2) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		m_gameCamera->CycleCameraModes();
+		theGame->m_inputDelayTimer->Reset();
 	}
 
 	//change physics mode
-	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F3))
+	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_F3) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		m_player->CyclePhysicsModes();
+		theGame->m_inputDelayTimer->Reset();
 	}
 
 	if(theInput->WasKeyJustPressed(theInput->KEYBOARD_ESCAPE))
