@@ -216,9 +216,9 @@ std::string GameCamera::GetCameraModeAsText()
 	case FIRST_PERSON_CAMERA_MODE:
 		cameraModeAsText = "First Person";
 		break;
-	//case THIRD_PERSON_CAMERA_MODE:
-	//	cameraModeAsText = "Third Person";
-	//	break;
+	/*case THIRD_PERSON_CAMERA_MODE:
+		cameraModeAsText = "Third Person";
+		break;*/
 	//case FIXED_ANGLE_CAMERA_MODE:
 	//	cameraModeAsText = "Fixed Angle";
 	//	break;

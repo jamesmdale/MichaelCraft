@@ -111,15 +111,14 @@ void World::Update(float deltaSeconds)
 		UpdateEntityPhysics(deltaSeconds);
 
 		//player raycast
-		if (m_gameCamera->m_currentCameraMode == DETACHED_CAMERA_MODE)
+		if (m_gameCamera->m_currentCameraMode != DETACHED_CAMERA_MODE)
 		{
-			Vector3 playerEyePosition = m_player->m_firstPersonCameraPositionOffsetFromPivot + m_player->GetBottomCenterPivot();
-			m_raycastResult = Raycast(playerEyePosition, m_player->GetForward(), RAYCAST_MAX_DISTANCE);
-		}
-		else
-		{		
 			UpdateCameraViewPosition();
+		
 		}
+
+		Vector3 playerEyePosition = m_player->m_firstPersonCameraPositionOffsetFromPivot + m_player->GetBottomCenterPivot();
+		m_raycastResult = Raycast(playerEyePosition, m_player->GetForward(), RAYCAST_MAX_DISTANCE);
 			
 	//}		
 }
@@ -317,7 +316,11 @@ void World::UpdateCameraViewPosition()
 			, SinDegrees(m_gameCamera->m_yawDegreesZ) * CosDegrees(m_gameCamera->m_pitchDegreesY),
 			-1.f * SinDegrees(m_gameCamera->m_pitchDegreesY));
 
-		CopyCameraDataToPlayerView(m_gameCamera->m_position, cameraForward);
+		Vector3 modifiedPosition = Vector3::ZERO;
+		/*if (m_gameCamera->m_currentCameraMode == THIRD_PERSON_CAMERA_MODE)
+			modifiedPosition + (-1.f * cameraForward * 4.f);*/
+
+		CopyCameraDataToPlayerView(m_gameCamera->m_position + modifiedPosition, cameraForward);
 	}	
 }
 

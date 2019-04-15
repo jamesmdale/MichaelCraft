@@ -152,9 +152,6 @@ void Player::Render()
 	Mesh* debugVelocityMesh = CreateLine(pivotWorldPosition, pivotWorldPosition + m_velocity, Rgba::YELLOW);
 	theRenderer->DrawMesh(debugVelocityMesh);
 
-	/*Vector3 eyePosition = GetBottomCenterPivot() + m_firstPersonCameraPositionOffsetFromPivot;
-	Mesh* debugRaycastMesh = CreateLine(m_world->m_raycastResult.m_ray.m_startPosition, m_world->m_raycastResult.m_endPosition, Rgba::WHITE);*/
-
 	delete(debugPivotMesh);
 	delete(debugPositionMesh);
 }
@@ -171,10 +168,10 @@ void Player::PreRender()
 		case FIRST_PERSON_CAMERA_MODE:
 			SetFirstPersonCamera();
 			break;
-			/*case THIRD_PERSON_CAMERA_MODE:
+		/*case THIRD_PERSON_CAMERA_MODE:
 				SetThirdPersonCamera();
-				break;
-			case FIXED_ANGLE_CAMERA_MODE:
+				break;*/
+			/*case FIXED_ANGLE_CAMERA_MODE:
 				break;*/
 		case DETACHED_CAMERA_MODE:
 			break;
@@ -311,7 +308,14 @@ void Player::SetFirstPersonCamera()
 //  =========================================================================================
 void Player::SetThirdPersonCamera()
 {
-	return; // Vector3();
+	/*if (m_attachedCamera != nullptr)
+		if (m_attachedCamera->m_currentCameraMode == THIRD_PERSON_CAMERA_MODE)
+		{
+			Vector3 eyePos = GetBottomCenterPivot() + m_firstPersonCameraPositionOffsetFromPivot;
+			Vector3 forward = GetForward();
+			m_attachedCamera->SetTranslation(eyePos + (-1.f * forward * 4.f));
+			m_attachedCamera->SetRotations(m_rollDegreesX, m_pitchDegreesY, m_yawDegreesZ);
+		}*/
 }
 
 //  =========================================================================================
