@@ -168,9 +168,9 @@ void Player::PreRender()
 		case FIRST_PERSON_CAMERA_MODE:
 			SetFirstPersonCamera();
 			break;
-		/*case THIRD_PERSON_CAMERA_MODE:
-				SetThirdPersonCamera();
-				break;*/
+		case THIRD_PERSON_CAMERA_MODE:
+			SetThirdPersonCamera();
+			break;
 			/*case FIXED_ANGLE_CAMERA_MODE:
 				break;*/
 		case DETACHED_CAMERA_MODE:
@@ -308,14 +308,16 @@ void Player::SetFirstPersonCamera()
 //  =========================================================================================
 void Player::SetThirdPersonCamera()
 {
-	/*if (m_attachedCamera != nullptr)
+	if (m_attachedCamera != nullptr)
+	{
 		if (m_attachedCamera->m_currentCameraMode == THIRD_PERSON_CAMERA_MODE)
 		{
 			Vector3 eyePos = GetBottomCenterPivot() + m_firstPersonCameraPositionOffsetFromPivot;
 			Vector3 forward = GetForward();
 			m_attachedCamera->SetTranslation(eyePos + (-1.f * forward * 4.f));
 			m_attachedCamera->SetRotations(m_rollDegreesX, m_pitchDegreesY, m_yawDegreesZ);
-		}*/
+		}
+	}
 }
 
 //  =========================================================================================

@@ -243,6 +243,7 @@ void World::UpdateFromInput(float deltaSeconds)
 		theGame->m_inputDelayTimer->Reset();
 	}
 
+	//lighting enabled/disabled
 	if (theInput->WasKeyJustPressed(theInput->KEYBOARD_4) && theGame->m_inputDelayTimer->HasElapsed())
 	{
 		m_lightingEffectsDisabled ? m_lightingEffectsDisabled = false : m_lightingEffectsDisabled = true;
@@ -317,11 +318,11 @@ void World::UpdateCameraViewPosition()
 			, SinDegrees(m_gameCamera->m_yawDegreesZ) * CosDegrees(m_gameCamera->m_pitchDegreesY),
 			-1.f * SinDegrees(m_gameCamera->m_pitchDegreesY));
 
-		Vector3 modifiedPosition = Vector3::ZERO;
-		/*if (m_gameCamera->m_currentCameraMode == THIRD_PERSON_CAMERA_MODE)
-			modifiedPosition + (-1.f * cameraForward * 4.f);*/
+		/*Vector3 modifiedPosition = Vector3::ZERO;
+		if (m_gameCamera->m_currentCameraMode == THIRD_PERSON_CAMERA_MODE)
+			modifiedPosition = (-1.f * cameraForward * 4.f);*/
 
-		CopyCameraDataToPlayerView(m_gameCamera->m_position + modifiedPosition, cameraForward);
+		CopyCameraDataToPlayerView(m_gameCamera->m_position, cameraForward);
 	}	
 }
 
