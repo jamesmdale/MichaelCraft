@@ -6,9 +6,9 @@ bool g_isDebug = false;
 bool g_isQuitting = false;
 
 // physics globals ----------------------------------------------
-Vector3 g_gravity = Vector3(0.f, 0.f, -2.f);
+Vector3 g_gravity = Vector3(0.f, 0.f, -20.f);
 float g_groundFrictionAmount = 7.5f;
-float g_airFrictionAmount = 2.5f;
+float g_airFrictionAmount = 0.1f;
 
 // player globals ----------------------------------------------
 float g_playerWidth = 0.6f;
@@ -16,8 +16,8 @@ float g_playerHeight = 1.8f;
 float g_playerEyesOffset = 1.65f;
 float g_playerWalkSpeed = 5.f;
 float g_playerWalkAcceleration = 160.f;
-float g_playerFlySpeed = 0.3f;
-float g_jumpStrength = 0.1f;
+float g_playerFlySpeed = 8.f;
+float g_jumpStrength = 7.5f;
 //float g_playerRunSpeed = 7.5f;
 
 //lighting values ----------------------------------------------

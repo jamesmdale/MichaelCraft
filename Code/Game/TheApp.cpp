@@ -16,6 +16,8 @@
 #include "Engine\Core\BytePacker.hpp"
 #include "Engine\Net\RemoteCommandService.hpp"
 #include "Engine\Net\NetSession.hpp"
+#include "Engine\Profiler\Profiler.hpp"
+#include "Engine\Profiler\ProfilerConsole.hpp"
 
 TheApp* g_theApp = nullptr;
 static bool isRunning = false;
@@ -86,6 +88,12 @@ void TheApp::Update()
 	if(DebugRender::GetInstance()->IsEnabled())
 	{
 		DebugRender::GetInstance()->Update(deltaSeconds);
+	}
+
+	if (ProfilerConsole::GetInstance()->IsOpen())
+	{
+		ProfilerConsole::GetInstance()->UpdateFromInput();
+		ProfilerConsole::GetInstance()->Update();
 	}
 
 	if(DevConsole::GetInstance()->IsOpen())

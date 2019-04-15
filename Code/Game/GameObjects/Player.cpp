@@ -72,7 +72,7 @@ void Player::UpdatePhysics(float deltaSeconds)
 	if (m_currentPhysicsMode == FLYING_PHYSICS_MODE)
 		gravity = Vector3::ZERO;
 
-	m_velocity += (gravity * deltaSeconds * 0.1f);
+	m_velocity += (gravity * deltaSeconds);
 
 	//apply friction
 	ApplyFrictionToVelocity(deltaSeconds);
