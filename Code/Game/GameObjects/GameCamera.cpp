@@ -129,9 +129,9 @@ void GameCamera::AttachToEntity(Entity* entity)
 		case FIRST_PERSON_CAMERA_MODE:
 			m_attachedEntity->EnableInput();
 			break;
-		case THIRD_PERSON_CAMERA_MODE:
-			m_attachedEntity->EnableInput();
-			break;
+			/*case THIRD_PERSON_CAMERA_MODE:
+				m_attachedEntity->EnableInput();
+				break;*/
 			/*case FIXED_ANGLE_CAMERA_MODE:
 				m_attachedEntity->EnableInput();
 				break;*/
@@ -182,16 +182,16 @@ void GameCamera::CycleCameraModes()
 		m_attachedEntity = gameState->m_world->m_player;
 		m_attachedEntity->EnableInput();
 		break;
-	case THIRD_PERSON_CAMERA_MODE:
-		gameState->m_world->m_player->SetCamera(this);
-		m_attachedEntity = gameState->m_world->m_player;
-		m_attachedEntity->EnableInput();
-		break;
-		/*case FIXED_ANGLE_CAMERA_MODE:
+		/*case THIRD_PERSON_CAMERA_MODE:
 			gameState->m_world->m_player->SetCamera(this);
 			m_attachedEntity = gameState->m_world->m_player;
 			m_attachedEntity->EnableInput();
 			break;*/
+	/*case FIXED_ANGLE_CAMERA_MODE:
+		gameState->m_world->m_player->SetCamera(this);
+		m_attachedEntity = gameState->m_world->m_player;
+		m_attachedEntity->EnableInput();
+		break;*/
 	/*case STATIONARY_CAMERA_MODE:
 		m_attachedEntity->m_attachedCamera = nullptr;
 		m_attachedEntity = nullptr;

@@ -22,7 +22,7 @@ public:
 	void Render();
 	void UpdateFromInput(float deltaSeconds);
 
-	void UpdatePlayerViewPosition();
+	void UpdateCameraViewPosition();
 	void UpdateDirtyLighting();
 	void UpdateChunks();
 	void UpdateEntities(float deltaSeconds);

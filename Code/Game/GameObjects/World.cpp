@@ -106,13 +106,21 @@ void World::Update(float deltaSeconds)
 	/*if (m_activeChunks.size() > 3)
 	{*/
 		UpdateEntities(deltaSeconds);
-		UpdatePlayerViewPosition();
 
 		//update physics
 		UpdateEntityPhysics(deltaSeconds);
 
 		//player raycast
-		m_raycastResult = Raycast(m_cameraViewPosition, m_cameraViewForwardNormalized, RAYCAST_MAX_DISTANCE);
+		if (m_gameCamera->m_currentCameraMode == DETACHED_CAMERA_MODE)
+		{
+			Vector3 playerEyePosition = m_player->m_firstPersonCameraPositionOffsetFromPivot + m_player->GetBottomCenterPivot();
+			m_raycastResult = Raycast(playerEyePosition, m_player->GetForward(), RAYCAST_MAX_DISTANCE);
+		}
+		else
+		{		
+			UpdateCameraViewPosition();
+		}
+			
 	//}		
 }
 
@@ -301,7 +309,7 @@ void World::UpdateFromInput(float deltaSeconds)
 }
 
 //  =========================================================================================
-void World::UpdatePlayerViewPosition()
+void World::UpdateCameraViewPosition()
 {
 	if (!IsCameraViewLocked())
 	{

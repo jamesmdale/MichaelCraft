@@ -84,3 +84,13 @@ std::string Entity::GetPhysicsModeAsText()
 	return physicsModeAsText;
 }
 
+//  =========================================================================================
+Vector3 Entity::GetForward()
+{
+	Vector3 entityForward = Vector3(CosDegrees(m_yawDegreesZ) * CosDegrees(m_pitchDegreesY)
+		, SinDegrees(m_yawDegreesZ) * CosDegrees(m_pitchDegreesY),
+		-1.f * SinDegrees(m_pitchDegreesY));
+
+	return entityForward;
+}
+

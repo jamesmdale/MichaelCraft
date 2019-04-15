@@ -38,6 +38,8 @@ public:
 	inline Sphere GetPhysicsBounds() { return m_physicsSphere; }
 	inline void Translate(const Vector3& translation) { m_position += translation; }
 
+	Vector3 GetForward();
+
 public:
 	Vector3 m_firstPersonCameraPositionOffsetFromPivot = Vector3::ZERO;
 	

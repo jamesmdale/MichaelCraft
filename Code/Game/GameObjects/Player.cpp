@@ -149,6 +149,12 @@ void Player::Render()
 	physicsMatrix.SetTranslation(physicsSpherePosition);
 	theRenderer->DrawMesh(m_physicsMesh, physicsMatrix);
 
+	Mesh* debugVelocityMesh = CreateLine(pivotWorldPosition, pivotWorldPosition + m_velocity, Rgba::YELLOW);
+	theRenderer->DrawMesh(debugVelocityMesh);
+
+	/*Vector3 eyePosition = GetBottomCenterPivot() + m_firstPersonCameraPositionOffsetFromPivot;
+	Mesh* debugRaycastMesh = CreateLine(m_world->m_raycastResult.m_ray.m_startPosition, m_world->m_raycastResult.m_endPosition, Rgba::WHITE);*/
+
 	delete(debugPivotMesh);
 	delete(debugPositionMesh);
 }
