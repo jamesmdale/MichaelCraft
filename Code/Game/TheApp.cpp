@@ -18,6 +18,7 @@
 #include "Engine\Net\NetSession.hpp"
 #include "Engine\Profiler\Profiler.hpp"
 #include "Engine\Profiler\ProfilerConsole.hpp"
+#include "Engine\Core\NamedProperties.hpp"
 
 TheApp* g_theApp = nullptr;
 static bool isRunning = false;
@@ -80,6 +81,23 @@ void TheApp::Initialize()
 //  =============================================================================
 void TheApp::Update() 
 {
+	std::string lastName("Eiserloh");
+	NamedProperties employmentInfoProperties;
+	// ...
+
+	//NamedProperties p;
+	//p.Set("FirstName", "Squirrel"); 	// Setting as c-string (const char*) data...
+	//p.Set("LastName", lastName);	// Setting as std::string data...
+	//p.Set("Height", 1.93f);
+	//p.Set("Age", 45);
+	//p.Set("IsMarried", true);
+	//p.Set("Position", Vector2(3.5f, 6.2f));
+	//p.Set("EyeColor", Rgba(77, 38, 23));
+	//p.Set("EmploymentInfo", employmentInfoProperties); // NamedProperties inside NamedProperties
+
+	//float health = p.Get("Height", 1.75f);
+
+
 	float deltaSeconds = GetMasterDeltaSeconds();
 	deltaSeconds = UpdateInput(deltaSeconds);
 
