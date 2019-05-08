@@ -78,19 +78,9 @@ void TheApp::Initialize()
 
 	Game::GetInstance()->Initialize();
 
-	std::string lastName("Eiserloh");
-	NamedProperties employmentInfoProperties;
-	// ...
 
-	//NamedProperties p;
-	//p.Set("FirstName", "Squirrel"); 	// Setting as c-string (const char*) data...
-	//p.Set("LastName", lastName);	// Setting as std::string data...
-	//p.Set("Height", 1.93f);
-	//p.Set("Age", 45);
-	//p.Set("IsMarried", true);
-	//p.Set("Position", Vector2(3.5f, 6.2f));
-	//p.Set("EyeColor", Rgba(77, 38, 23));
-	//p.Set("EmploymentInfo", employmentInfoProperties); // NamedProperties inside NamedProperties
+	NamedProperties p;
+	p.Set("FirstName", "Squirrel"); 	// Setting as c-string (const char*) data...	
 
 	//float health = p.Get("Height", 1.75f);
 	EventSystem* theEventSystem = EventSystem::GetInstance();
@@ -100,7 +90,7 @@ void TheApp::Initialize()
 
 	theEventSystem->Subscribe("testEvent2", TestFunction2); //will add test event 2
 
-	theEventSystem->FireEvent("testEvent");
+	theEventSystem->FireEvent("testEvent", p);
 	theEventSystem->FireEvent("testEvent2");
 
 	//object method test
@@ -204,15 +194,18 @@ void Quit(Command& cmd)
 
 bool TestFunction(NamedProperties& args)
 {
-	DebuggerPrintf("Hello %i \n", eventCountTest);
+	std::string firstName = args.Get("FirstName", "Invalid");
+	DebuggerPrintf("Hello %s %i \n", firstName.c_str(), eventCountTest);
 	++eventCountTest;
 
+	args.Set("FirstName", "Michael");
 	return false;
 }
 
 bool TestFunction2(NamedProperties& args)
 {
-	DebuggerPrintf("Goodbye %i \n", eventCountTest);
+	std::string firstName = args.Get("FirstName", "Invalid");
+	DebuggerPrintf("Goodbye %s %i \n", firstName.c_str(), eventCountTest);
 	++eventCountTest;
 
 	return false;
