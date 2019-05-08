@@ -1,3 +1,6 @@
+//in order to test A05
+Open the MichaelCraft project and go to TheApp.cpp's Initialize function. At the bottom are the test cases for the named properties and event system fire functions and test cases for object methods, subscribe, and unsubscribe.
+
 MICHAEL CRAFT CONTROLS:
 
 WASD			- Move in Cardinal Directions
