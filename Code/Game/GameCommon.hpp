@@ -119,4 +119,5 @@ extern IntVector2 g_chunkWest;
 
 extern Matrix44 g_flipMatrix;
 
+extern int eventCountTest;
 

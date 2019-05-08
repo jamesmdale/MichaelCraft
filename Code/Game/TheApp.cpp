@@ -19,6 +19,7 @@
 #include "Engine\Profiler\Profiler.hpp"
 #include "Engine\Profiler\ProfilerConsole.hpp"
 #include "Engine\Core\NamedProperties.hpp"
+#include "Engine\Events\EventSystem.hpp"
 
 TheApp* g_theApp = nullptr;
 static bool isRunning = false;
@@ -96,6 +97,15 @@ void TheApp::Update()
 	//p.Set("EmploymentInfo", employmentInfoProperties); // NamedProperties inside NamedProperties
 
 	//float health = p.Get("Height", 1.75f);
+	EventSystem* theEventSystem = EventSystem::GetInstance();
+	theEventSystem->Subscribe("testEvent", TestFunction); //will add testEvent
+	theEventSystem->Subscribe("testEvent", TestFunction2); //will Add testfunction 2
+	theEventSystem->Subscribe("testEvent", TestFunction); //will not add second test event
+
+	theEventSystem->Subscribe("testEvent2", TestFunction2); //will add test event 2
+
+	theEventSystem->FireEvent("testEvent");
+	theEventSystem->FireEvent("testEvent2");
 
 
 	float deltaSeconds = GetMasterDeltaSeconds();
@@ -186,6 +196,22 @@ void Quit(Command& cmd)
 {
 	DevConsolePrintf(cmd.m_commandInfo->m_successMessage.c_str());
 	g_isQuitting = true;
+}
+
+bool TestFunction(NamedProperties& args)
+{
+	DebuggerPrintf("Hello %i", eventCountTest);
+	++eventCountTest;
+
+	return false;
+}
+
+bool TestFunction2(NamedProperties& args)
+{
+	DebuggerPrintf("Goodbye %i", eventCountTest);
+	++eventCountTest;
+
+	return false;
 }
 
 

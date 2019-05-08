@@ -56,3 +56,5 @@ Matrix44 g_flipMatrix = Matrix44(Vector4(0.f, 0.f, 1.f, 0.f),
 								Vector4(-1.f, 0.f, 0.f, 0.f),
 								Vector4(0.f, 1.f, 0.f, 0.f),
 								Vector4(0.f, 0.f, 0.f, 1.f));
+
+int eventCountTest = 0;
