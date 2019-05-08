@@ -77,11 +77,7 @@ void TheApp::Initialize()
 	InputSystem::GetInstance()->GetMouse()->SetMouseMode(MOUSE_RELATIVE_MODE);	
 
 	Game::GetInstance()->Initialize();
-}
 
-//  =============================================================================
-void TheApp::Update() 
-{
 	std::string lastName("Eiserloh");
 	NamedProperties employmentInfoProperties;
 	// ...
@@ -107,7 +103,15 @@ void TheApp::Update()
 	theEventSystem->FireEvent("testEvent");
 	theEventSystem->FireEvent("testEvent2");
 
+	//object method test
+	TestObject* object = new TestObject();
+	theEventSystem->Subscribe("testMethodEvent", object, &TestObject::TestCallbackMethod); //will add test event 2
+	theEventSystem->FireEvent("testMethodEvent");
+}
 
+//  =============================================================================
+void TheApp::Update() 
+{
 	float deltaSeconds = GetMasterDeltaSeconds();
 	deltaSeconds = UpdateInput(deltaSeconds);
 
@@ -200,7 +204,7 @@ void Quit(Command& cmd)
 
 bool TestFunction(NamedProperties& args)
 {
-	DebuggerPrintf("Hello %i", eventCountTest);
+	DebuggerPrintf("Hello %i \n", eventCountTest);
 	++eventCountTest;
 
 	return false;
@@ -208,7 +212,7 @@ bool TestFunction(NamedProperties& args)
 
 bool TestFunction2(NamedProperties& args)
 {
-	DebuggerPrintf("Goodbye %i", eventCountTest);
+	DebuggerPrintf("Goodbye %i \n", eventCountTest);
 	++eventCountTest;
 
 	return false;

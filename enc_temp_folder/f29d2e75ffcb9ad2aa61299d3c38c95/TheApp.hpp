@@ -41,6 +41,6 @@ public:
 	}
 
 public:
-	std::string m_testValue = "Method \n";
+	std::string m_testValue = "Method";
 };
 
